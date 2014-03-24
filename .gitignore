@@ -1,0 +1,6 @@
+bin/
+dist/
+demo-data/
+temp/
+.classpath
+.project

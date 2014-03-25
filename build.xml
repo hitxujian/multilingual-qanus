@@ -10,6 +10,8 @@
     <property name="source" value="1.7"/>
     <path id="multilingual-qanus.classpath">
         <pathelement location="bin"/>
+    	<pathelement location="dist/lib/freeling.jar"/>
+    	<pathelement location="dist/lib/commons-lang3-3.1.jar"/>
         <pathelement location="dist/lib/axis.jar"/>
         <pathelement location="dist/lib/BM25.jar"/>
         <pathelement location="dist/lib/commons-beanutils-1.8.2.jar"/>

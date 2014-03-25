@@ -107,7 +107,7 @@ public class AnswerChecker extends StageEngine implements IXMLDataReceipient {
 
 
 		// Set up name of file where we store our output
-		m_OutputFileName = GetTargetFile().getAbsolutePath() + "\\eval" + l_DateString + ".xml";
+		m_OutputFileName = GetTargetFile().getAbsolutePath() + "/eval" + l_DateString + ".xml";
 
 		m_GeneratedAnswersReceived = false;
 		m_CorrectAnswersReceived = false;

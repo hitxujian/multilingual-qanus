@@ -9,7 +9,7 @@ An integration of qanus framework with freeling api.
 3. Run `ant build-jar` in <project-root>. This will create the file `dist/ml.jar`
 4. Test if everything is working fine:
 5. `cd dist`
-6.  `java -Xmx1g -classpath ml.jar sg.edu.nus.wing.qanus.stock.ibp.Controller --src ../demo-data/data --tgt ../temp`
+6.  `java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ibp.Controller --src ../demo-data/data --tgt ../temp`
 
 
 

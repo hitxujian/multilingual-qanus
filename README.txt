@@ -38,17 +38,17 @@ Running a simple demo
 	ie. cd <QANUS>/dist
 
 3. Run the information base builder
-	ie. java -Xmx1g -classpath QANUS.jar sg.edu.nus.wing.qanus.stock.ibp.Controller --src ..\demo-data\data --tgt ..\temp
+	ie. java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ibp.Controller --src ../demo-data/data --tgt ../temp
 
 4. Run the question processor
-	ie. java -Xmx1g -classpath QANUS.jar sg.edu.nus.wing.qanus.stock.qp.Controller --src ..\demo-data\questions --tgt ..\questions-anon
+	ie. java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.qp.Controller --src ../demo-data/questions --tgt ../questions-anon
 
 5. Run the answer retrieval
-	ie. java -Xmx1g -classpath QANUS.jar sg.edu.nus.wing.qanus.stock.ar.Controller --kbsrc ..\temp\Lucene-Index --qnsrc ..\questions-anon --anstgt ..\
+	ie. java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ar.Controller --kbsrc ../temp/Lucene-Index --qnsrc ../questions-anon --anstgt ../
 	
 6. Run the evaluation module 
     - Take note the change "answers.xml" below to the generated answer file in step 5 above
-	ie. java -Xmx1g -classpath QANUS.jar sg.edu.nus.wing.qanus.stock.eval.Controller --gen ..\answers.xml --correct ..\demo-data\data\demo-answers.xml --ans ..\
+	ie. java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.eval.Controller --gen ../answers.xml --correct ../demo-data/data/demo-answers.xml --ans ../
 
 7. Answers can be found in the <QANUS> folder in a XML file named answers-<DATE>.xml, where <DATE> is the current data and time.
 

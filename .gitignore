@@ -1,5 +1,9 @@
 bin/
-dist/
+dist/lib/
+dist/choppingboard/
+dist/*.jar
 temp/
 .classpath
 .project
+*~
+1

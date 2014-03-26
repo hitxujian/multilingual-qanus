@@ -7,8 +7,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.*;
-import org.apache.lucene.queryParser.*;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 
@@ -40,7 +45,10 @@ public class LuceneInformationBaseQuerier implements IInformationBaseQuerier {
 
 		try {
 			// Build an IndexSearcher using the in-memory index
-			m_Searcher = new IndexSearcher(a_KBFolder.getAbsolutePath());
+			Directory directory = FSDirectory.open(a_KBFolder);
+			IndexReader reader = IndexReader.open(directory);
+			m_Searcher = new IndexSearcher(reader);
+			
 		} catch (Exception e) {
 			Logger.getLogger("QANUS").logp(Level.WARNING, LuceneInformationBaseQuerier.class.getName(), "Constructor", "Unable to initialise Lucene index searcher.", e);
 		}
@@ -59,7 +67,7 @@ public class LuceneInformationBaseQuerier implements IInformationBaseQuerier {
 	public Object SearchQuery(String a_Query) {
 
 		// Build a Query object
-		QueryParser l_QP = new QueryParser("Text", new StandardAnalyzer());
+		QueryParser l_QP = new QueryParser(Version.LUCENE_40, "Text", new StandardAnalyzer(Version.LUCENE_40));
 		Query l_ParsedQuery = null;
 		try {
 			

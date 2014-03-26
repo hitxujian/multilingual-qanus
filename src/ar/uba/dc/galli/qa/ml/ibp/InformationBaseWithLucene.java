@@ -4,7 +4,6 @@ package ar.uba.dc.galli.qa.ml.ibp;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,7 +12,10 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.util.Version;
 
 import sg.edu.nus.wing.qanus.framework.commons.DataItem;
 import sg.edu.nus.wing.qanus.framework.commons.IInformationBaseBuilder;
@@ -45,9 +47,8 @@ public class InformationBaseWithLucene implements IInformationBaseBuilder {
 		// Build the index writer by Lucene
 		try {
 			String l_LuceneIndexFileName = a_TargetFile + File.separator + "Lucene-Index";
-			m_LuceneIW = new IndexWriter(
-					l_LuceneIndexFileName, new StandardAnalyzer(), true,
-					IndexWriter.MaxFieldLength.UNLIMITED);
+			IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_40, new StandardAnalyzer(Version.LUCENE_40));
+			m_LuceneIW = new IndexWriter(FSDirectory.open(a_TargetFile), config);
 		} catch (CorruptIndexException e) {
 			m_LuceneIW = null;
 			Logger.getLogger("QANUS").logp(Level.SEVERE, InformationBaseWithLucene.class.getName(), "Go", "Problem initializing Lucene", e);

@@ -65,7 +65,7 @@ public class Configuration {
 		try {
 			res = Configuration.WIKIDIR+wikipedias[OptionToIndex(option)]+wikiPostfix;
 		}
-		catch (ArrayIndexOutOfBoundsException e) {
+		catch (NullPointerException e) {
 			Logger.getLogger("QANUS").logp(Level.SEVERE, Configuration.class.getName(), "GetWikipediaFromOption", "Your --wiki parameter is incorrectly configured, options are: simple-06, simple-13, es-06, en-06, pt-07");
 			System.exit(1);
 		}
@@ -84,7 +84,7 @@ public class Configuration {
 		try {
 			res = Configuration.INDEXDIR+outputDirs[OptionToIndex(option)];
 		}
-		catch (ArrayIndexOutOfBoundsException e) {
+		catch (NullPointerException e) {
 			Logger.getLogger("QANUS").logp(Level.SEVERE, Configuration.class.getName(), "GetLuceneIndexFromOption", "Your --wiki parameter is incorrectly configured, options are: simple-06, simple-13, es-06, en-06, pt-07");
 			System.exit(1);
 		}

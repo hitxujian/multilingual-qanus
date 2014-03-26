@@ -5,13 +5,12 @@
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. --><project basedir="." default="build" name="multilingual-qanus">
     <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="../../../../usr/lib/eclipse"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
     <path id="multilingual-qanus.classpath">
         <pathelement location="bin"/>
-    	<pathelement location="dist/lib/freeling.jar"/>
-    	<pathelement location="dist/lib/commons-lang3-3.1.jar"/>
         <pathelement location="dist/lib/axis.jar"/>
         <pathelement location="dist/lib/BM25.jar"/>
         <pathelement location="dist/lib/commons-beanutils-1.8.2.jar"/>
@@ -26,7 +25,6 @@
         <pathelement location="dist/lib/jopt-simple-3.1.jar"/>
         <pathelement location="dist/lib/json-lib-2.3-jdk15.jar"/>
         <pathelement location="dist/lib/log4j-1.2.8.jar"/>
-        <pathelement location="dist/lib/lucene-core-2.4.0.jar"/>
         <pathelement location="dist/lib/owlapi-bin.jar"/>
         <pathelement location="dist/lib/saaj.jar"/>
         <pathelement location="dist/lib/search-engine-wrapper.jar"/>
@@ -35,6 +33,13 @@
         <pathelement location="dist/lib/stanford-parser-2008-10-26.jar"/>
         <pathelement location="dist/lib/stanford-postagger-2008-09-28.jar"/>
         <pathelement location="dist/lib/wsdl4j-1.5.1.jar"/>
+        <pathelement location="dist/lib/commons-lang3-3.1.jar"/>
+        <pathelement location="dist/lib/freeling.jar"/>
+        <pathelement location="dist/lib/bliki-core-3.0.19.jar"/>
+        <pathelement location="dist/lib/commons-compress-1.5.jar"/>
+        <pathelement location="dist/lib/lucene-analyzers-common-4.4.0.jar"/>
+        <pathelement location="dist/lib/lucene-core-4.4.0.jar"/>
+        <pathelement location="dist/lib/lucene-queryparser-4.4.0.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -72,11 +77,15 @@
         <antcall target="build"/>
     </target>
     <target name="Controller (1)">
-        <java classname="sg.edu.nus.wing.qanus.stock.ibp.Controller" failonerror="true" fork="yes">
+        <java classname="ar.uba.dc.galli.qa.ml.ibp.Controller" failonerror="true" fork="yes">
             <classpath refid="multilingual-qanus.classpath"/>
         </java>
     </target>
-
+    <target name="FreelingAPI (1)">
+        <java classname="ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI" failonerror="true" fork="yes">
+            <classpath refid="multilingual-qanus.classpath"/>
+        </java>
+    </target>
   	<path id="build.classpath">
   	  <fileset dir="${basedir}">
   	     <include name="dist/lib/*.jar"/>
@@ -101,8 +110,6 @@
   	       <attribute name="Class-Path" value="${manifest.classpath}"/>
   	     </manifest>
   	 </jar>
-  	</target>              	
-              	
-    
-    
+  	</target>     
 </project>
+

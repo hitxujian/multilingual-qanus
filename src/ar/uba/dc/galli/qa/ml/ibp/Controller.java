@@ -1,15 +1,24 @@
 package ar.uba.dc.galli.qa.ml.ibp;
 
+import info.bliki.wiki.dump.IArticleFilter;
+import info.bliki.wiki.dump.WikiXMLParser;
+
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import sg.edu.nus.wing.qanus.framework.commons.IRegisterableModule;
-import sg.edu.nus.wing.qanus.framework.commons.IXMLParser;
-import sg.edu.nus.wing.qanus.framework.ibp.FrameworkController;
-import sg.edu.nus.wing.qanus.framework.commons.IInformationBaseBuilder;
-import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
+import org.xml.sax.SAXException;
 
-import sg.edu.nus.wing.qanus.textprocessing.StanfordNERWebService;
-import sg.edu.nus.wing.qanus.textprocessing.StanfordPOSTagger;
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
+
+import sg.edu.nus.wing.qanus.framework.commons.BasicController;
+import sg.edu.nus.wing.qanus.framework.util.DirectoryAndFileManipulation;
 
 
 /**
@@ -25,64 +34,104 @@ import sg.edu.nus.wing.qanus.textprocessing.StanfordPOSTagger;
  * @author NG, Jun Ping -- junping@comp.nus.edu.sg
  * @version Jan 16, 2010
  */
-public class Controller extends FrameworkController {
-
-	/**
-	 * First customisable part of the controller.
-	 * Prepares and returns the XML handler to be used by the StageEngine for this Controller.
-	 * For this StageEngine -- knowledge base building --- a XML parser is needed to process
-	 * the source corpus documents
-	 *
-	 * @return array of XML handlers to use for the StageEngine
-	 */
-	@Override
-	public IXMLParser[] GetXMLHandlersForStageEngine() {
-
-		IXMLParser[] l_Array = new IXMLParser[1];
-		l_Array[0] = new AQUAINT2XMLHandler();		
-
-		return l_Array;
-
-	} // end GetXMLHandlerForStageEngine()
+public class Controller extends BasicController {
 
 
+	public Controller() {
 
-	/**
-	 * Second customisable part of the controller.
-	 * Prepares and returns the modules to be invoked by the StageEngine.
-	 * For this StageEngine -- knowledge base building -- the modules would be
-	 * the text processors such as named entity recognisers which can be
-	 * used to pre-process the corpus text
-	 *
-	 * @return array of modules to be invoked.
-	 */
-	@Override
-	public IRegisterableModule[] GetModulesForStageEngine() {
+		// The command line options expected to use with this Controller
+		AddOptionWithRequiredArgument("wiki", "Options are: simple-06, simple-13, es-06, en-06, pt-07", String.class);
+			MakeOptionCompulsory("wiki");
+			
+	}
+	
+	
+	public boolean Entry(String[] args) {
 
-		IRegisterableModule[] l_Array = new IRegisterableModule[2];
+		// Check that the arguments are supplied correctly.
+		boolean l_OkSoFar = super.Entry(args);
 		
-		l_Array[0] = new StanfordPOSTagger("lib" + File.separator + "bidirectional-wsj-0-18.tagger");		  
-        l_Array[1] = new StanfordNER("lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
-		//l_Array[1] = new StanfordNERWebService(); // "lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz"
+		String l_WikipediaFile = Configuration.GetWikipediaFromOption((String) GetOptionArgument("wiki"));
+		String l_LuceneFolder = Configuration.GetLuceneIndexFromOption((String) GetOptionArgument("wiki"));
 
-		return l_Array;
+		// Ensure that the source file/folder exists
+		if (l_OkSoFar && !InputExists(l_WikipediaFile)) {
+			// source file does not exist, we cannot continue.
+			Logger.getLogger("QANUS").logp(Level.SEVERE, Controller.class.getName(), "Entry", "Cannot access source folder.");
+			l_OkSoFar = false;
+		}
 
-	} // end GetModulesForStageEngine()
+		// Create the target file/folder if it doesn't exist
+		if (l_OkSoFar && !OutputCheckAndEmpty(l_LuceneFolder)) {
+			// No point continueing if the results produced later cannot be saved?
+			Logger.getLogger("QANUS").logp(Level.SEVERE, Controller.class.getName(), "Entry", "Cannot access target folder.");
+			l_OkSoFar = false;
+		}
 
-
-	/**
-	 * Customisable for knowledge base preparation stage.
-	 * Prepares and sets up a Lucene index to be created.
-	 *
-	 * @return a knowledge base builder using Lucene
-	 */
-	@Override
-	public IInformationBaseBuilder GetInformationBaseBuilder() {
+		 
+		// Don't proceed if the requirements for a successfull execution are not met
+		if (!l_OkSoFar) return false;
 		
-		InformationBaseWithLucene l_KBB = new InformationBaseWithLucene(GetTargetFile());
-		return l_KBB;
+		long start = System.currentTimeMillis();
 
-	} // end GetInformationBaseBuilder()
+
+		System.out.println("Extracting "+l_WikipediaFile+" in directory "+l_LuceneFolder+"...");
+
+		try {
+
+			IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_40, new StandardAnalyzer(Version.LUCENE_40));
+			IndexWriter luceneIW = new IndexWriter(FSDirectory.open(new File(l_LuceneFolder)), config);
+
+			IArticleFilter handler = new ArticleFilter(luceneIW);
+			WikiXMLParser wxp = new WikiXMLParser(l_WikipediaFile, handler);
+			wxp.parse();
+			luceneIW.close();
+			
+		} catch (IOException | SAXException e) {
+			e.printStackTrace();
+		}
+
+		long finish = System.currentTimeMillis();
+		System.out.println("Success creating index [" + ((finish - start) /1000) + " secs]");
+
+		
+		return true;
+
+
+	}
+	
+	private boolean OutputCheckAndEmpty(String l_LuceneFolder) {
+		File l_TargetFile = new File(l_LuceneFolder);
+		
+		if (!DirectoryAndFileManipulation.CreateDirectoryIfNonExistent(l_TargetFile)) {
+			Logger.getLogger(Controller.class.getName()).log(Level.WARNING, "Unable to access the target folder.");
+			
+			return false;
+		}	
+		else
+		{
+			File[] files = l_TargetFile.listFiles();
+			if(files.length > 0)
+				Logger.getLogger(Controller.class.getName()).log(Level.FINE, "Target folder is not empty. Deleting files...");
+			
+			boolean l_DeleteOk = true;
+			for (int i = 0; i < files.length; i++) l_DeleteOk &= files[i].delete();
+				
+			
+			if(!l_DeleteOk)Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, "Unable to delete some files.");
+		}
+
+		return true;
+	}
+
+
+
+	private boolean InputExists(String l_Wikipedia) {
+		
+		File l_WikiFile = new File(l_Wikipedia);
+		return l_WikiFile.exists();
+	}
+
 
 
 	/**
@@ -90,9 +139,9 @@ public class Controller extends FrameworkController {
 	 * You don't have to change this usually, so you can just copy this to make your own
 	 * Controller.
 	 *
-	 * @param args
+	 * @param args 
 	 */
-	public static void main(String args[]) {
+	public static void main(String args[]){
 
 		// --------------------------------------------------------
 		// Start up an instance of the controller, and invoke it to get the machinery going
@@ -105,6 +154,7 @@ public class Controller extends FrameworkController {
 		// are not saved to any file
 		//l_Ctr.SetUpLog();
 
+		
 
 		// This call will jump-start the machinery. Must be called, else nothing will happen!
 		if (!l_Ctr.Entry(args)) {

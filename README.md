@@ -10,16 +10,20 @@ An integration of qanus framework with freeling api.
 4. Download [this zip][2] and extract the jars in `project-root/dist/lib/`
 (this step is quiet dirty and is going to be refactored)
 5. Remove `lucene-core-2.4.0.jar` from `project-root/dist/lib`
-5. Run `ant build-jar` in `project-root`. This will create the file `dist/ml.jar`
-6. `cd dist`
-8. Test if installation was ok:
+6. Follow the steps described in **Wikipedia Dumps**
+7. Configure the constants in `ar.uba.dc.galli.qa.ml.util.Configuration.WIKIDIR` and `INDEXDIR` 
+7. Run `ant build-jar` in `project-root`. This will create the file `dist/ml.jar`
+8. `cd dist`
+9. Test if installation was ok:
 ```
-java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ibp.Controller --src ../demo-data/data --tgt ../temp/Lucene-Index
+java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ibp.Controller --wiki ../demo-data/data --tgt ../temp/Lucene-Index
 ```
 
 
 
 ##Freeling Installation
+
+##Wikipedia Dumps
 
 ##Usage
 

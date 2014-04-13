@@ -23,6 +23,9 @@ java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ibp.Controller --wiki ../dem
 
 ##Freeling Installation
 
+1. Add the .so to java.library.path. This is the easy way: `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:project-root/`
+6. This is the correct way:  `sudo cp libfreeling_javaAPI.so /usr/lib/`
+
 ##Wikipedia Dumps
 
 ##Usage

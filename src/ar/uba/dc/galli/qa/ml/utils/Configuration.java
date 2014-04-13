@@ -1,19 +1,24 @@
 package ar.uba.dc.galli.qa.ml.utils;
 
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import sg.edu.nus.wing.qanus.framework.util.DirectoryAndFileManipulation;
 
 import ar.uba.dc.galli.qa.ml.ibp.Controller;
 
 public class Configuration {
 
+	public static String BASELIBDIR = "/home/julian/git/multilingual-qanus/dist/";
 	public static String WIKIDIR = "/home/julian/tesis/wiki/";
 	public static String INDEXDIR = "/home/julian/tesis/lucene-indexes/";
-	public static String PREGUNTAS_EN = "/home/julian/tesis/clef/clef2007/preguntas_harry_en.xml";
-	public static String PREGUNTAS_ES = "/home/julian/tesis/clef/clef2007/ES_EN_MONO.xml";//preguntas_harry_es.xml";
-	public static String RESPUESTAS_ES = "/home/julian/tesis/clef/clef2007/ES_GOLDSTANDARD_2007.xml";//respuestas_harry.xml";
-	public static String PREGUNTAS_PT = "/home/julian/tesis/clef/clef2007/PT_EN_MONO.xml";
-	public static String RESPUESTAS_PT = "/home/julian/tesis/clef/clef2007/PT_GOLDSTANDARD_2007.xml";
+	public static String QDIR = "/home/julian/tesis/questions/";
+	public static String PREGUNTAS_EN = QDIR+"q-en.xml";
+	public static String PREGUNTAS_ES = QDIR+"q-es.xml";
+	public static String PREGUNTAS_PT = QDIR+"q-pt.xml";
+	public static String RESPUESTAS_ES = QDIR+"a-es.xml";
+	public static String RESPUESTAS_PT = QDIR+"a-pt.xml";
 	
 	public static boolean SUPPORT_WIKI = true;
 	public static boolean SUPPORT_NIL = true;
@@ -28,7 +33,7 @@ public class Configuration {
 	
 	public static boolean EVAL_PASSAGES = false; //false es evaldocs
 	
-	public static String LANG = "pt";
+	public static String LANG = "en";
 	public static String INDEX = "pt-2007"; // "pt-2007"
 	public static int LUCENERESULTS = 100;
 	public static int QUERYGENERATION = 2; //1, 2, 3 o 4
@@ -53,6 +58,36 @@ public class Configuration {
 		if(option.compareTo("en-06") == 0) extractThis = 3;
 		if(option.compareTo("pt-07") == 0) extractThis = 4;
 		return extractThis;
+	}
+	
+	public static boolean OutputCheckAndEmpty(String l_OutputFolder) {
+		File l_TargetFile = new File(l_OutputFolder);
+		
+		if (!DirectoryAndFileManipulation.CreateDirectoryIfNonExistent(l_TargetFile)) {
+			Logger.getLogger(Controller.class.getName()).log(Level.WARNING, "Unable to access the target folder.");
+			
+			return false;
+		}	
+		else
+		{
+			File[] files = l_TargetFile.listFiles();
+			if(files.length > 0)
+				Logger.getLogger(Controller.class.getName()).log(Level.FINE, "Target folder is not empty. Deleting files...");
+			
+			boolean l_DeleteOk = true;
+			for (int i = 0; i < files.length; i++) l_DeleteOk &= files[i].delete();
+				
+			
+			if(!l_DeleteOk)Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, "Unable to delete some files.");
+		}
+
+		return true;
+	}
+	
+	public static boolean FileExists(String l_File) {
+		
+		File l_TheFile = new File(l_File);
+		return l_TheFile.exists();
 	}
 	
 	public static String GetWikipediaFromOption(String option)
@@ -91,6 +126,22 @@ public class Configuration {
 		
 		return res;
 		
+	}
+
+	public static String GetQuestionFileFromOption(String option) {
+		
+		if(option.compareToIgnoreCase("es-06") == 0)
+		{
+			return PREGUNTAS_ES;
+		}
+		else
+			return PREGUNTAS_PT;
+			
+	}
+
+	public static String GetTargetFile() {
+		// TODO Auto-generated method stub
+		return "/tmp/ml-qa/";
 	}
 }
 

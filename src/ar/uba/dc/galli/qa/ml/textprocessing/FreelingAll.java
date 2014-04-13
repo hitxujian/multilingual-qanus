@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * @author NG, Jun Ping -- ngjp@nus.edu.sg
  * @version 18Sep2009
  */
-public class FreelingNER implements ITextProcessingModule {
+public class FreelingAll implements ITextProcessingModule {
 
 
 	private FreelingAPI l_freelingAPI;
@@ -27,8 +27,8 @@ public class FreelingNER implements ITextProcessingModule {
 	 * Constructor.
 	 * @param lang [in] String with the lang token identifier
 	 */
-	public FreelingNER(FreelingAPI a_freelingAPI) {
-		l_freelingAPI = a_freelingAPI;
+	public FreelingAll() {
+		l_freelingAPI = FreelingAPI.getInstance();
 	} // end constructor
 
 
@@ -50,7 +50,7 @@ public class FreelingNER implements ITextProcessingModule {
 		for (String l_Sentence : a_Sentences) {
 
 			try {
-				String l_Result = l_freelingAPI.getNERs(l_Sentence);
+				String l_Result = l_freelingAPI.getAll(l_Sentence);
 				l_ParsedSentences.add(l_Result);
 			} catch (Exception e) {								
 				Logger.getLogger("QANUS").log(Level.WARNING, "Unable to perform NER on sentence [" + l_Sentence + "]");
@@ -64,7 +64,7 @@ public class FreelingNER implements ITextProcessingModule {
 	} // end ProcessText()
 
 	public String GetModuleID() {
-		return "NER";
+		return "FreeAll";
 	}
 
 } // end class StanfordNER

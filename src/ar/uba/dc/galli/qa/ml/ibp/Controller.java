@@ -55,14 +55,14 @@ public class Controller extends BasicController {
 		String l_LuceneFolder = Configuration.GetLuceneIndexFromOption((String) GetOptionArgument("wiki"));
 
 		// Ensure that the source file/folder exists
-		if (l_OkSoFar && !InputExists(l_WikipediaFile)) {
+		if (l_OkSoFar && !Configuration.FileExists(l_WikipediaFile)) {
 			// source file does not exist, we cannot continue.
 			Logger.getLogger("QANUS").logp(Level.SEVERE, Controller.class.getName(), "Entry", "Cannot access source folder.");
 			l_OkSoFar = false;
 		}
 
 		// Create the target file/folder if it doesn't exist
-		if (l_OkSoFar && !OutputCheckAndEmpty(l_LuceneFolder)) {
+		if (l_OkSoFar && !Configuration.OutputCheckAndEmpty(l_LuceneFolder)) {
 			// No point continueing if the results produced later cannot be saved?
 			Logger.getLogger("QANUS").logp(Level.SEVERE, Controller.class.getName(), "Entry", "Cannot access target folder.");
 			l_OkSoFar = false;
@@ -100,37 +100,11 @@ public class Controller extends BasicController {
 
 	}
 	
-	private boolean OutputCheckAndEmpty(String l_LuceneFolder) {
-		File l_TargetFile = new File(l_LuceneFolder);
-		
-		if (!DirectoryAndFileManipulation.CreateDirectoryIfNonExistent(l_TargetFile)) {
-			Logger.getLogger(Controller.class.getName()).log(Level.WARNING, "Unable to access the target folder.");
-			
-			return false;
-		}	
-		else
-		{
-			File[] files = l_TargetFile.listFiles();
-			if(files.length > 0)
-				Logger.getLogger(Controller.class.getName()).log(Level.FINE, "Target folder is not empty. Deleting files...");
-			
-			boolean l_DeleteOk = true;
-			for (int i = 0; i < files.length; i++) l_DeleteOk &= files[i].delete();
-				
-			
-			if(!l_DeleteOk)Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, "Unable to delete some files.");
-		}
-
-		return true;
-	}
+	
 
 
 
-	private boolean InputExists(String l_Wikipedia) {
-		
-		File l_WikiFile = new File(l_Wikipedia);
-		return l_WikiFile.exists();
-	}
+
 
 
 

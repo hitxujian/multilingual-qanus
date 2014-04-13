@@ -5,6 +5,9 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAll;
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
+
 import sg.edu.nus.wing.qanus.framework.commons.IRegisterableModule;
 import sg.edu.nus.wing.qanus.framework.commons.IXMLParser;
 import sg.edu.nus.wing.qanus.framework.qp.FrameworkController;
@@ -72,25 +75,28 @@ public class Controller extends FrameworkController {
 	@Override
 	public IRegisterableModule[] GetModulesForStageEngine() {
 
-		IRegisterableModule[] l_Array = new IRegisterableModule[3];
+		IRegisterableModule[] l_Array = new IRegisterableModule[4];
 		try {
 
 			IRegisterableModule l_ModQuestionClassifier = null;
 			if (File.separator.compareTo("\\") == 0) {
 				// Special case for Windows as the Stanford classifier will treat the single \ as an escape character
-				l_ModQuestionClassifier = new QuestionClassifierWithStanfordClassifier("lib\\\\trec_classifier.stanford-classifier", "choppingboard" + File.separator + "temp");
+				l_ModQuestionClassifier = new QuestionClassifierWithStanfordClassifier(Configuration.BASELIBDIR+"lib\\\\trec_classifier.stanford-classifier", "choppingboard" + File.separator + "temp");
 			} else {
-				l_ModQuestionClassifier = new QuestionClassifierWithStanfordClassifier("lib" + File.separator + "trec_classifier.stanford-classifier", "choppingboard" + File.separator + "temp");
+				l_ModQuestionClassifier = new QuestionClassifierWithStanfordClassifier(Configuration.BASELIBDIR+"lib" + File.separator + "trec_classifier.stanford-classifier", "choppingboard" + File.separator + "temp");
 			}
 			l_Array[0] = l_ModQuestionClassifier;
 
 
-			StanfordNER l_ModNER = new StanfordNER("lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
+			StanfordNER l_ModNER = new StanfordNER(Configuration.BASELIBDIR+"lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
 			//IRegisterableModule l_ModNER = new StanfordNERWebService();
 			l_Array[1] = l_ModNER;
 
-			IRegisterableModule l_ModPOSTagger = new StanfordPOSTagger("lib" + File.separator + "bidirectional-wsj-0-18.tagger");
+			IRegisterableModule l_ModPOSTagger = new StanfordPOSTagger(Configuration.BASELIBDIR+"lib" + File.separator + "bidirectional-wsj-0-18.tagger");
 			l_Array[2] = l_ModPOSTagger;
+			
+			IRegisterableModule l_FreelingAll = new FreelingAll();
+			l_Array[3] = l_FreelingAll;
 
 		} catch (Exception ex) {
 			Logger.getLogger("QANUS").logp(Level.WARNING, Controller.class.getName(), "GetModulesForStageEngine", "Unable to initialise text processing module: [" + ex + "]");

@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 
+import com.google.gson.Gson;
+
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
 import ar.uba.dc.galli.qa.ml.utils.EnumTypes;
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
 import ar.uba.dc.galli.qa.ml.utils.Timer;
@@ -33,8 +36,8 @@ import edu.upc.freeling.Ner;
 
 
 /**
- * Interfaz para los distintos analizadores de Freeling
- * @author julian
+ * Interface for all freeling services. 
+ * @author jpeller
  *
  */
 public class FreelingAPI {
@@ -70,23 +73,35 @@ public class FreelingAPI {
 	public ListSentence ls;
 	public String input_string;
 	private EnumTypes asked_entity;
-	  
+	
+	private static FreelingAPI instance = null;
+		  
+	//Singleton pattern to execute only once the system call
+	public static FreelingAPI getInstance() 
+	{		
+		if(instance == null)
+		{
+			System.loadLibrary( "freeling_javaAPI" );
+			Util.initLocale( "default" );
+			instance = new FreelingAPI(Configuration.LANG);
+		}
+		return instance;
+
+	}
+	
 	public FreelingAPI(String in_lang)
 	{
 		lang = in_lang;
 		if(lang.compareTo("es") != 0 && lang.compareTo("en") != 0 && lang.compareTo("pt") != 0)
 		{
-			System.out.println("FreelingAPI: lang debe ser 'es' o 'en' o 'pt'");
+			System.out.println("FreelingAPI: lang must be 'es', 'en' or 'pt'");
 			return;
 		}
 		
 		Timer timer = new Timer();
-		if(VERBOSE)
-		{
-			System.out.print("Cargando freeling["+lang+"]... ");
-		}
+		
+		if(VERBOSE) System.out.print("Loading freeling["+lang+"]... ");
 			
-
 	    
 		tk = new Tokenizer( DATA + lang + "/tokenizer.dat" );
 		sp = new Splitter( DATA + lang + "/splitter.dat" );
@@ -101,12 +116,8 @@ public class FreelingAPI {
 	    
 	    //sen = new Senses(DATA + LANG + "/senses.dat" ); // sense dictionary
 	    //dis = new Ukb( DATA + LANG + "/ukb.dat" ); // sense disambiguator
-	    if(VERBOSE)
-	    {
-	    	 // Run some code;
-			 
-			 System.out.println(" [ "+ timer.tic() + " secs ] Ok!");
-	    }
+	    
+		if(VERBOSE) System.out.println(" [ "+ timer.tic() + " secs ] Ok!");
 	}
 	
 
@@ -155,6 +166,7 @@ public class FreelingAPI {
 	{
 		System.out.println(str);
 	}
+	
 	public void print(ListWord list_word)
 	{
 		for (int i = 0; i < list_word.size(); i++) System.out.print(list_word.get(i).getForm()+" ");
@@ -694,10 +706,6 @@ public class FreelingAPI {
 	public static void main( String argv[] ) throws IOException 
 	{
 		
-
-		 System.loadLibrary( "freeling_javaAPI" );
-	     Util.initLocale( "default" );
-
 	     FreelingAPI free_pt = new FreelingAPI("pt");
 	     
 	     String pt = "Na parte inicial da sua história, a astronomia envolveu somente a observação e a previsão dos movimentos dos objetos no céu que podiam ser vistos a olho nu. O Rigveda refere-se aos 27 asterismos ou nakshatras associados aos movimentos do Sol e também às 12 divisões Zodíaco do céu. Os Grécia Antiga fizeram importantes contribuições para a astronomia, entre elas a definição de magnitude aparente. A Bíblia contém um número de afirmações sobre a posição da Terra no universo e sobre a natureza das estrelas e dos planetas, a maioria das quais são poéticas e não devem ser interpretadas literalmente; ver Cosmologia Bíblica. Nos anos 500, Aryabhata apresentou um sistema matemático que considerava que a Terra rodava em torno do seu eixo e que os planetas se deslocavam em relação ao Sol.";
@@ -741,35 +749,36 @@ public class FreelingAPI {
 		 free.print("Ejecute mil catorce");
 	
 	}
-	
-	public void playground()
-	{
+
+
+
+	public String getAll(String l_Sentence) {
 		
-	    FreelingAPI free = new FreelingAPI("es");
-	    
-	    //Tokenizer
-	    //ListWord tok = free.tokenize("El perro corria feliz");
-	   
-	    //ListSentence ls = free.split(free.tokenize("El perro corria feliz. El humano, no tanto. A veces salía el sol. Otras veces, no tanto. A veces era original. Otras no."));
-	    
-	   /* for (int i = 0; i < tok.size(); i++) {
-	    	
-	    	Word w = tok.get(i);
-	    	
-	    	String word = w.getForm();
-	    	String lemma = w.getLemma();
-	    	String senses = w.getSensesString();
-	    	String tag = w.getTag();
-	    	
-	    	//free.print(lc+"  "+word+" "+lemma+" "+senses+" "+tag);
-			
-		}*/
-	}
+		process(l_Sentence);
+		//LinkedList<TextEntity> res = new LinkedList<TextEntity>();
+		ListWord list_word;
+		Word word;
+		String form, tag;
+		EnumTypes ner_type;
+		String res = "";
+		for (int i = 0; i < ls.size(); i++)
+	    {
+	    	list_word = ls.get(i);
+	    	for (int j = 0; j < list_word.size(); j++) 
+	    	{
+	    		word = list_word.get(j);
+	    		form =	cleanUnderscores(word.getForm());
+	    		res+=form+"/"+word.getTag()+" ";
+					//res.add(new TextEntity(form, word.getTag(), word.getForm(), "", "FreelingAPI("+lang+")", ner_type));
 
+			}
+	    	
+	    }
+		return res;
+		//Gson gson = new Gson();
+		//return gson.toJson(ls);
+		
 
-	public String getNERs(String l_Sentence) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	

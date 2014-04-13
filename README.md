@@ -16,9 +16,13 @@ An integration of qanus framework with freeling api.
 8. `cd dist`
 9. Test if installation was ok:
 ```
-java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ibp.Controller --wiki ../demo-data/data --tgt ../temp/Lucene-Index
+ java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ibp.Controller --wiki [simple-06|simple-13|es-06|en-06|pt-07]
+ java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.qp.Controller ??
+ java -Xmx1g -classpath ml.jar ar.uba.dc.galli.qa.ml.ar.Controller --run [es-06|pt-07]
 ```
 
+#Other
+1. Obtain and configure de question files in Config.java
 
 
 ##Freeling Installation

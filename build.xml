@@ -41,6 +41,7 @@
         <pathelement location="dist/lib/lucene-core-4.4.0.jar"/>
         <pathelement location="dist/lib/lucene-queryparser-4.4.0.jar"/>
     	<pathelement location="dist/lib/gson-2.2.3.jar"/>
+    	<pathelement location="dist/lib/jdom-2.0.5.jar"/>
     	
     </path>
     <target name="init">

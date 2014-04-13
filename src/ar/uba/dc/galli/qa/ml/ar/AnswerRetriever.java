@@ -1,10 +1,10 @@
 package ar.uba.dc.galli.qa.ml.ar;
 
-
 import java.io.*;
 
 import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,12 +12,25 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+
+
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import sg.edu.nus.wing.qanus.framework.ar.er.ErrorAnalyzer;
 
+import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScoringStrategy;
+import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
+import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
+import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAll;
+import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import ar.uba.dc.galli.qa.ml.utils.TextEntity;
+
+
+
+import sg.edu.nus.wing.qanus.framework.ar.er.ErrorAnalyzer;
 import sg.edu.nus.wing.qanus.framework.commons.*;
 import sg.edu.nus.wing.qanus.framework.util.DirectoryAndFileManipulation;
+import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
 
 
 /**
@@ -40,6 +53,11 @@ public class AnswerRetriever{
 
 	// Name of file where output is placed
 	protected String m_OutputFileName;
+	protected File m_QuestionSource;
+	protected File m_ResultFolder;
+	protected File m_LuceneFolder;
+	
+	protected String m_LangYear;
 
 	// Hold all the retrieved answer strings until they are ready to be written to file.
 	protected DataItem m_DataItem_Results;
@@ -47,64 +65,27 @@ public class AnswerRetriever{
 	// Error analysis module
 	protected ErrorAnalyzer m_ErrorAnalyzer = null;
 
-	// List of registered evaluation metrics
-	protected LinkedList<IRegisterableModule> m_ModuleList;
+	protected IRegisterableModule l_Module;
 
 
 	/**
 	 * Constructor.
 	 * @param a_QuestionsSource [in] folder containing annotated questions in XML files
 	 * @param a_ResultFolder [in] folder to write answers to, in the form of XML files
+	 * @param file 
 	 */
-	public AnswerRetriever(File a_QuestionsSource, File a_ResultFolder) {
+	public AnswerRetriever(File a_LuceneFolder, File a_QuestionsSource, File a_ResultFolder, String a_LangYear ) {
 
-		SetSourceFile(a_QuestionsSource);
-		SetTargetFile(a_ResultFolder);
-
-
+		m_QuestionSource = a_QuestionsSource;
+		m_ResultFolder = a_ResultFolder;
 		m_DataItem_Results = new DataItem("DOCSTREAM");
-
-
-		// If the questions are given in a folder, we will create a answer file with a name including the current date string
-		// If the questions are given in a file, we will create a answer file with the same name, appended with the word "answers.xml"
-
-		if (a_QuestionsSource.isFile()) {
-
-			m_OutputFileName = GetTargetFile().getAbsolutePath() + File.separator + a_QuestionsSource.getName() + "-answers.xml";
-
-		} else {
-
-			// Get the current date and time to append to the output file name
-			java.util.Date l_Date = new java.util.Date();
-			java.text.SimpleDateFormat l_DateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-			String l_DateString = l_DateFormat.format(l_Date);
-
-			// Set up name of file where we store our output
-			m_OutputFileName = GetTargetFile().getAbsolutePath() + File.separator + "answers" + l_DateString + ".xml";
-
-		}
+		m_LuceneFolder = a_LuceneFolder;
+		m_LangYear = a_LangYear;
+		
+		//FeatureScoringStrategy l_Module = new FeatureScoringStrategy(m_LuceneFolder);
 
 		
-		
-	} // end constructor
-
-
-	private void SetTargetFile(File a_ResultFolder) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	private File GetTargetFile() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	private void SetSourceFile(File a_QuestionsSource) {
-		// TODO Auto-generated method stub
-		
-	}
+	} 
 
 
 	/**
@@ -127,49 +108,47 @@ public class AnswerRetriever{
 	 */
 	public boolean Go() {
 
-		// Since the questions are read in callback fashion
-		// we will start the questions parsing, then on each call back,
-		// activate the various strategies and retrieve their answers.
-		// Subsequently we rank the answers and post-process
 
+		//lr = new LuceneReader(index);
+		FreelingAPI free = FreelingAPI.getInstance(m_LangYear);
+		StanfordAPI stan = new StanfordAPI();
 		
+		
+		Question[] qs = QuestionParser.getQuestions(m_QuestionSource);
+		Question[] gr;
+		String group_entity;
+		
+		int cov10, cov08, cov09, exact;
+		
+		int[] totals = {0,0,0,0};
+		int[] antitotals = {0,0,0,0};
+		int up_to = Configuration.UP_TO_N_QUESTIONS; //qs.length; //qs.length
 
-
-		// The input source file could be a folder or a file
-		// We try to make the code generic by expanding the list of file names to be processed into
-		// a linked list.
-		LinkedList<String> l_ListOfFileNames = null;
-		if (GetSourceFile().isDirectory()) {
-
-			// Is a directory
-
-			// The source folder could contain main nested directories,
-			// we will collect all the file names in these directories first
-			// so that it is easier to process them subsequently.
-			// We collect the file names and not the files to save on memory requirements.
-			// We will instantiate the java.io.File object as and when needed instead.
-			l_ListOfFileNames = DirectoryAndFileManipulation.CollectFileNamesInDirectory(GetSourceFile());
-
-		} else {
-
-			// Is a file
-			l_ListOfFileNames = new LinkedList<String>();
-			l_ListOfFileNames.add(GetSourceFile().getAbsolutePath());
-
-		}			
-
-		// Process each file, sending it into the XML parser. -----------------
-		for (String l_FileNameToParse : l_ListOfFileNames) {
-						
-			// Start parsing -------------------------------------------------------
-			File l_FileToParse = new File(l_FileNameToParse);
+		TextEntity[] first_question_ners = {};
+		//System.out.println("# value  token  luc    doc    pass   answ   dcovr  pcovr  acovr  dfreq  pfreq  afreq  dspan  pspan  aspan  tokens    titulo       texto");
+		//Aca va un traductor
+		for (int i = 0; i < up_to ; i++) 
+		{
+			if(qs[i].isProcessed())continue;
+			group_entity = "";
+			gr = QuestionParser.getGroup(qs, qs[i].getGroup());
 			
+			first_question_ners = new TextEntity[0];
+			for (int j = 0; j < gr.length && j < up_to; j++) 
+			{
+				gr[j].setQCType(stan);
+		
+				gr[j].process(free, first_question_ners);
+		
+				//System.out.println(gr[j].getQType());
+				QuestionParser.getById(qs, gr[j].getId()).setProcessed(true);
 
-		} // end for
-
-
-
-		WriteResultsToFile();
+			}
+		}
+		System.out.format("%ntotal: %d, n-passages: %d, exac: %d,  cov10: %d, cov09: %d, cov08: %d %n", 
+				up_to, Configuration.N_PASSAGES,  totals[3], totals[0],totals[2],  totals[1]);
+		//Utils.println("total-questions: "+(up_to)+", w+", without: "+without_answer);
+		//WriteResultsToFile();
 
 		
 		// Signal the error analysis engine that everything is over.
@@ -181,12 +160,6 @@ public class AnswerRetriever{
 
 	} // end Go()
 
-
-
-	private File GetSourceFile() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 	/**
@@ -204,9 +177,6 @@ public class AnswerRetriever{
 		DataItem l_RankedAnswerTODO = null;
 
 
-		// a_Item contains the question and its annotations
-		for (IRegisterableModule l_Module : m_ModuleList) {
-
 			// TODO questions do not follow an order now
 
 			//System.out.println(a_Item.toXMLString()); // Display received question for debugging if needed
@@ -216,7 +186,6 @@ public class AnswerRetriever{
 				l_StrategyModule = (IStrategyModule) l_Module;			
 			} else {
 				Logger.getLogger("QANUS").logp(Level.WARNING, AnswerRetriever.class.getName(), "Notify", "Wrong module type.");
-				continue;
 			}
 
 			IAnalyzable l_AnalyzableModule = null;
@@ -238,7 +207,6 @@ public class AnswerRetriever{
 				
 			} // end if
 			
-		} // end for
 
 
 		// TODO Answer ranker

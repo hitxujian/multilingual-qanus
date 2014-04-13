@@ -89,11 +89,8 @@ public class Controller extends BasicController {
 		
 		// Don't proceed if the requirements for a successfull execution are not met
 		if (!l_OkSoFar) return false;
-		System.out.println("Chequeo archivos y paso la pelota a AnswerRetriever");
 		
-		FeatureScoringStrategy l_Module = new FeatureScoringStrategy(new File(l_LuceneFolder));
-
-		m_StageEngine = new AnswerRetriever(new File(l_QuestionFile),new File(l_TargetFolder));
+		m_StageEngine = new AnswerRetriever(new File(l_LuceneFolder), new File(l_QuestionFile),new File(l_TargetFolder), (String)GetOptionArgument("run"));
 
 
 		return m_StageEngine.Go();

@@ -89,6 +89,20 @@ public class FreelingAPI {
 
 	}
 	
+	//Singleton pattern to execute only once the system call
+	public static FreelingAPI getInstance(String langYear) 
+	{		
+		if(instance == null)
+		{
+			System.loadLibrary( "freeling_javaAPI" );
+			Util.initLocale( "default" );
+			instance = new FreelingAPI(Configuration.langFromLangYear(langYear));
+		}
+		return instance;
+
+	}
+	
+	
 	public FreelingAPI(String in_lang)
 	{
 		lang = in_lang;

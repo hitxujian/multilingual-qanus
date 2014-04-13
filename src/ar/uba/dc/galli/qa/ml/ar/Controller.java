@@ -2,8 +2,16 @@ package ar.uba.dc.galli.qa.ml.ar;
 
 
 
+import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.lucene.store.FSDirectory;
+
 import ar.uba.dc.galli.qa.ml.ar.er.FactoidPipelineErrorAnalyzer;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScoringStrategy;
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import sg.edu.nus.wing.qanus.framework.commons.BasicController;
 import sg.edu.nus.wing.qanus.framework.commons.IRegisterableModule;
 import sg.edu.nus.wing.qanus.framework.commons.IXMLParser;
 import sg.edu.nus.wing.qanus.framework.ar.*;
@@ -24,7 +32,7 @@ import sg.edu.nus.wing.qanus.framework.ar.er.ErrorAnalyzer;
  * @author NG, Jun Ping - junping@comp.nus.edu.sg
  * @version 15Jan2010
  */
-public class Controller extends FrameworkController {
+public class Controller extends BasicController {
 
 
 	// For the ar.FrameworkController
@@ -40,63 +48,60 @@ public class Controller extends FrameworkController {
 	 */
 
 
-	/**
-	 * First customisable part of the controller.
-	 * Prepares and returns the XML handler to be used by the StageEngine for this Controller.
-	 * For this StageEngine -- answer retrieval --- the XML parser should be the one handling
-	 * the file of annotated questions
-	 * Only 1 handler is required for the engine, so the returned array only contains 1 element.
-	 * @return array of XML handlers to use for annotated questions file.
-	 */
-	@Override
-	public IXMLParser[] GetXMLHandlersForStageEngine() {
-		IXMLParser[] l_Array = new IXMLParser[1];
-		l_Array[0] = new TREC2007AnnotatedQuestionXMLParser();
-
-		return l_Array;
-	} // end GetXMLHandlerForStageEngine()
+	private AnswerRetriever m_StageEngine;
 
 
+	public Controller() {
 
-	/**
-	 * Seconde customisable part of the controller.
-	 * Prepares and returns the modules to be invoked by the StageEngine.
-	 * For this StageEngine -- answer retrieval -- the modules would be the answer retrieval
-	 * strategies
-	 * @return array of modules to be invoked.
-	 */
-	@Override
-	public IRegisterableModule[] GetModulesForStageEngine() {
+		// The command line options expected to use with this Controller
+		AddOptionWithRequiredArgument("run", "Options are: 'pt-07' and 'es-06'", String.class);
+			MakeOptionCompulsory("run");
+			
+	}
 
-		//BasicIRBasedStrategyUsingWebAsCorpus l_Module = new BasicIRBasedStrategyUsingWebAsCorpus();
+	protected boolean Entry(String[] args) {
+
+		// Check that the arguments are supplied correctly.
+		boolean l_OkSoFar = super.Entry(args);
+		String l_LuceneFolder = Configuration.GetLuceneIndexFromOption((String) GetOptionArgument("run"));
+		String l_QuestionFile = Configuration.GetQuestionFileFromOption((String) GetOptionArgument("run"));
+		// Ensure that the source file/folder exists
+		String l_TargetFolder = Configuration.GetTargetFile();
 		
-		// Use the feature scoring strategy, initialised to the provided knowledge base
-		FeatureScoringStrategy l_Module = new FeatureScoringStrategy(GetSourceFile1());
-		
-		IRegisterableModule[] l_Array = new IRegisterableModule[1];
-		l_Array[0] = l_Module;
-
-		return l_Array;
-
-	} // end GetModulesForStageEngine()
-
-
-	/**
-	 * Overrides implementation in parent class to provide an error analyzer so that
-	 * error analysis can be carried out
-	 * @return error analysis engine
-	 */	
-	@Override
-	public ErrorAnalyzer GetErrorAnalysisEngine() {
-		if (GetErrorAnalysisSource() == null) {
-			return null;
+		if (l_OkSoFar && !Configuration.FileExists(l_QuestionFile)) {
+			System.out.println(l_QuestionFile);
+			Logger.getLogger("QANUS").logp(Level.SEVERE, Controller.class.getName(), "Entry", "Cannot access question files");
+			l_OkSoFar = false;
 		}
-		return new FactoidPipelineErrorAnalyzer(GetErrorAnalysisSource(), GetErrorAnalysisTarget());
-	} // end GetErrorAnalysisEngine()
+		
+		if (l_OkSoFar && !Configuration.FileExists(l_LuceneFolder)) {
+			Logger.getLogger("QANUS").logp(Level.SEVERE, Controller.class.getName(), "Entry", "Cannot access index-files");
+			l_OkSoFar = false;
+		}
+		
+		// Create the target file/folder if it doesn't exist
+		if (l_OkSoFar && !Configuration.OutputCheckAndEmpty(l_TargetFolder)) {
+			// No point continueing if the results produced later cannot be saved?
+			Logger.getLogger("QANUS").logp(Level.SEVERE, Controller.class.getName(), "Entry", "Cannot access target folder.");
+			l_OkSoFar = false;
+		}
+
+		
+		// Don't proceed if the requirements for a successfull execution are not met
+		if (!l_OkSoFar) return false;
+		System.out.println("Chequeo archivos y paso la pelota a AnswerRetriever");
+		
+		FeatureScoringStrategy l_Module = new FeatureScoringStrategy(new File(l_LuceneFolder));
+
+		m_StageEngine = new AnswerRetriever(new File(l_QuestionFile),new File(l_TargetFolder));
 
 
+		return m_StageEngine.Go();
+		
 
-	
+	} // end Entry()
+
+
 	/**
 	 * Entry point function.
 	 * You don't have to change this usually, so you can just copy this to make your own

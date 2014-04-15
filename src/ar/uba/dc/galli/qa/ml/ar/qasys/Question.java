@@ -51,6 +51,7 @@ public class Question {
 	public void setProcessed(boolean processed) {this.processed = processed;}
 
 	public Logger LOGGER = Logger.getLogger(Controller.class .getName());
+	private String qc_all;
 
 	
 	public Question(String id, String group, String question, String answer, String question_en, String[] in_group_entities, String q_type, String q_ans, String support) {
@@ -328,7 +329,8 @@ public class Question {
 
 			e.printStackTrace();
 		}
-
+		
+		qc_all = stan.qc_res;
 		qc_class = stan.qc_class;
 		qc_subclass = stan.qc_subclass;
 		qc_confidence =  Double.parseDouble(stan.qc_confidence);
@@ -400,7 +402,28 @@ public class Question {
 	
 	public DataItem toDataItem()
 	{
-		return null;
+		DataItem me = new DataItem("question");
+		me.AddAttribute("id", this.getId());
+		me.AddAttribute("type", this.getQType());
+		me.AddField("q", this.getQuestionEn());
+		me.AddAttribute("type", "Aca iria el topic");
+		me.AddField("Q-QC", this.qc_all);
+		me.AddField("Q-POS", "Who/WP was/VBD the/DT title/NN sponsor/NN of/IN the/DT team?/NN ");
+		me.AddField("Q-NER", this.qc_all);
+	/*	<Q-POS id="555.2">Who/WP was/VBD the/DT title/NN sponsor/NN of/IN the/DT team?/NN </Q-POS>
+
+		<Q-NER id="555.1">What/O does/O WMSC/ORGANIZATION stand/O for/O ?/O </Q-NER>
+
+		<q id="555.1" type="FACTOID">What does WMSC stand for?</q>
+
+
+		<Q-FreeAll id="555.1">What/WP does/VBZ WMSC/NP00000 stand/VB for/IN ?/Fit </Q-FreeAll>
+
+
+		<Q-QC id="555.1">ABBR:exp</Q-QC>
+
+		*/
+		return me;
 	}
 	
 

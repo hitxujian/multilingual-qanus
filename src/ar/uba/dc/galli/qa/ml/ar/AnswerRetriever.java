@@ -65,7 +65,7 @@ public class AnswerRetriever{
 	// Error analysis module
 	protected ErrorAnalyzer m_ErrorAnalyzer = null;
 
-	protected IRegisterableModule m_Module;
+	protected FeatureScoringStrategy m_Module;
 
 	protected FreelingAPI m_free;
 	protected StanfordAPI m_stan;
@@ -168,9 +168,15 @@ public class AnswerRetriever{
 
 	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
 		
+		DataItem param, result;
 		question.annotate(m_free, m_stan, first_question_ners);
-
-		return null;
+		param = question.toDataItem();
+		System.out.println(param.toXMLString());
+		
+		result = m_Module.GetAnswerForQuestion(param);
+		
+		return result;
+		
 	}
 
 

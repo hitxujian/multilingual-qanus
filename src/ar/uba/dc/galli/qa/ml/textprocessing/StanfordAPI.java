@@ -55,7 +55,6 @@ public class StanfordAPI {
     public EnumTypes qc_subclass;
     public EnumTypes asked_entity;
 	
-	public static final String BASE_URL = Configuration.STANFORD_API_BASE_URL;
 	private static final boolean VERBOSE_LOAD = true;
 	
 	public StanfordAPI() {
@@ -82,7 +81,7 @@ public class StanfordAPI {
 	{
 	   try{
 		
-		   qc = new QuestionClassifierWithStanfordClassifier(BASE_URL+"lib"+ File.separator +"trec_classifier.stanford-classifier", "choppingboard" + File.separator + "temp");
+		   qc = new QuestionClassifierWithStanfordClassifier(Configuration.BASELIBDIR+"lib"+ File.separator +"trec_classifier.stanford-classifier", "choppingboard" + File.separator + "temp");
 		  
 	    }catch (Exception ex) {System.out.println("Error al iniciar QC:" + ex);}
 	}

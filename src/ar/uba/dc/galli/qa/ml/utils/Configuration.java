@@ -10,9 +10,10 @@ import ar.uba.dc.galli.qa.ml.ibp.Controller;
 
 public class Configuration {
 
-	public static final String STANFORD_API_BASE_URL = "/home/julian/qanus/qanus/";
+	
 	
 	public static String BASELIBDIR = "/home/julian/git/multilingual-qanus/dist/";
+	public static final String STANFORD_API_BASE_URL = BASELIBDIR;
 	public static String WIKIDIR = "/home/julian/tesis/wiki/";
 	public static String INDEXDIR = "/home/julian/tesis/lucene-indexes/";
 	public static String QDIR = "/home/julian/tesis/questions/";

@@ -18,6 +18,7 @@ import org.apache.lucene.search.ScoreDoc;
 import ar.uba.dc.galli.qa.ml.ar.AnswerCandidate;
 import ar.uba.dc.galli.qa.ml.ar.FreebaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 import sg.edu.nus.wing.qanus.framework.commons.IStrategyModule;
 import sg.edu.nus.wing.qanus.framework.commons.DataItem;
@@ -110,12 +111,12 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		m_InformationBase = new LuceneInformationBaseQuerier(a_IBFolder, RESULTS_TO_RETRIEVE);
 
 		// Processing modules
-		m_ModulePOS = new StanfordPOSTagger("lib" + File.separator + "bidirectional-wsj-0-18.tagger");
-		m_ModuleNER = new StanfordNER("lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
+		m_ModulePOS = new StanfordPOSTagger(Configuration.BASELIBDIR+"lib" + File.separator + "bidirectional-wsj-0-18.tagger");
+		m_ModuleNER = new StanfordNER(Configuration.BASELIBDIR+"lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
 		//m_ModuleNER = new StanfordNERWebService();
 
 		// Validation modules
-		m_FBQ = new FreebaseQuerier("choppingboard" + File.separator + "temp" + File.separator + "freebase-cache");
+		m_FBQ = new FreebaseQuerier(Configuration.BASELIBDIR+"choppingboard" + File.separator + "temp" + File.separator + "freebase-cache");
 
 	}
 
@@ -146,7 +147,6 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	 */
 	public DataItem GetAnswerForQuestion(DataItem a_QuestionItem, boolean a_Analysis) {
 
-		
 		// Retrieve question and annotations
 		String l_QuestionType = a_QuestionItem.GetAttribute("type");
 		if (l_QuestionType.compareToIgnoreCase("FACTOID") != 0) {
@@ -163,13 +163,14 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			l_ExpectedAnswerType = (l_QCItems[0].GetValue())[0];
 		}
 
+
 		// Retreive actual question string
 		String l_QuestionText = "";
 		DataItem[] l_QItems = a_QuestionItem.GetFieldValues("q");
 		if (l_QItems != null) {
 			l_QuestionText = (l_QItems[0].GetValue())[0];
 		}
-
+	
 		// Retrieve POS annotation
 		String l_QuestionPOS = "";
 		DataItem[] l_QuestionPOSItems = a_QuestionItem.GetFieldValues("Q-POS");
@@ -178,6 +179,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		}
 
 
+		
 
 		// If analysis is required, prepare the return items
 		DataItem l_AnalysisResults = new DataItem("Analysis");
@@ -1405,7 +1407,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 
 		// Used to remove stop words and stem the query
 		String[] l_StopWordsFileNames = new String[1];
-		l_StopWordsFileNames[0] = "lib" + File.separator + "common-english-words.txt";
+		l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-english-words.txt";
 		StopWordsFilter l_StopWords = new StopWordsFilter(l_StopWordsFileNames);
 
 		// Build seach terms dynamically, incorporating relevant information where possible
@@ -1415,6 +1417,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		String l_Query = "";
 
 		// -- Include the name of the target as part of the query
+		System.out.println(a_Target);
 		StringTokenizer l_ST_Target = new StringTokenizer(a_Target);
 		while (l_ST_Target.hasMoreTokens()) {
 			String l_Term = l_ST_Target.nextToken();

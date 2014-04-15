@@ -43,9 +43,6 @@ public class Question {
 	public EnumTypes qc_subclass;
 	public double qc_confidence;
 
-	public String getQuestionEn() {return question_en;}
-	public void setQuestionEn(String question_en) {this.question_en = question_en;}
-
 	public TextEntity[] first_question_ners = {};
 	
 	private boolean processed = false;
@@ -67,13 +64,21 @@ public class Question {
 		setQAns(q_ans);
 		old_group_entities= in_group_entities;
 	}
-	
-	public void process(FreelingAPI free, TextEntity[] in_first_question_ners)
+
+	public void annotate(FreelingAPI free, StanfordAPI stan, TextEntity[] in_first_question_ners)
+	{
+		setQCType(stan);
+		nlpProcess(free, in_first_question_ners);
+		
+		
+	}
+
+	public void nlpProcess(FreelingAPI free, TextEntity[] in_first_question_ners)
 	{
 		first_question_ners = in_first_question_ners;
-		process(free);
+		nlpProcess(free);
 	}
-	public void process(FreelingAPI free)
+	public void nlpProcess(FreelingAPI free)
 	{
 		if(!nlp_processed)
 		{
@@ -156,7 +161,7 @@ public class Question {
 	private String[] generateQueries1(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries1");
-		process(free);
+		nlpProcess(free);
 		String[] queries = {};
 
 		queries = ArrayUtils.add(queries,String.format("ALL:(%s)",clean(question)));
@@ -168,7 +173,7 @@ public class Question {
 	private String[] generateQueries2(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries1");
-		process(free);
+		nlpProcess(free);
 		String[] queries = {};
 
 		if(!group_entity.isEmpty())
@@ -187,7 +192,7 @@ public class Question {
 	private String[] generateQueries3(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries4");
-		process(free);
+		nlpProcess(free);
 		String[] queries = {};
 
 
@@ -234,7 +239,7 @@ public class Question {
 	private String[] generateQueries4(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries4");
-		process(free);
+		nlpProcess(free);
 		String[] queries = {};
 
 		if(!group_entity.isEmpty())
@@ -388,6 +393,10 @@ public class Question {
 	public void setSupport(String support) {
 		this.support = support;
 	}
+	
+	public String getQuestionEn() {return question_en;}
+	public void setQuestionEn(String question_en) {this.question_en = question_en;}
+
 	
 	public DataItem toDataItem()
 	{

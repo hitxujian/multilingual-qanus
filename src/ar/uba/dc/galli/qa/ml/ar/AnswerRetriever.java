@@ -65,8 +65,10 @@ public class AnswerRetriever{
 	// Error analysis module
 	protected ErrorAnalyzer m_ErrorAnalyzer = null;
 
-	protected IRegisterableModule l_Module;
+	protected IRegisterableModule m_Module;
 
+	protected FreelingAPI m_free;
+	protected StanfordAPI m_stan;
 
 	/**
 	 * Constructor.
@@ -82,7 +84,9 @@ public class AnswerRetriever{
 		m_LuceneFolder = a_LuceneFolder;
 		m_LangYear = a_LangYear;
 		
-		//FeatureScoringStrategy l_Module = new FeatureScoringStrategy(m_LuceneFolder);
+		m_free = FreelingAPI.getInstance(m_LangYear);
+		m_stan = new StanfordAPI();
+		m_Module = new FeatureScoringStrategy(m_LuceneFolder);
 
 		
 	} 
@@ -110,8 +114,6 @@ public class AnswerRetriever{
 
 
 		//lr = new LuceneReader(index);
-		FreelingAPI free = FreelingAPI.getInstance(m_LangYear);
-		StanfordAPI stan = new StanfordAPI();
 		
 		
 		Question[] qs = QuestionParser.getQuestions(m_QuestionSource);
@@ -123,7 +125,9 @@ public class AnswerRetriever{
 		int[] totals = {0,0,0,0};
 		int[] antitotals = {0,0,0,0};
 		int up_to = Configuration.UP_TO_N_QUESTIONS; //qs.length; //qs.length
-
+		
+		DataItem[] results = new DataItem[up_to];
+		
 		TextEntity[] first_question_ners = {};
 		//System.out.println("# value  token  luc    doc    pass   answ   dcovr  pcovr  acovr  dfreq  pfreq  afreq  dspan  pspan  aspan  tokens    titulo       texto");
 		//Aca va un traductor
@@ -132,15 +136,15 @@ public class AnswerRetriever{
 			if(qs[i].isProcessed())continue;
 			group_entity = "";
 			gr = QuestionParser.getGroup(qs, qs[i].getGroup());
-			
 			first_question_ners = new TextEntity[0];
+			
 			for (int j = 0; j < gr.length && j < up_to; j++) 
 			{
-				gr[j].setQCType(stan);
+				if(i > 0 )
+					results[i] = this.processQuestion(gr[j], first_question_ners);
+				else
+					results[i] = this.processQuestion(gr[j], first_question_ners);
 		
-				gr[j].process(free, first_question_ners);
-		
-				//System.out.println(gr[j].getQType());
 				QuestionParser.getById(qs, gr[j].getId()).setProcessed(true);
 
 			}
@@ -159,6 +163,15 @@ public class AnswerRetriever{
 		return true;
 
 	} // end Go()
+
+
+
+	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
+		
+		question.annotate(m_free, m_stan, first_question_ners);
+
+		return null;
+	}
 
 
 
@@ -182,15 +195,15 @@ public class AnswerRetriever{
 			//System.out.println(a_Item.toXMLString()); // Display received question for debugging if needed
 
 			IStrategyModule l_StrategyModule = null;
-			if (l_Module instanceof IStrategyModule) {
-				l_StrategyModule = (IStrategyModule) l_Module;			
+			if (m_Module instanceof IStrategyModule) {
+				l_StrategyModule = (IStrategyModule) m_Module;			
 			} else {
 				Logger.getLogger("QANUS").logp(Level.WARNING, AnswerRetriever.class.getName(), "Notify", "Wrong module type.");
 			}
 
 			IAnalyzable l_AnalyzableModule = null;
-			if (l_Module instanceof IAnalyzable && m_ErrorAnalyzer != null) {
-				l_AnalyzableModule = (IAnalyzable) l_Module;
+			if (m_Module instanceof IAnalyzable && m_ErrorAnalyzer != null) {
+				l_AnalyzableModule = (IAnalyzable) m_Module;
 
 				// Retrieve useful analysis info
 				DataItem l_AnalysisInfo = l_AnalyzableModule.GetAnalysisInfoForQuestion(a_Item);
@@ -203,7 +216,7 @@ public class AnswerRetriever{
 				DataItem l_RetrievedAnswer = l_StrategyModule.GetAnswerForQuestion(a_Item);
 				l_RankedAnswerTODO = l_RetrievedAnswer;
 
-				l_Answers.put(l_Module.GetModuleID(), l_RetrievedAnswer);				
+				l_Answers.put(m_Module.GetModuleID(), l_RetrievedAnswer);				
 				
 			} // end if
 			

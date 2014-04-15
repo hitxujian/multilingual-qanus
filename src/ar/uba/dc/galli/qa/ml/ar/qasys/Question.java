@@ -89,7 +89,7 @@ public class Question {
 			nouns = free.getNouns();	
 			adjectives = free.getAdjectives();
 			nlp_processed = true;
-			print();
+			//print();
 		}
 	}
 	
@@ -406,7 +406,7 @@ public class Question {
 		me.AddAttribute("id", this.getId());
 		me.AddAttribute("type", this.getQType());
 		me.AddField("q", this.getQuestionEn());
-		me.AddAttribute("type", "Aca iria el topic");
+		me.AddAttribute("Target", "The target of the question");
 		me.AddField("Q-QC", this.qc_all);
 		me.AddField("Q-POS", "Who/WP was/VBD the/DT title/NN sponsor/NN of/IN the/DT team?/NN ");
 		me.AddField("Q-NER", this.qc_all);

@@ -168,12 +168,9 @@ public class AnswerRetriever{
 
 	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
 		
-		DataItem param, result;
+		DataItem result;
 		question.annotate(m_free, m_stan, first_question_ners);
-		param = question.toDataItem();
-		System.out.println(param.toXMLString());
-		
-		result = m_Module.GetAnswerForQuestion(param);
+		result = m_Module.GetAnswerForQuestion(question.toDataItem());
 		
 		return result;
 		

@@ -29,6 +29,10 @@ public class FeatureScorer {
 		m_DocumentStore = new ArrayList<String>();
 	} // end constructor
 
+	public int documentStoreSize()
+	{
+		return m_DocumentStore.size();
+	}
 
 	/**
 	 * Adds a document to the class for subsequent consideration.

@@ -67,7 +67,7 @@ public class LuceneInformationBaseQuerier implements IInformationBaseQuerier {
 	public Object SearchQuery(String a_Query) {
 
 		// Build a Query object
-		QueryParser l_QP = new QueryParser(Version.LUCENE_40, "Text", new StandardAnalyzer(Version.LUCENE_40));
+		QueryParser l_QP = new QueryParser(Version.LUCENE_40, "ALL", new StandardAnalyzer(Version.LUCENE_40));
 		Query l_ParsedQuery = null;
 		try {
 			

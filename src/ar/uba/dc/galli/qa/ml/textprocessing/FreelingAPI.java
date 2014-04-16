@@ -204,7 +204,6 @@ public class FreelingAPI {
 		if(sentences.size() == 0)
 		{
 			String[] res = {text};
-			System.out.println("Body: "+text);
 			return res;
 		}
 			
@@ -223,7 +222,7 @@ public class FreelingAPI {
 	    	if(i1 > 0)
 	    		sentence = sentence.substring(0, sentence.length() - 1);
 	    	
-	    	System.out.println("Setence "+i+": "+sentence);
+	    	//System.out.println("Setence "+i+": "+sentence);
 	    	results[i] = sentence;
 	    }
 		

@@ -109,7 +109,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	
 
 
-	public FeatureScoringStrategy(File a_IBFolder, StanfordAPI stan, FreelingAPI in_free) {
+	public FeatureScoringStrategy(File a_IBFolder, StanfordAPI stan) {
 
 		// Initialise required components
 		m_InformationBase = new LuceneInformationBaseQuerier(a_IBFolder, RESULTS_TO_RETRIEVE);
@@ -118,7 +118,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		m_ModulePOS =stan.pos; 
 		m_ModuleNER =stan.ner; 
 		//m_ModuleNER = new StanfordNERWebService();
-		m_free = in_free;
+		
 		// Validation modules
 		m_FBQ = new FreebaseQuerier(Configuration.BASELIBDIR+"choppingboard" + File.separator + "temp" + File.separator + "freebase-cache");
 
@@ -154,7 +154,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		// Retrieve question and annotations
 		String l_QuestionType = a_QuestionItem.GetAttribute("type");
 		if (l_QuestionType.compareToIgnoreCase("FACTOID") != 0) {
-			System.out.print("Non factoid");
+			System.out.println("Non factoid");
 			return null; // TODO list questions?
 			// Plans are to support list questions soon
 		}
@@ -221,6 +221,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			}
 		}
 		
+		System.out.println("Comenzando heuristicas");
 		BaselineARHeuristic ar = new BaselineARHeuristic(m_ModuleNER,m_ModulePOS, m_FBQ, m_InformationBase);
 		DataItem res = ar.execute(l_BestSentence, l_ExpectedAnswerType, a_QuestionItem, a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
 		return res;

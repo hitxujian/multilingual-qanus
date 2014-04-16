@@ -88,8 +88,11 @@ public class AnswerRetriever{
 		m_LangYear = a_LangYear;
 		
 		m_free = FreelingAPI.getInstance(m_LangYear);
+		//String simple4 = "Articles related to the science of Geology, the study of the earth's surface.";
+		//String[] res = m_free.splitString(simple4);
+		
 		m_stan = new StanfordAPI();
-		m_Module = new FeatureScoringStrategy(m_LuceneFolder, m_stan);
+		m_Module = new FeatureScoringStrategy(m_LuceneFolder, m_stan, m_free);
 		m_ModulePOS = m_stan.pos;
 		m_ModuleNER = m_stan.ner;
 		
@@ -175,7 +178,9 @@ public class AnswerRetriever{
 		DataItem result;
 		question.annotate(m_stan, m_ModuleNER, m_ModulePOS);
 		result = m_Module.GetAnswerForQuestion(question.toDataItem());
-		
+		if(result == null) return result;
+		DataItem[] l_QCItems = result.GetFieldValues("Answer");
+		System.out.println(l_QCItems[0].GetValue()[0]);
 		return result;
 		
 	}

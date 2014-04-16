@@ -87,12 +87,12 @@ public class AnswerRetriever{
 		m_LuceneFolder = a_LuceneFolder;
 		m_LangYear = a_LangYear;
 		
-		m_free = FreelingAPI.getInstance(m_LangYear);
+		FreelingAPI.getInstance(m_LangYear);
 		//String simple4 = "Articles related to the science of Geology, the study of the earth's surface.";
 		//String[] res = m_free.splitString(simple4);
 		
 		m_stan = new StanfordAPI();
-		m_Module = new FeatureScoringStrategy(m_LuceneFolder, m_stan, m_free);
+		m_Module = new FeatureScoringStrategy(m_LuceneFolder, m_stan);
 		m_ModulePOS = m_stan.pos;
 		m_ModuleNER = m_stan.ner;
 		
@@ -138,7 +138,7 @@ public class AnswerRetriever{
 		TextEntity[] first_question_ners = {};
 		//System.out.println("# value  token  luc    doc    pass   answ   dcovr  pcovr  acovr  dfreq  pfreq  afreq  dspan  pspan  aspan  tokens    titulo       texto");
 		//Aca va un traductor
-		for (int i = 0; i < up_to ; i++) 
+		for (int i = Configuration.FROM_QUESTION; i < up_to ; i++) 
 		{
 			if(qs[i].isProcessed())continue;
 			group_entity = "";
@@ -147,7 +147,7 @@ public class AnswerRetriever{
 			
 			for (int j = 0; j < gr.length && j < up_to; j++) 
 			{
-				if(i > 0 )
+				if(i > Configuration.FROM_QUESTION )
 					results[i+j] = this.processQuestion(gr[j], first_question_ners);
 				else
 					results[i+j] = this.processQuestion(gr[j], first_question_ners);
@@ -161,7 +161,7 @@ public class AnswerRetriever{
 				*/
 		//Utils.println("total-questions: "+(up_to)+", w+", without: "+without_answer);
 		//WriteResultsToFile();
-		for (int k = 0; k < up_to; k++) {
+		for (int k = Configuration.FROM_QUESTION; k < up_to; k++) {
 			
 				
 				System.out.print(qs[k].getQuestionEn()+" --> ");
@@ -197,7 +197,7 @@ public class AnswerRetriever{
 		result = m_Module.GetAnswerForQuestion(question.toDataItem());
 		if(result == null)
 		{
-			System.out.println("Resultado nulo");
+			//System.out.println("Resultado nulo");
 			return result;
 		}
 		return result;

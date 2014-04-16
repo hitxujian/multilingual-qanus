@@ -11,6 +11,7 @@ import sg.edu.nus.wing.qanus.framework.commons.DataItem;
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScorer;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScoringStrategy;
+import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 
 public class BaselinePassageExtractor {
 
@@ -18,15 +19,23 @@ public class BaselinePassageExtractor {
 		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	public static String[] passagesFromBody(String body, FreelingAPI free)
+	{
+		//System.out.println("Body: "+body);
+		String[] sentences = FreelingAPI.getInstance().splitString(body);
+		for (int i = 0; i < sentences.length; i++) {
+			//System.out.println("Splitted: "+sentences[i]);
+		}
+		return sentences;
 	}
+	
+	public static void main()
+	{
+		
+	}
+	
 
-	public static String[] extractPassages(String l_Query, ScoreDoc[] l_RetrievedDocs, LuceneInformationBaseQuerier m_InformationBase, boolean a_Analysis, DataItem l_AnalysisResults) {
+	public static String[] extractPassages(String l_Query, ScoreDoc[] l_RetrievedDocs, LuceneInformationBaseQuerier m_InformationBase, boolean a_Analysis, DataItem l_AnalysisResults, FreelingAPI free) {
 		// Perform search and process results for answers
 		
 			// Iterate over the Documents in the Hits object
@@ -35,7 +44,7 @@ public class BaselinePassageExtractor {
 
 				ScoreDoc l_ScoreDoc = l_RetrievedDocs[i];
 				Document l_Doc = m_InformationBase.GetDoc(l_ScoreDoc.doc);
-				String[] l_ArrText = l_Doc.getValues("BODY");
+				String[] l_ArrText = passagesFromBody(l_Doc.get("BODY"), free);
 				String l_Headline = l_Doc.get("TITLE");
 
 

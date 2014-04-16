@@ -1,5 +1,6 @@
 package ar.uba.dc.galli.qa.ml.ar.qasys;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.logging.Logger;
@@ -7,6 +8,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.ArrayUtils;
 
 import sg.edu.nus.wing.qanus.framework.commons.DataItem;
+import sg.edu.nus.wing.qanus.framework.commons.IRegisterableModule;
+import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
+import sg.edu.nus.wing.qanus.textprocessing.StanfordPOSTagger;
 
 import ar.uba.dc.galli.qa.ml.ar.Controller;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
@@ -39,6 +43,9 @@ public class Question {
 	public TextEntity[] nouns;
 	public TextEntity[] adjectives;
 	
+	public String[] l_annotatedNER;
+	public String[] l_annotatedPOS;
+	
 	public EnumTypes qc_class;
 	public EnumTypes qc_subclass;
 	public double qc_confidence;
@@ -66,6 +73,18 @@ public class Question {
 		old_group_entities= in_group_entities;
 	}
 
+	public void annotate(StanfordAPI stan)
+	{
+		StanfordNER l_ModNER = new StanfordNER(Configuration.BASELIBDIR+"lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
+		//IRegisterableModule l_ModNER = new StanfordNERWebService();
+		String[] question = {this.getQuestionEn()};
+		setQCType(stan);
+		l_annotatedNER = l_ModNER.ProcessText(question);
+
+		StanfordPOSTagger l_ModPOSTagger = new StanfordPOSTagger(Configuration.BASELIBDIR+"lib" + File.separator + "bidirectional-wsj-0-18.tagger");
+		l_annotatedNER = l_ModPOSTagger.ProcessText(question);
+	
+	}
 	public void annotate(FreelingAPI free, StanfordAPI stan, TextEntity[] in_first_question_ners)
 	{
 		setQCType(stan);

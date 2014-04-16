@@ -169,7 +169,7 @@ public class AnswerRetriever{
 	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
 		
 		DataItem result;
-		question.annotate(m_free, m_stan, first_question_ners);
+		question.annotate(m_stan);
 		result = m_Module.GetAnswerForQuestion(question.toDataItem());
 		
 		return result;

@@ -612,9 +612,11 @@ public class BaselineARHeuristic {
 				// use the date of the article as the result?
 
 				ScoreDoc l_ScoreDoc = l_RetrievedDocs[0];
+				
 				Document l_Doc = m_InformationBase.GetDoc(l_ScoreDoc.doc);
 				String l_DocID = l_Doc.get("DocID");
 				String l_Captured = l_DocID;
+				
 				/*Pattern l_Pattern = Pattern.compile("[A-Za-z_]+([0-9]+)\\..");
 				Matcher l_Matcher = l_Pattern.matcher(l_DocID);
 				String l_Captured = "";
@@ -625,8 +627,12 @@ public class BaselineARHeuristic {
 					}
 				}*/
 
+				if(true)
+				{
+					l_Answer= l_Doc.get("TITLE");
+				}
 				// Change the YYYYMMDD format into DD-MM-YY
-				String l_Month = "";
+				/*String l_Month = "";
 				if (l_Captured.substring(4, 6).compareTo("01") == 0) {
 					l_Month = "Jan";
 				} else if (l_Captured.substring(4, 6).compareTo("02") == 0) {
@@ -658,7 +664,8 @@ public class BaselineARHeuristic {
 					l_Answer = l_Captured.substring(6, 8);
 				}
 				l_Answer += "-" + l_Month + "-" + l_Captured.substring(2, 4);
-
+				 */
+				
 				// Extract first sentence as answer string
 				String[] l_ArrText = l_Doc.getValues("Text");
 				if (l_ArrText != null) {

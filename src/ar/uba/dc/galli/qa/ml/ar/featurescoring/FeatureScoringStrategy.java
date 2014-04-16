@@ -18,6 +18,7 @@ import org.apache.lucene.search.ScoreDoc;
 import ar.uba.dc.galli.qa.ml.ar.AnswerCandidate;
 import ar.uba.dc.galli.qa.ml.ar.FreebaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
+import ar.uba.dc.galli.qa.ml.ar.components.BaselinePassageExtractor;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
@@ -178,7 +179,6 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		}
 
 
-		
 
 		// If analysis is required, prepare the return items
 		DataItem l_AnalysisResults = new DataItem("Analysis");
@@ -191,70 +191,47 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		String l_Query = null;
 		QuestionSubType l_SubType = BaselineQueryGenerator.GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
 		l_Query = BaselineQueryGenerator.generateQuery(l_QuestionTarget, l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
-		System.out.println(l_Query);
-				
+		
+		ScoreDoc[] l_RetrievedDocs = null;
+		
 
-		// Perform search and process results for answers
-		try {
-
-			// Retrieve documents based on the search string from the search engine
-			ScoreDoc[] l_RetrievedDocs = (ScoreDoc[]) m_InformationBase.SearchQuery(l_Query);
-
-			if (l_RetrievedDocs == null) throw new Exception("No search queries returned.");
-
-			// Iterate over the Documents in the Hits object
-			FeatureScorer l_FScorer = new FeatureScorer();
-			for (int i = 0; i < l_RetrievedDocs.length; i++) {
-
-				ScoreDoc l_ScoreDoc = l_RetrievedDocs[i];
-				Document l_Doc = m_InformationBase.GetDoc(l_ScoreDoc.doc);
-				String[] l_ArrText = l_Doc.getValues("Text");
-				String l_Headline = l_Doc.get("Headline");
-
-
-				// Treat each sentence within every document as a 'passage'
-				// We will rank each passage based on a set of features, and use the top scoring
-				// passage for answer string extraction
-				for (String l_Sentence : l_ArrText) {
-					// Add the passage to our scorer for scoring
-					l_FScorer.AddDocument(l_Sentence);
-
-					// If analysis is to be performed, we track the sentences that are retrieved
-					if (a_Analysis) {
-						l_AnalysisResults.AddField("Stage1", l_Sentence);
-					}
-				} // end for
-
-			} // end for i
-
+		// Retrieve documents based on the search string from the search engine
+		l_RetrievedDocs = (ScoreDoc[]) m_InformationBase.SearchQuery(l_Query);
 			
-			// Retrieve the N-best passages from all the retrieved documents
-			String[] l_BestSentence = l_FScorer.RetrieveTopDocuments(l_Query, 40);
+		
+	
 
-			// If analysis is to be performed, we track the sentences that are retrieved
-			if (a_Analysis) {
-				for (String l_Sentence : l_BestSentence) {
-					l_AnalysisResults.AddField("Stage2", l_Sentence);
-				}
+		if (l_RetrievedDocs == null)
+		{
+			Logger.getLogger("QANUS").logp(Level.WARNING, FeatureScoringStrategy.class.getName(), "GetAnswerForQuestion", "General exception");
+			System.exit(1);
+		}
+		
+		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults);
+		// If analysis is to be performed, we track the sentences that are retrieved
+		if (a_Analysis) {
+			for (String l_Sentence : l_BestSentence) {
+				l_AnalysisResults.AddField("Stage2", l_Sentence);
 			}
+		}
 
 
-			// Pattern-based answer extraction
-			// Use expected question answer type, try to see if we can find a similar type in best sentence
-			
+		// Pattern-based answer extraction
+		// Use expected question answer type, try to see if we can find a similar type in best sentence
+		
 
-			// Get POS annotations for ranked sentences
-			// This is currently being built into the Lucene index. It will take some time. Once
-			// this is done we can just retrieve the annotations from Lucene - cutting down on
-			// run-time computation requirements.
-			String[] l_POSTaggedBestSentence = m_ModulePOS.ProcessText(l_BestSentence);
+		// Get POS annotations for ranked sentences
+		// This is currently being built into the Lucene index. It will take some time. Once
+		// this is done we can just retrieve the annotations from Lucene - cutting down on
+		// run-time computation requirements.
+		String[] l_POSTaggedBestSentence = m_ModulePOS.ProcessText(l_BestSentence);
 
 
-			// Variable used to hold the extracted answer (eventually) and the passage from which
-			// it is extracted
-			String l_Answer = "";
-			String l_OriginalAnswerString = "";
-			// -----
+		// Variable used to hold the extracted answer (eventually) and the passage from which
+		// it is extracted
+		String l_Answer = "";
+		String l_OriginalAnswerString = "";
+		// -----
 
 
 			// Start of pattern based answer extraction - based on the identified expected
@@ -1288,18 +1265,6 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			} else {
 				return l_Result;
 			}
-
-
-		} catch (Exception ex) {
-			Logger.getLogger("QANUS").logp(Level.WARNING, FeatureScoringStrategy.class.getName(), "GetAnswerForQuestion", "General exception", ex);
-		}
-
-
-		// Before returning, save the results we have queries from freebase for this question
-		m_FBQ.SaveCache();
-
-		// Exception encountered, no answer
-		return null;
 
 	} // end GetAnswerForQuestion()
 

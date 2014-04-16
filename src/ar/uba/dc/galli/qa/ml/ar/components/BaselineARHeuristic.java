@@ -667,7 +667,7 @@ public class BaselineARHeuristic {
 				 */
 				
 				// Extract first sentence as answer string
-				String[] l_ArrText = l_Doc.getValues("Text");
+				String[] l_ArrText = BaselinePassageExtractor.passagesFromBody(l_Doc.get("BODY"));
 				if (l_ArrText != null) {
 					l_OriginalAnswerString = l_ArrText[0];
 					// If analysis is to be performed, we track the sentences that are retrieved

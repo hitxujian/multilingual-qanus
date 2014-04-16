@@ -20,8 +20,18 @@ public class Configuration {
 	public static String PREGUNTAS_EN = QDIR+"q-en.xml";
 	public static String PREGUNTAS_ES = QDIR+"q-es.xml";
 	public static String PREGUNTAS_PT = QDIR+"q-pt.xml";
-	public static String RESPUESTAS_ES = QDIR+"a-es.xml";
-	public static String RESPUESTAS_PT = QDIR+"a-pt.xml";
+	
+	/*Cuantas preguntas itera del total del xml 200 = todas*/
+	public static int FROM_QUESTION = 0;
+	public static int UP_TO_N_QUESTIONS = 200;
+	
+	public static String LANG = "en";
+	public static String INDEX = "pt-2007"; // "pt-2007"
+	public static int LUCENERESULTS = 50; //default at qanus was 50
+	public static int N_PASSAGES = 40; //default at quanus was 40
+	
+	
+	
 	
 	public static boolean SUPPORT_WIKI = true;
 	public static boolean SUPPORT_NIL = true;
@@ -31,22 +41,19 @@ public class Configuration {
 	public static boolean QTYPE_DEFINITION = true;
 	public static boolean GROUP_ENTITY_NER_AND_NOUNS = true;
 	
-	/*Cuantas preguntas itera del total del xml 200 = todas*/
-	public static int FROM_QUESTION = 21;
-	public static int UP_TO_N_QUESTIONS = 200;
+	public static String RESPUESTAS_ES = QDIR+"a-es.xml";
+	public static String RESPUESTAS_PT = QDIR+"a-pt.xml";
 	
 	public static boolean EVAL_PASSAGES = false; //false es evaldocs
 	
-	public static String LANG = "en";
-	public static String INDEX = "pt-2007"; // "pt-2007"
-	public static int LUCENERESULTS = 50; //default at qanus was 50
+	
 	public static int QUERYGENERATION = 2; //1, 2, 3 o 4
 	
 	public static boolean LOG_CONSOLE_SOLO = true;
 	
 	public static String DOCS_LOGFILE = "/home/julian/tesis/clef/queries-eval/"+LANG+"_"+LUCENERESULTS+"_"+INDEX+"-"+QUERYGENERATION+".log";
 
-	public static int N_PASSAGES = 10; //default at quanus was 40
+	
 	public static int PASSAGE_RANK = 2;
 	public static String PASSAGES_LOGFILE = "/home/julian/tesis/clef/passage-eval/"+N_PASSAGES+"_"+LUCENERESULTS+"_3.log";
 	

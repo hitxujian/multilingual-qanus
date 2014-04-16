@@ -164,15 +164,16 @@ public class AnswerRetriever{
 		for (int k = Configuration.FROM_QUESTION; k < up_to; k++) {
 			
 				
-				System.out.print(qs[k].getQuestionEn()+" --> ");
+				System.out.print(qs[k].getQuestionEn()+" & ");
 				if(results[k] != null)
 				{
 					DataItem[] l_QCItems = results[k].GetFieldValues("Answer");
-					System.out.println(l_QCItems[0].GetValue()[0]);
+					System.out.print(l_QCItems[0].GetValue()[0]);
 				}
 				else
-					System.out.println("Null");
+					System.out.print("Null");
 				
+				System.out.println("  &  "+qs[k].getAnswer()+" \\\\ \\hline");
 					
 			
 			

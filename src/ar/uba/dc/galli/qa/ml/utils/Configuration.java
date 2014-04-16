@@ -139,12 +139,13 @@ public class Configuration {
 
 	public static String GetQuestionFileFromOption(String option) {
 		
-		if(option.compareToIgnoreCase("es-06") == 0)
+		if(option.compareToIgnoreCase("pt-07") == 0)
 		{
-			return PREGUNTAS_ES;
+			return PREGUNTAS_PT;
 		}
 		else
-			return PREGUNTAS_PT;
+			return PREGUNTAS_ES;
+			
 			
 	}
 

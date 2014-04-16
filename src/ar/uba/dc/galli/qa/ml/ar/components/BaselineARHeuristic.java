@@ -20,6 +20,7 @@ import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermCoverage;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermProximity;
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 public class BaselineARHeuristic {
 
@@ -330,7 +331,7 @@ public class BaselineARHeuristic {
 				// Clear stop words from the query, we will use this to score the proximity.
 				// That is how near the query appears to the candidate answer in the source passage
 				String[] l_StopWordsFileNames = new String[1];
-				l_StopWordsFileNames[0] = "lib" + File.separator + "common-english-words.txt";
+				l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-english-words.txt";
 				StopWordsFilter l_StopWords = new StopWordsFilter(l_StopWordsFileNames);
 				String[] l_StopWordsProcessArr = { l_Query };
 				String l_CleanedQuery = l_StopWords.ProcessText(l_StopWordsProcessArr)[0];
@@ -613,8 +614,8 @@ public class BaselineARHeuristic {
 				ScoreDoc l_ScoreDoc = l_RetrievedDocs[0];
 				Document l_Doc = m_InformationBase.GetDoc(l_ScoreDoc.doc);
 				String l_DocID = l_Doc.get("DocID");
-
-				Pattern l_Pattern = Pattern.compile("[A-Za-z_]+([0-9]+)\\..");
+				String l_Captured = l_DocID;
+				/*Pattern l_Pattern = Pattern.compile("[A-Za-z_]+([0-9]+)\\..");
 				Matcher l_Matcher = l_Pattern.matcher(l_DocID);
 				String l_Captured = "";
 				if (l_Matcher.find()) {
@@ -622,7 +623,7 @@ public class BaselineARHeuristic {
 					for (int i = 0; i <= l_Matcher.groupCount(); i++) {
 						l_Captured = l_Matcher.group(i);
 					}
-				}
+				}*/
 
 				// Change the YYYYMMDD format into DD-MM-YY
 				String l_Month = "";

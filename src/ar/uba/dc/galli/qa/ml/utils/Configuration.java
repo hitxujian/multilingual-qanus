@@ -133,7 +133,8 @@ public class Configuration {
 	
 	public static String langFromLangYear(String langYear)
 	{
-		return langYear.substring(0, 2);
+		
+		return langYear.substring(0, langYear.length()-3);
 	}
 	
 

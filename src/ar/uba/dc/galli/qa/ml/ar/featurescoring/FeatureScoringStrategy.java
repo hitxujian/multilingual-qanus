@@ -22,6 +22,7 @@ import ar.uba.dc.galli.qa.ml.ar.components.BaselineARHeuristic;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselinePassageExtractor;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
+import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 import sg.edu.nus.wing.qanus.framework.commons.IStrategyModule;
@@ -106,14 +107,14 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	
 
 
-	public FeatureScoringStrategy(File a_IBFolder) {
+	public FeatureScoringStrategy(File a_IBFolder, StanfordAPI stan) {
 
 		// Initialise required components
 		m_InformationBase = new LuceneInformationBaseQuerier(a_IBFolder, RESULTS_TO_RETRIEVE);
 
 		// Processing modules
-		m_ModulePOS = new StanfordPOSTagger(Configuration.BASELIBDIR+"lib" + File.separator + "bidirectional-wsj-0-18.tagger");
-		m_ModuleNER = new StanfordNER(Configuration.BASELIBDIR+"lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
+		m_ModulePOS =stan.pos; 
+		m_ModuleNER =stan.ner; 
 		//m_ModuleNER = new StanfordNERWebService();
 
 		// Validation modules
@@ -193,13 +194,16 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		QuestionSubType l_SubType = BaselineQueryGenerator.GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
 		l_Query = BaselineQueryGenerator.generateQuery(l_QuestionTarget, l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
 		
+		
+		
 		ScoreDoc[] l_RetrievedDocs = null;
 		
 
 		// Retrieve documents based on the search string from the search engine
 		l_RetrievedDocs = (ScoreDoc[]) m_InformationBase.SearchQuery(l_Query);
-			
 		
+		System.out.println(l_RetrievedDocs.length);
+		if(true)return null;
 	
 
 		if (l_RetrievedDocs == null)

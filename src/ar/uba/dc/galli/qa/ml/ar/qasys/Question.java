@@ -73,16 +73,14 @@ public class Question {
 		old_group_entities= in_group_entities;
 	}
 
-	public void annotate(StanfordAPI stan)
+	public void annotate(StanfordAPI stan, StanfordNER l_ModNER, StanfordPOSTagger l_ModPOSTagger)
 	{
-		StanfordNER l_ModNER = new StanfordNER(Configuration.BASELIBDIR+"lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
-		//IRegisterableModule l_ModNER = new StanfordNERWebService();
+		
 		String[] question = {this.getQuestionEn()};
 		setQCType(stan);
 		l_annotatedNER = l_ModNER.ProcessText(question);
-
-		StanfordPOSTagger l_ModPOSTagger = new StanfordPOSTagger(Configuration.BASELIBDIR+"lib" + File.separator + "bidirectional-wsj-0-18.tagger");
-		l_annotatedNER = l_ModPOSTagger.ProcessText(question);
+		l_annotatedPOS = l_ModPOSTagger.ProcessText(question);
+		
 	
 	}
 	public void annotate(FreelingAPI free, StanfordAPI stan, TextEntity[] in_first_question_ners)
@@ -425,10 +423,10 @@ public class Question {
 		me.AddAttribute("id", this.getId());
 		me.AddAttribute("type", this.getQType());
 		me.AddField("q", this.getQuestionEn());
-		me.AddAttribute("Target", "The target of the question");
+		me.AddAttribute("Target",  this.getQuestionEn());
 		me.AddField("Q-QC", this.qc_all);
-		me.AddField("Q-POS", "Who/WP was/VBD the/DT title/NN sponsor/NN of/IN the/DT team?/NN ");
-		me.AddField("Q-NER", this.qc_all);
+		me.AddField("Q-POS", this.l_annotatedPOS[0]);
+		me.AddField("Q-NER", this.l_annotatedNER[0]);
 	/*	<Q-POS id="555.2">Who/WP was/VBD the/DT title/NN sponsor/NN of/IN the/DT team?/NN </Q-POS>
 
 		<Q-NER id="555.1">What/O does/O WMSC/ORGANIZATION stand/O for/O ?/O </Q-NER>

@@ -31,6 +31,7 @@ import sg.edu.nus.wing.qanus.framework.ar.er.ErrorAnalyzer;
 import sg.edu.nus.wing.qanus.framework.commons.*;
 import sg.edu.nus.wing.qanus.framework.util.DirectoryAndFileManipulation;
 import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
+import sg.edu.nus.wing.qanus.textprocessing.StanfordPOSTagger;
 
 
 /**
@@ -69,6 +70,8 @@ public class AnswerRetriever{
 
 	protected FreelingAPI m_free;
 	protected StanfordAPI m_stan;
+	private StanfordNER m_ModuleNER;
+	private StanfordPOSTagger m_ModulePOS;
 
 	/**
 	 * Constructor.
@@ -86,8 +89,9 @@ public class AnswerRetriever{
 		
 		m_free = FreelingAPI.getInstance(m_LangYear);
 		m_stan = new StanfordAPI();
-		m_Module = new FeatureScoringStrategy(m_LuceneFolder);
-
+		m_Module = new FeatureScoringStrategy(m_LuceneFolder, m_stan);
+		m_ModulePOS = m_stan.pos;
+		m_ModuleNER = m_stan.ner;
 		
 	} 
 
@@ -169,7 +173,7 @@ public class AnswerRetriever{
 	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
 		
 		DataItem result;
-		question.annotate(m_stan);
+		question.annotate(m_stan, m_ModuleNER, m_ModulePOS);
 		result = m_Module.GetAnswerForQuestion(question.toDataItem());
 		
 		return result;

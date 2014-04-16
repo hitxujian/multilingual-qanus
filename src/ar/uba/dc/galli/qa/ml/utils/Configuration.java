@@ -32,7 +32,7 @@ public class Configuration {
 	public static boolean GROUP_ENTITY_NER_AND_NOUNS = true;
 	
 	/*Cuantas preguntas itera del total del xml 200 = todas*/
-	public static int UP_TO_N_QUESTIONS = 10;
+	public static int UP_TO_N_QUESTIONS = 1;
 	
 	public static boolean EVAL_PASSAGES = false; //false es evaldocs
 	

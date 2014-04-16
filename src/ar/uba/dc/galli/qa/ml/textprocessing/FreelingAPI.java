@@ -103,6 +103,7 @@ public class FreelingAPI {
 	}
 	
 	
+	
 	public FreelingAPI(String in_lang)
 	{
 		lang = in_lang;
@@ -183,30 +184,6 @@ public class FreelingAPI {
 		System.out.println(str);
 	}
 	
-	public void print(ListWord list_word)
-	{
-		for (int i = 0; i < list_word.size(); i++) System.out.print(list_word.get(i).getForm()+" ");
-		System.out.println();
-	}
-	
-	/**
-	 * Takes ListWord and print all "words" in one line (then CR)
-	 * @param list_word ListWord
-	 * @see ListWord
-	 * @see Sentence
-	 * @see ListSentence
-	 */
-	public void printSentence(ListWord list_word)
-	{
-		for (int i = 0; i < list_word.size(); i++) {
-			System.out.print(list_word.get(i).getForm()+" ");
-			System.out.print(list_word.get(i).getTag()+" ");
-			System.out.print(list_word.get(i).getTag(1)+" ");
-			//isNer(list_word.get(i));
-			System.out.println("");
-		}
-		
-	}
 
 	/**
 	 * Tokenize a text string
@@ -219,6 +196,40 @@ public class FreelingAPI {
 		return res;
 	}
 	
+	
+	public String[] splitString(String text)
+	{
+		ListSentence sentences = split(tokenize(text));
+		ListWord list_word;
+		if(sentences.size() == 0)
+		{
+			String[] res = {text};
+			System.out.println("Body: "+text);
+			return res;
+		}
+			
+		String[] results = new String[(int) sentences.size()];
+		String sentence;
+		int i1;
+		for (int i = 0; i < sentences.size(); i++)
+	    {
+	    	list_word = sentences.get(i);
+	    	sentence = "";
+	    	for (i1 = 0; i1 < list_word.size(); i1++) 
+	    	{
+	    		sentence+=list_word.get(i1).getForm()+" ";
+			}
+	    	
+	    	if(i1 > 0)
+	    		sentence = sentence.substring(0, sentence.length() - 1);
+	    	
+	    	System.out.println("Setence "+i+": "+sentence);
+	    	results[i] = sentence;
+	    }
+		
+		return results;
+		
+	}
 
 	/**
 	 * Splits in sentences a string text
@@ -230,9 +241,9 @@ public class FreelingAPI {
 		ListWord list_word = tokenize(text);
 		// Split the tokens into distinct sentences.
 	    
-		ListSentence ls = sp.split( list_word, false );
+		ListSentence ls_aux = sp.split( list_word, true );
 	    
-	    return ls;
+	    return ls_aux;
 	}
 	/**
 	 * Splits in sentences a ListWord (tokenizer output)
@@ -241,13 +252,13 @@ public class FreelingAPI {
 	public ListSentence split(ListWord list_word)
 	{
 		// Split the tokens into distinct sentences.
-	    ListSentence ls = sp.split( list_word, false );
+	    ListSentence ls_aux = sp.split( list_word, true );
 
 /*	    for (int i = 0; i < ls.size(); i++) {
 			print(ls.get(i));
 		}
 		*/
-	    return ls;
+	    return ls_aux;
 	}
 	
 	//TODO: do
@@ -722,8 +733,23 @@ public class FreelingAPI {
 	public static void main( String argv[] ) throws IOException 
 	{
 		
-	     FreelingAPI free_pt = new FreelingAPI("pt");
+	     FreelingAPI free_pt = FreelingAPI.getInstance("simple-06");
 	     
+	     String simple2 = "A ' 'priest' ' or ' 'priestess' ' is a person who is allowed to do religious rites. Their office or position is the ' 'priesthood' ', a word which can also be used for such persons collectively. In most religions and cultures in history there have been priests, although they have a lot of different names, and follow different rules. A ' 'priest' ' is a member of a church that has been told to look after his (spiritual) community. He is the head of a parish. Most protestant religions know nothing about ordaining priests. To become a catholic priest, you are required to study Theology. The Orthodox and Protestant Churches also have laymen as clergy. Catholic priests are not allowed to marry. Orthodox priests can be married, but they must not marry after they become a priest. The Catholic Church does not allow women to become priests.";
+	     String simple3 = "Pixar animated movie which debuted in 2003. It stars the voices of Albert Brooks, Alexander Gould, and Ellen Degeneres as fish. The movie is about Nemo, a clownfish who gets lost in the ocean around Australia. His father, Marlin, and Marlin's new friend, Dory, spend the entire movie looking for him. The movie won an Oscar in 2004 for \"Best Animated Film.\"";
+	     String simple = "Something is wrong here. Something is just maybe wrong. Something must be done now. Dr Pepe Sanchez was on boarding to New York. What the hell. What the fucking hell! Oh my god, Oh my god. Who is him, my lord? Who is the Majestic that you pointed out as 'superior'? Very ''superior '' you said. Really what if. i. just. start bothering you... LOL! now i start correctly trying to make myself understandable.";
+	     String simple4 = " Marshall Bruce Mathers III' ') (born October 17, 1972) is a famous rap artist from Michigan. Eminem has a daughter named Hailie Jade Scott and an ex-wife (and soon to be wife again) named Kim Scott. He has 5 albums under his name that have been released ' 'worldwide' '. He is currently contemplating what to do next with his career; the rumour that he will retire may well be true but has been dismissed by Eminem himself, adding he is just taking time out to see what he wants to do next.";
+	     String[] res = free_pt.splitString(simple4);
+	     for (int i = 0; i < res.length; i++) {
+	    	 System.out.println(res[i]);	
+		}
+	     
+	     res = free_pt.splitString(simple2);
+	     for (int i = 0; i < res.length; i++) {
+	    	 System.out.println(res[i]);	
+		}
+	     
+	     System.exit(1);
 	     String pt = "Na parte inicial da sua história, a astronomia envolveu somente a observação e a previsão dos movimentos dos objetos no céu que podiam ser vistos a olho nu. O Rigveda refere-se aos 27 asterismos ou nakshatras associados aos movimentos do Sol e também às 12 divisões Zodíaco do céu. Os Grécia Antiga fizeram importantes contribuições para a astronomia, entre elas a definição de magnitude aparente. A Bíblia contém um número de afirmações sobre a posição da Terra no universo e sobre a natureza das estrelas e dos planetas, a maioria das quais são poéticas e não devem ser interpretadas literalmente; ver Cosmologia Bíblica. Nos anos 500, Aryabhata apresentou um sistema matemático que considerava que a Terra rodava em torno do seu eixo e que os planetas se deslocavam em relação ao Sol.";
 	     
 	     free_pt.print("Analizando "+pt);

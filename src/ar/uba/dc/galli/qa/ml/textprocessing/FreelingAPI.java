@@ -106,11 +106,13 @@ public class FreelingAPI {
 	public FreelingAPI(String in_lang)
 	{
 		lang = in_lang;
-		if(lang.compareTo("es") != 0 && lang.compareTo("en") != 0 && lang.compareTo("pt") != 0)
+		if(lang.compareTo("es") != 0 && lang.compareTo("en") != 0 && lang.compareTo("pt") != 0 && lang.compareTo("simple") != 0)
 		{
-			System.out.println("FreelingAPI: lang must be 'es', 'en' or 'pt'");
+			System.out.println("FreelingAPI: lang must be 'es', 'en', 'pt' or 'simple'");
 			return;
 		}
+		
+		if(lang.compareTo("simple") == 0) lang = "en";
 		
 		Timer timer = new Timer();
 		

@@ -133,7 +133,7 @@ public class AnswerRetriever{
 		int[] antitotals = {0,0,0,0};
 		int up_to = Configuration.UP_TO_N_QUESTIONS; //qs.length; //qs.length
 		
-		DataItem[] results = new DataItem[up_to];
+		DataItem[] results = new DataItem[up_to+5];
 		
 		TextEntity[] first_question_ners = {};
 		//System.out.println("# value  token  luc    doc    pass   answ   dcovr  pcovr  acovr  dfreq  pfreq  afreq  dspan  pspan  aspan  tokens    titulo       texto");
@@ -148,19 +148,36 @@ public class AnswerRetriever{
 			for (int j = 0; j < gr.length && j < up_to; j++) 
 			{
 				if(i > 0 )
-					results[i] = this.processQuestion(gr[j], first_question_ners);
+					results[i+j] = this.processQuestion(gr[j], first_question_ners);
 				else
-					results[i] = this.processQuestion(gr[j], first_question_ners);
+					results[i+j] = this.processQuestion(gr[j], first_question_ners);
 		
 				QuestionParser.getById(qs, gr[j].getId()).setProcessed(true);
 
 			}
 		}
-		System.out.format("%ntotal: %d, n-passages: %d, exac: %d,  cov10: %d, cov09: %d, cov08: %d %n", 
+		/*System.out.format("%ntotal: %d, n-passages: %d, exac: %d,  cov10: %d, cov09: %d, cov08: %d %n", 
 				up_to, Configuration.N_PASSAGES,  totals[3], totals[0],totals[2],  totals[1]);
+				*/
 		//Utils.println("total-questions: "+(up_to)+", w+", without: "+without_answer);
 		//WriteResultsToFile();
-
+		for (int k = 0; k < up_to; k++) {
+			
+				
+				System.out.print(qs[k].getQuestionEn()+" --> ");
+				if(results[k] != null)
+				{
+					DataItem[] l_QCItems = results[k].GetFieldValues("Answer");
+					System.out.println(l_QCItems[0].GetValue()[0]);
+				}
+				else
+					System.out.println("Null");
+				
+					
+			
+			
+				
+		}
 		
 		// Signal the error analysis engine that everything is over.
 		if (m_ErrorAnalyzer != null) {
@@ -179,8 +196,6 @@ public class AnswerRetriever{
 		question.annotate(m_stan, m_ModuleNER, m_ModulePOS);
 		result = m_Module.GetAnswerForQuestion(question.toDataItem());
 		if(result == null) return result;
-		DataItem[] l_QCItems = result.GetFieldValues("Answer");
-		System.out.println(l_QCItems[0].GetValue()[0]);
 		return result;
 		
 	}

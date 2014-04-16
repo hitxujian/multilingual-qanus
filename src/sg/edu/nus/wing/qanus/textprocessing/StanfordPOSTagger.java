@@ -83,6 +83,7 @@ public class StanfordPOSTagger implements ITextProcessingModule {
 		// Check that the tagger is loaded properly. We cannot proceed otherwise.
 		boolean l_TaggerLoaded = false;
 		if (m_Tagger == null)  {
+			System.out.println("Load tagger");
 			l_TaggerLoaded = LoadTagger();
 			if (!l_TaggerLoaded) {
 				return null;
@@ -93,12 +94,17 @@ public class StanfordPOSTagger implements ITextProcessingModule {
 		// Parse each sentence
 		for (String l_Sentence : a_Sentences) {
 			
-			try {
-				l_TaggedSentences.add(MaxentTagger.tagString(l_Sentence));
-			} catch (Exception e) {
-				System.err.println("StanfordPOSTagger::LoadTagger() -> Error tagging sentence [" + l_Sentence + "]");
-				continue;
+			System.out.println(l_Sentence);
+			if(l_Sentence.length() < 23000)
+			{
+				try {
+					l_TaggedSentences.add(MaxentTagger.tagString(l_Sentence));
+				} catch (Exception e) {
+					System.err.println("StanfordPOSTagger::LoadTagger() -> Error tagging sentence [" + l_Sentence + "]");
+					continue;
+				}	
 			}
+			
 			
 		} // end for
 		

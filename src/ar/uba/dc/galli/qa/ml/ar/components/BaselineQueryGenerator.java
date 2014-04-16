@@ -264,18 +264,6 @@ public class BaselineQueryGenerator {
 							String l_Term = StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
 							if (!l_UsedTerms.contains(l_Term)) {
 
-								/* Unused, thesaurus look up
-								String[] l_QueryWords = { l_Term };
-								String[] l_RelatedWords = l_Thesaurus.ProcessText(l_QueryWords);
-								String l_Expanded = "";
-								for (String l_RelatedWord : l_RelatedWords) {
-								if (l_RelatedWord == null) continue;
-								if (l_StopWords.IsStopWord(l_RelatedWord)) continue;
-								if (l_Expanded.length() > 0) l_Expanded += " ";
-								l_Expanded += l_RelatedWord;
-								}
-								l_Query = UpdateQuery(l_UsedTerms, l_Expanded, l_Query);
-								 */
 								l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
 
 							}
@@ -286,18 +274,6 @@ public class BaselineQueryGenerator {
 							String l_Term = StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
 							if (!l_UsedTerms.contains(l_Term)) {
 
-								/* Unused thesaurus look up
-								String[] l_QueryWords = { l_Term };
-								String[] l_RelatedWords = l_Thesaurus.ProcessText(l_QueryWords);
-								String l_Expanded = "";
-								for (String l_RelatedWord : l_RelatedWords) {
-								if (l_RelatedWord == null) continue;
-								if (l_StopWords.IsStopWord(l_RelatedWord)) continue;
-								if (l_Expanded.length() > 0) l_Expanded += " ";
-								l_Expanded += l_RelatedWord;
-								}
-								l_Query = UpdateQuery(l_UsedTerms, l_Expanded, l_Query);
-								 */
 								l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
 
 							}
@@ -307,18 +283,6 @@ public class BaselineQueryGenerator {
 							String l_Term = StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
 							if (!l_UsedTerms.contains(l_Term)) {
 
-								/* Unused, thesaurus look up
-								String[] l_QueryWords = { l_Term };
-								String[] l_RelatedWords = l_Thesaurus.ProcessText(l_QueryWords);
-								String l_Expanded = "";
-								for (String l_RelatedWord : l_RelatedWords) {
-								if (l_RelatedWord == null) continue;
-								if (l_StopWords.IsStopWord(l_RelatedWord)) continue;
-								if (l_Expanded.length() > 0) l_Expanded += " ";
-								l_Expanded += l_RelatedWord;
-								}
-								l_Query = UpdateQuery(l_UsedTerms, l_Expanded, l_Query);
-								 */
 								l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
 
 							}

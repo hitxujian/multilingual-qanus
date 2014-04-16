@@ -61,10 +61,10 @@ public class StanfordAPI {
 	
 		   	
 			System.out.print("StanfordNER...");
-			//ner = new StanfordNER(BASE_URL+"lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
+			ner = new StanfordNER(Configuration.BASELIBDIR+"lib" + File.separator + "ner-eng-ie.crf-4-conll-distsim.ser.gz");
 			Timer timer = new Timer();
 			
-			//pos = new StanfordPOSTagger(BASE_URL+"lib" + File.separator + "bidirectional-wsj-0-18.tagger");
+			pos = new StanfordPOSTagger(Configuration.BASELIBDIR+"lib" + File.separator + "bidirectional-wsj-0-18.tagger");
 			//if(VERBOSE_LOAD)System.out.println("["+timer.tic()+"secs ]");
 			//if(VERBOSE_LOAD)System.out.print("StanfordQC...");
 			if(VERBOSE_LOAD)System.out.print("Stanford  QC...");

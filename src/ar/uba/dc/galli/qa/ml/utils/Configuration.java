@@ -32,13 +32,13 @@ public class Configuration {
 	public static boolean GROUP_ENTITY_NER_AND_NOUNS = true;
 	
 	/*Cuantas preguntas itera del total del xml 200 = todas*/
-	public static int UP_TO_N_QUESTIONS = 1;
+	public static int UP_TO_N_QUESTIONS = 5;
 	
 	public static boolean EVAL_PASSAGES = false; //false es evaldocs
 	
 	public static String LANG = "en";
 	public static String INDEX = "pt-2007"; // "pt-2007"
-	public static int LUCENERESULTS = 100;
+	public static int LUCENERESULTS = 100; //default at qanus was 50
 	public static int QUERYGENERATION = 2; //1, 2, 3 o 4
 	
 	public static boolean LOG_CONSOLE_SOLO = true;

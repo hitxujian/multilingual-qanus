@@ -22,6 +22,7 @@ import ar.uba.dc.galli.qa.ml.ar.components.BaselineARHeuristic;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselinePassageExtractor;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
+import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
@@ -86,7 +87,7 @@ import sg.yeefan.searchenginewrapper.clients.*;
 public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 
 	// Retrieve 100 top documents from search engine for each search
-	private final int RESULTS_TO_RETRIEVE = 50; // was 100
+	private final int RESULTS_TO_RETRIEVE = Configuration.LUCENERESULTS; // was 100
 
 	// The Lucene engine
 	private LuceneInformationBaseQuerier m_InformationBase;
@@ -97,6 +98,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	private StanfordNER m_ModuleNER; // TODO remove after the information is included into Lucene index
 	//private StanfordNERWebService m_ModuleNER; // TODO remove after the information is included into Lucene index
 
+	private FreelingAPI m_free;
 	// Used to query Freebase to make sure some answers are "sane".
 	// I mean, we want to be sure we return a country when asked for a country.
 	private FreebaseQuerier m_FBQ;
@@ -107,7 +109,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	
 
 
-	public FeatureScoringStrategy(File a_IBFolder, StanfordAPI stan) {
+	public FeatureScoringStrategy(File a_IBFolder, StanfordAPI stan, FreelingAPI in_free) {
 
 		// Initialise required components
 		m_InformationBase = new LuceneInformationBaseQuerier(a_IBFolder, RESULTS_TO_RETRIEVE);
@@ -116,7 +118,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		m_ModulePOS =stan.pos; 
 		m_ModuleNER =stan.ner; 
 		//m_ModuleNER = new StanfordNERWebService();
-
+		m_free = in_free;
 		// Validation modules
 		m_FBQ = new FreebaseQuerier(Configuration.BASELIBDIR+"choppingboard" + File.separator + "temp" + File.separator + "freebase-cache");
 
@@ -202,8 +204,6 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		// Retrieve documents based on the search string from the search engine
 		l_RetrievedDocs = (ScoreDoc[]) m_InformationBase.SearchQuery(l_Query);
 		
-		System.out.println(l_RetrievedDocs.length);
-		if(true)return null;
 	
 
 		if (l_RetrievedDocs == null)
@@ -212,7 +212,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			System.exit(1);
 		}
 		
-		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults);
+		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults, m_free);
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
 			for (String l_Sentence : l_BestSentence) {

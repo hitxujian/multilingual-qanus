@@ -19,13 +19,13 @@ public class BaselinePassageExtractor {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static String[] passagesFromBody(String body, FreelingAPI free)
+	public static String[] passagesFromBody(String body)
 	{
 		//System.out.println("Body: "+body);
 		String[] sentences = FreelingAPI.getInstance().splitString(body);
-		for (int i = 0; i < sentences.length; i++) {
+		//for (int i = 0; i < sentences.length; i++) {
 			//System.out.println("Splitted: "+sentences[i]);
-		}
+		//}
 		return sentences;
 	}
 	
@@ -44,7 +44,7 @@ public class BaselinePassageExtractor {
 
 				ScoreDoc l_ScoreDoc = l_RetrievedDocs[i];
 				Document l_Doc = m_InformationBase.GetDoc(l_ScoreDoc.doc);
-				String[] l_ArrText = passagesFromBody(l_Doc.get("BODY"), free);
+				String[] l_ArrText = passagesFromBody(l_Doc.get("BODY"));
 				String l_Headline = l_Doc.get("TITLE");
 
 
@@ -63,9 +63,9 @@ public class BaselinePassageExtractor {
 
 			} // end for i
 
-			
+			System.out.println("BaselinePassageExtractor: Se seleccionan 40 de "+l_FScorer.documentStoreSize()+" oraciones");
 			// Retrieve the N-best passages from all the retrieved documents
-			return l_FScorer.RetrieveTopDocuments(l_Query, 40);
+			return l_FScorer.RetrieveTopDocuments(l_Query, 10);
 			
 
 	}

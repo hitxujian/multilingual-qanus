@@ -154,6 +154,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		// Retrieve question and annotations
 		String l_QuestionType = a_QuestionItem.GetAttribute("type");
 		if (l_QuestionType.compareToIgnoreCase("FACTOID") != 0) {
+			System.out.print("Non factoid");
 			return null; // TODO list questions?
 			// Plans are to support list questions soon
 		}

@@ -195,7 +195,11 @@ public class AnswerRetriever{
 		DataItem result;
 		question.annotate(m_stan, m_ModuleNER, m_ModulePOS);
 		result = m_Module.GetAnswerForQuestion(question.toDataItem());
-		if(result == null) return result;
+		if(result == null)
+		{
+			System.out.println("Resultado nulo");
+			return result;
+		}
 		return result;
 		
 	}

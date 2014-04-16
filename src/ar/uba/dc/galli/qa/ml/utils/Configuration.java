@@ -45,7 +45,7 @@ public class Configuration {
 	
 	public static String DOCS_LOGFILE = "/home/julian/tesis/clef/queries-eval/"+LANG+"_"+LUCENERESULTS+"_"+INDEX+"-"+QUERYGENERATION+".log";
 
-	public static int N_PASSAGES = 10;
+	public static int N_PASSAGES = 10; //default at quanus was 40
 	public static int PASSAGE_RANK = 2;
 	public static String PASSAGES_LOGFILE = "/home/julian/tesis/clef/passage-eval/"+N_PASSAGES+"_"+LUCENERESULTS+"_3.log";
 	

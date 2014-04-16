@@ -12,6 +12,7 @@ import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScorer;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScoringStrategy;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
+import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 public class BaselinePassageExtractor {
 
@@ -65,7 +66,7 @@ public class BaselinePassageExtractor {
 
 			System.out.println("BaselinePassageExtractor: Se seleccionan 40 de "+l_FScorer.documentStoreSize()+" oraciones");
 			// Retrieve the N-best passages from all the retrieved documents
-			return l_FScorer.RetrieveTopDocuments(l_Query, 10);
+			return l_FScorer.RetrieveTopDocuments(l_Query, Configuration.N_PASSAGES);
 			
 
 	}

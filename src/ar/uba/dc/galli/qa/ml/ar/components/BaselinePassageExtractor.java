@@ -24,6 +24,13 @@ public class BaselinePassageExtractor {
 	{
 		//System.out.println("Body: "+body);
 		String[] sentences = FreelingAPI.getInstance().splitString(body);
+		
+		if(sentences.length == 1)
+		{
+			System.out.println("No pude splittear un documento y lo tire");
+			sentences = new String[0];
+		}
+		
 		//for (int i = 0; i < sentences.length; i++) {
 			//System.out.println("Splitted: "+sentences[i]);
 		//}
@@ -64,7 +71,7 @@ public class BaselinePassageExtractor {
 
 			} // end for i
 
-			System.out.println("BaselinePassageExtractor: Se seleccionan 40 de "+l_FScorer.documentStoreSize()+" oraciones");
+			System.out.println("BaselinePassageExtractor: Se seleccionan "+Configuration.N_PASSAGES+" de "+l_FScorer.documentStoreSize()+" oraciones");
 			// Retrieve the N-best passages from all the retrieved documents
 			return l_FScorer.RetrieveTopDocuments(l_Query, Configuration.N_PASSAGES);
 			

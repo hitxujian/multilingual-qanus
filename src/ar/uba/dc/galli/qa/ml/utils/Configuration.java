@@ -38,7 +38,7 @@ public class Configuration {
 	
 	public static String LANG = "en";
 	public static String INDEX = "pt-2007"; // "pt-2007"
-	public static int LUCENERESULTS = 100; //default at qanus was 50
+	public static int LUCENERESULTS = 50; //default at qanus was 50
 	public static int QUERYGENERATION = 2; //1, 2, 3 o 4
 	
 	public static boolean LOG_CONSOLE_SOLO = true;

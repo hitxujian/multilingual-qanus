@@ -17,11 +17,11 @@ import sg.edu.nus.wing.qanus.textprocessing.StopWordsFilter;
 import ar.uba.dc.galli.qa.ml.ar.AnswerCandidate;
 import ar.uba.dc.galli.qa.ml.ar.FreebaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
-import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermCoverage;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermProximity;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import ar.uba.dc.galli.qa.ml.utils.EnumTypes.QuestionSubType;
 
 public class BaselineARHeuristic {
 

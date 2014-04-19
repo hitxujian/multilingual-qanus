@@ -23,13 +23,15 @@ public class Configuration {
 	
 	/*Cuantas preguntas itera del total del xml 200 = todas*/
 	public static int FROM_QUESTION = 0;
-	public static int UP_TO_N_QUESTIONS = 200;
+	public static int UP_TO_N_QUESTIONS = 1;
 	
 	public static String LANG = "en";
 	public static String INDEX = "pt-2007"; // "pt-2007"
 	public static int LUCENERESULTS = 50; //default at qanus was 50
 	public static int N_PASSAGES = 40; //default at quanus was 40
 	
+	
+	public static boolean USE_STANFORD = true;
 	
 	
 	

@@ -9,13 +9,11 @@ import java.util.regex.Pattern;
 import sg.edu.nus.wing.qanus.textprocessing.StopWordsFilter;
 
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import ar.uba.dc.galli.qa.ml.utils.EnumTypes.QuestionSubType;
 import ar.uba.dc.galli.qa.ml.utils.Utils;
 
 public class BaselineQueryGenerator {
 
-	public enum QuestionSubType {
-		HUM_IND_TYPE1, HUM_IND_TYPE1_IC, HUM_IND_TYPE2, OTHERS
-	};
 
 	public BaselineQueryGenerator() {
 		// TODO Auto-generated constructor stub

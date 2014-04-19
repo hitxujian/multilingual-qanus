@@ -39,7 +39,7 @@ public class Question {
 	private String[] all_entities;
 	
 
-	private boolean nlp_processed = false;
+	private boolean free_processed = false;
 	public TextEntity[] free_entities;
 	public TextEntity[] free_verbs;
 	public TextEntity[] free_nouns;
@@ -84,7 +84,7 @@ public class Question {
 	{
 		first_question_ners = in_first_question_ners;
 		stanfordAnnotation();
-		freelingAnnotation();
+		if(!Configuration.USE_STANFORD) freelingAnnotation();
 		
 	
 	}
@@ -105,14 +105,14 @@ public class Question {
 	public void freelingAnnotation()
 	{
 		FreelingAPI free = FreelingAPI.getInstance();
-		if(!nlp_processed)
+		if(!free_processed)
 		{
 			ListSentence ls = free.process(question);
 			free_entities = free.getEntities(ls);
 			free_verbs = free.getVerbs(ls);
 			free_nouns = free.getNouns(ls);	
 			free_adjectives = free.getAdjectives(ls);
-			nlp_processed = true;
+			free_processed = true;
 			//print();
 		}
 	}
@@ -143,24 +143,28 @@ public class Question {
 
 	public TextEntity[] getEntities()
 	{
+		if(Configuration.USE_STANFORD)return stan_entities;
 		return free_entities;
 	}
 
+	public TextEntity[] getAdjectives()
+	{
+		if(Configuration.USE_STANFORD)return stan_adjectives;
+		else return free_adjectives;
+	}
+	
 	public TextEntity[] getVerbs()
 	{
+		if(Configuration.USE_STANFORD)return stan_verbs;
 		return free_verbs;
 	}
 
 	public TextEntity[] getNouns()
 	{
+		if(Configuration.USE_STANFORD)return stan_nouns;
 		return free_nouns;
 	}
 
-	public String entity()
-	{
-		return free_entities[0].term;
-	}
-	
 	public String getNersAndNounsString()
 	{
 		return Utils.concatString(Utils.flattenTextEntities(free_entities))+" "+Utils.concatString(Utils.flattenTextEntities(free_nouns))+" "+Utils.concatString(Utils.flattenTextEntities(free_adjectives));

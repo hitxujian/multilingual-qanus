@@ -18,14 +18,12 @@ import org.apache.lucene.search.ScoreDoc;
 import ar.uba.dc.galli.qa.ml.ar.AnswerCandidate;
 import ar.uba.dc.galli.qa.ml.ar.FreebaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
-import ar.uba.dc.galli.qa.ml.ar.components.BaselineARHeuristic;
-import ar.uba.dc.galli.qa.ml.ar.components.BaselinePassageExtractor;
-import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator;
-import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
+import ar.uba.dc.galli.qa.ml.ar.components.*;
 import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import ar.uba.dc.galli.qa.ml.utils.EnumTypes.QuestionSubType;
 
 import sg.edu.nus.wing.qanus.framework.commons.IStrategyModule;
 import sg.edu.nus.wing.qanus.framework.commons.DataItem;
@@ -182,8 +180,8 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		// Query to use depends on question type
 		// First identify question type and subtype
 		String l_Query = null;
-		QuestionSubType l_SubType = BaselineQueryGenerator.GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
-		l_Query = BaselineQueryGenerator.generateQuery(l_QuestionTarget, l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
+		QuestionSubType l_SubType = MLBaselineQueryGenerator.GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
+		l_Query = MLBaselineQueryGenerator.generateQuery(l_QuestionTarget, l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType, question);
 		
 		
 		

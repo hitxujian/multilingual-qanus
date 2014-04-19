@@ -17,6 +17,11 @@ public enum EnumTypes
     date,count,money,period,volsize,speed,perc,code,dist,temp,ord,weight; //other,//NUM subclasses
     
     
+	public enum QuestionSubType {
+		HUM_IND_TYPE1, HUM_IND_TYPE1_IC, HUM_IND_TYPE2, OTHERS
+	};
+
+    
     public static EnumTypes val(String str)
     {
         try {

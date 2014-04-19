@@ -58,7 +58,7 @@ public class Question {
 	public void setProcessed(boolean processed) {this.processed = processed;}
 
 	public Logger LOGGER = Logger.getLogger(Controller.class .getName());
-	private String qc_all;
+	public String qc_all;
 
 	
 	public Question(String id, String group, String question, String answer, String question_en, String[] in_group_entities, String q_type, String q_ans, String support) {

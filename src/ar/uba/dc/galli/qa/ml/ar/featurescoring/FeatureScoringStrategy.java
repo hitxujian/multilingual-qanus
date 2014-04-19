@@ -22,6 +22,7 @@ import ar.uba.dc.galli.qa.ml.ar.components.BaselineARHeuristic;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselinePassageExtractor;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
+import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
@@ -129,61 +130,48 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	}
 
 	
-	public DataItem GetAnalysisInfoForQuestion(DataItem a_QuestionItem) {
+	public DataItem GetAnalysisInfoForQuestion(Question a_QuestionItem) {
 		return GetAnswerForQuestion(a_QuestionItem, true);
 	} // end GetAnalysisInfoForQuestion()
 
 
 	/**
 	 * Retrieves an answer for the provided question.
-	 * @param a_QuestionItem [in] structure containing question and annotations
+	 * @param question [in] structure containing question and annotations
 	 * @return Answer to the question
 	 */
-	public DataItem GetAnswerForQuestion(DataItem a_QuestionItem) {
-		return GetAnswerForQuestion(a_QuestionItem, false);
+	public DataItem GetAnswerForQuestion(Question question) {
+		return GetAnswerForQuestion(question, false);
 	} // end GetAnswerForQuestion()
 
 
 	/**
 	 * Retrieves an answer for the provided question.
-	 * @param a_QuestionItem [in] structure containing question and annotations
+	 * @param question [in] structure containing question and annotations
 	 * @return Answer to the question
 	 */
-	public DataItem GetAnswerForQuestion(DataItem a_QuestionItem, boolean a_Analysis) {
+	public DataItem GetAnswerForQuestion(Question question, boolean a_Analysis) {
 
 		// Retrieve question and annotations
-		String l_QuestionType = a_QuestionItem.GetAttribute("type");
+		
+		String l_QuestionType = question.getQType();
 		if (l_QuestionType.compareToIgnoreCase("FACTOID") != 0) {
 			System.out.println("Non factoid");
 			return null; // TODO list questions?
 			// Plans are to support list questions soon
 		}
 
-		String l_QuestionID = a_QuestionItem.GetAttribute("id");
-		String l_QuestionTarget = a_QuestionItem.GetAttribute("Target");
+		String l_QuestionID = question.getId();
+		String l_QuestionTarget = question.getQuestionEn();
 
-		String l_ExpectedAnswerType = null;
-		DataItem[] l_QCItems = a_QuestionItem.GetFieldValues("Q-QC");
-		if (l_QCItems != null) {
-			l_ExpectedAnswerType = (l_QCItems[0].GetValue())[0];
-		}
-
-
+		String 	l_ExpectedAnswerType =question.qc_all;
 		// Retreive actual question string
-		String l_QuestionText = "";
-		DataItem[] l_QItems = a_QuestionItem.GetFieldValues("q");
-		if (l_QItems != null) {
-			l_QuestionText = (l_QItems[0].GetValue())[0];
-		}
-	
+		
+		String l_QuestionText =  question.getQuestionEn();
+			
 		// Retrieve POS annotation
-		String l_QuestionPOS = "";
-		DataItem[] l_QuestionPOSItems = a_QuestionItem.GetFieldValues("Q-POS");
-		if (l_QuestionPOSItems != null) {
-			l_QuestionPOS = (l_QuestionPOSItems[0].GetValue())[0];
-		}
-
-
+		String l_QuestionPOS = question.l_annotatedPOS[0];
+		
 
 		// If analysis is required, prepare the return items
 		DataItem l_AnalysisResults = new DataItem("Analysis");
@@ -223,7 +211,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 		System.out.println("Comenzando heuristicas");
 		BaselineARHeuristic ar = new BaselineARHeuristic(m_ModuleNER,m_ModulePOS, m_FBQ, m_InformationBase);
-		DataItem res = ar.execute(l_BestSentence, l_ExpectedAnswerType, a_QuestionItem, a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
+		DataItem res = ar.execute(l_BestSentence, l_ExpectedAnswerType, question.toDataItem(), a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
 		return res;
 		// Pattern-based answer extraction
 		// Use expected question answer type, try to see if we can find a similar type in best sentence
@@ -268,6 +256,18 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		return l_SearchResults.getTotalResults();
 
 	} // end GetNumberOfHits();
+
+	@Override
+	public DataItem GetAnalysisInfoForQuestion(DataItem a_QuestionItem) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DataItem GetAnswerForQuestion(DataItem a_QuestionItem) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 
 

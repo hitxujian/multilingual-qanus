@@ -15,6 +15,7 @@ import ar.uba.dc.galli.qa.ml.utils.TextEntity;
 import ar.uba.dc.galli.qa.ml.utils.Timer;
 
 import edu.upc.freeling.ListWord;
+import edu.upc.freeling.Util;
 import edu.upc.freeling.Word;
 
 import sg.edu.nus.wing.qanus.textprocessing.PorterStemmer;
@@ -56,6 +57,20 @@ public class StanfordAPI {
     public EnumTypes asked_entity;
 	
 	private static final boolean VERBOSE_LOAD = true;
+	
+	private static StanfordAPI instance;
+	
+	public static StanfordAPI getInstance() 
+	{		
+		if(instance == null)
+		{
+			System.loadLibrary( "freeling_javaAPI" );
+			Util.initLocale( "default" );
+			instance = new StanfordAPI();
+		}
+		return instance;
+
+	}
 	
 	public StanfordAPI() {
 	
@@ -137,7 +152,7 @@ public class StanfordAPI {
         	asked_entity = EnumTypes.val("NOVALUE");
         }
       
-        return new TextEntity(question_word.term, question_word.type, question_word.subtype, question_word.matched_str, question_word.comparator_used, asked_entity);
+        return new TextEntity(question_word.term, question_word.tag, question_word.subtype, question_word.matched_str, question_word.comparator_used, asked_entity);
 
     	
     	
@@ -277,9 +292,9 @@ public class StanfordAPI {
 		
 	    LinkedList<TextEntity> res = new LinkedList<TextEntity>();
 	    
-	    for(String person: persons)res.add(new TextEntity(person, "PERSON", "StanfordAPI", null, null));
-	    for(String location: locations)res.add(new TextEntity(location, "LOCATION","StanfordAPI", null, null));
-	    for(String organization: organizations)res.add(new TextEntity(organization, "ORGANIZATION","StanfordAPI", null, null));
+	    for(String person: persons)res.add(new TextEntity(person, "PERSON", "StanfordAPI"));
+	    for(String location: locations)res.add(new TextEntity(location, "LOCATION","StanfordAPI"));
+	    for(String organization: organizations)res.add(new TextEntity(organization, "ORGANIZATION","StanfordAPI"));
 	    
 	    return res.toArray(new TextEntity[0]);
 		

@@ -70,9 +70,6 @@ public class FreelingAPI {
 	public Ukb dis;
 	public String lang;
 	
-	public ListSentence ls;
-	public String input_string;
-	private EnumTypes asked_entity;
 	
 	private static FreelingAPI instance = null;
 		  
@@ -174,16 +171,6 @@ public class FreelingAPI {
 	    
 	    mf = new Maco( op );
 	}
-	
-	/**
-	 * Just a nasty System.out.println() alias
-	 * @param str
-	 */
-	public void print(String str)
-	{
-		System.out.println(str);
-	}
-	
 
 	/**
 	 * Tokenize a text string
@@ -192,7 +179,6 @@ public class FreelingAPI {
 	public ListWord tokenize(String text)
 	{
 		ListWord res = tk.tokenize(text);
-		
 		return res;
 	}
 	
@@ -266,10 +252,15 @@ public class FreelingAPI {
 		return text;
 	}
 	
-	public void process(String text)
+	public ListSentence process(String in_text)
 	{
 		PrintStream old_out = System.out;
 		PrintStream old_err = System.err;
+		
+		String text = in_text;
+		
+		ListSentence ls;
+		
 		/*PrintStream n;
 		FileOutputStream fos;
 		try {
@@ -289,7 +280,7 @@ public class FreelingAPI {
 
 		//Utils.redirectStdOut(n);
 		*/
-		input_string = text;
+		
 		text = addPunctuation(text);
 		
 		ls = split(tokenize(text));
@@ -329,6 +320,7 @@ public class FreelingAPI {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
+		return ls;
 	}
 	
 	public String cleanUnderscores(String str)
@@ -341,10 +333,10 @@ public class FreelingAPI {
 	 * @param str
 	 * @return
 	 */
-	public boolean isEntity(String str)
+	public boolean isEntity(String str, ListSentence ls)
 	{
 		boolean res = false;
-		for(TextEntity e : getEntities())
+		for(TextEntity e : getEntities(ls))
 		{
 			if(e.term.compareToIgnoreCase(str) == 0)
 			{
@@ -354,7 +346,7 @@ public class FreelingAPI {
 		return res;
 	}
 	
-	public ListWord getBaseWords()
+	public ListWord getBaseWords(ListSentence ls)
 	{
 		ListWord list_word = new ListWord();
 		ListWord aux;
@@ -369,7 +361,7 @@ public class FreelingAPI {
 		return list_word;
 	}
 	
-	public TextEntity[] getQWords()
+	public TextEntity[] getQWords(ListSentence ls)
 	{
 		
 		LinkedList<TextEntity> res = new LinkedList<TextEntity>();
@@ -476,7 +468,7 @@ public class FreelingAPI {
         	asked_entity = EnumTypes.val("NOVALUE");
         }
       
-    	return new TextEntity(question_word.term, question_word.type, question_word.subtype, question_word.matched_str, question_word.comparator_used, asked_entity);
+    	return new TextEntity(question_word.term, question_word.tag, question_word.subtype, question_word.matched_str, question_word.comparator_used, asked_entity);
 			
 		
 	}
@@ -501,12 +493,12 @@ public class FreelingAPI {
         	asked_entity = EnumTypes.val("NOVALUE");
         }
       
-        return new TextEntity(question_word.term, question_word.type, question_word.subtype, question_word.matched_str, question_word.comparator_used, asked_entity);
+        return new TextEntity(question_word.term, question_word.tag, question_word.subtype, question_word.matched_str, question_word.comparator_used, asked_entity);
 			
 		
 	}
 	
-    public boolean wordPOSExists(String type)
+    public boolean wordPOSExists(String type, ListSentence ls)
     {
 		
 		for (int i = 0; i < ls.size(); i++)
@@ -517,7 +509,7 @@ public class FreelingAPI {
 			
     }
 	
-	public TextEntity[] getEntities()
+	public TextEntity[] getEntities(ListSentence ls)
 	{
 		
 		LinkedList<TextEntity> res = new LinkedList<TextEntity>();
@@ -549,7 +541,7 @@ public class FreelingAPI {
 		return res.toArray(new TextEntity[0]);
 	}
 	
-	public TextEntity[] getNouns()
+	public TextEntity[] getNouns(ListSentence ls)
 	{
 		
 		LinkedList<TextEntity> res = new LinkedList<TextEntity>()
@@ -578,7 +570,7 @@ public class FreelingAPI {
 	}
 	
 	
-	public TextEntity[] getAdjectives()
+	public TextEntity[] getAdjectives(ListSentence ls)
 	{
 		
 		LinkedList<TextEntity> res = new LinkedList<TextEntity>();
@@ -614,7 +606,7 @@ public class FreelingAPI {
 	}
 
 
-	public TextEntity[] getVerbs()
+	public TextEntity[] getVerbs(ListSentence ls)
 	{
 		
 		LinkedList<TextEntity> res = new LinkedList<TextEntity>()
@@ -751,13 +743,13 @@ public class FreelingAPI {
 	     System.exit(1);
 	     String pt = "Na parte inicial da sua história, a astronomia envolveu somente a observação e a previsão dos movimentos dos objetos no céu que podiam ser vistos a olho nu. O Rigveda refere-se aos 27 asterismos ou nakshatras associados aos movimentos do Sol e também às 12 divisões Zodíaco do céu. Os Grécia Antiga fizeram importantes contribuições para a astronomia, entre elas a definição de magnitude aparente. A Bíblia contém um número de afirmações sobre a posição da Terra no universo e sobre a natureza das estrelas e dos planetas, a maioria das quais são poéticas e não devem ser interpretadas literalmente; ver Cosmologia Bíblica. Nos anos 500, Aryabhata apresentou um sistema matemático que considerava que a Terra rodava em torno do seu eixo e que os planetas se deslocavam em relação ao Sol.";
 	     
-	     free_pt.print("Analizando "+pt);
-	     free_pt.process(pt);
-	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getEntities())));
+	     System.out.println("Analizando "+pt);
+	     ListSentence ls_old = free_pt.process(pt);
+	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getEntities(ls_old))));
 	     Utils.println("");
-	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getNouns())));
+	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getNouns(ls_old))));
 	     Utils.println("");
-	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getVerbs())));
+	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getVerbs(ls_old))));
 	     
 	     Utils.println("");
 		 Utils.print("Finish OK");
@@ -769,25 +761,25 @@ public class FreelingAPI {
 		 
 		 
 		 
-		 free.print("Ejecutando freeling sobre input...");
+		 System.out.println("Ejecutando freeling sobre input...");
 		 String input = "Marcelo Jaime habita en la Gran Ciudad de Buenos Aires. También se la conoce como CABA, tal vez te suene. Los perros tienen mucho orgullo de la limpieza de su barrio.";
-		 free.print(input);
-		 free.process(input);
-		 free2.process(input);
-		 free.print("ES");
-		 free.getNouns();
-		 free.print("EN");
-		 free2.getNouns();
+		 System.out.println(input);
+		 ls_old = free.process(input);
+		 ListSentence ls_old2 = free2.process(input);
+		 System.out.println("ES");
+		 free.getNouns(ls_old);
+		 System.out.println("EN");
+		 free2.getNouns(ls_old2);
 		 
 		 input = "Marcelo Jaime worked at the Gran Ciudad de Buenos Aires. Almost known as CABA, may be that sounds to you. The dogs are proud of their cleanness.";
-		 free.print(input);
-		 free.process(input);
-		 free2.process(input);
-		 free.print("ES");
-		 free.getNouns();
-		 free.print("EN");
-		 free2.getNouns();
-		 free.print("Ejecute mil catorce");
+		 System.out.println(input);
+		 ls_old= free.process(input);
+		 ls_old2= free2.process(input);
+		 System.out.println("ES");
+		 free.getNouns(ls_old);
+		 System.out.println("EN");
+		 free2.getNouns(ls_old2);
+		 System.out.println("Ejecute mil catorce");
 	
 	}
 
@@ -795,7 +787,7 @@ public class FreelingAPI {
 
 	public String getAll(String l_Sentence) {
 		
-		process(l_Sentence);
+		ListSentence ls = process(l_Sentence);
 		//LinkedList<TextEntity> res = new LinkedList<TextEntity>();
 		ListWord list_word;
 		Word word;

@@ -20,12 +20,13 @@ import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.components.BaselineQueryGenerator.QuestionSubType;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermCoverage;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermProximity;
+import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 public class BaselineARHeuristic {
 
-	private StanfordPOSTagger m_ModulePOS;
-	private StanfordNER m_ModuleNER; // TODO remove after the information is included into Lucene index
+	//private StanfordPOSTagger m_ModulePOS;
+	//private StanfordNER m_ModuleNER; // TODO remove after the information is included into Lucene index
 	//private StanfordNERWebService m_ModuleNER; // TODO remove after the information is included into Lucene index
 
 	// Used to query Freebase to make sure some answers are "sane".
@@ -33,10 +34,9 @@ public class BaselineARHeuristic {
 	private FreebaseQuerier m_FBQ;
 	private LuceneInformationBaseQuerier m_InformationBase;
 	
-	public BaselineARHeuristic(StanfordNER in_ModuleNER, StanfordPOSTagger in_ModulePOS, FreebaseQuerier in_FBQ, LuceneInformationBaseQuerier in_InformationBase)
+	public BaselineARHeuristic( FreebaseQuerier in_FBQ, LuceneInformationBaseQuerier in_InformationBase)
 	{
-		m_ModuleNER = in_ModuleNER;
-		m_ModulePOS = in_ModulePOS;
+
 		m_FBQ = in_FBQ;
 		m_InformationBase = in_InformationBase;
 		
@@ -49,7 +49,7 @@ public class BaselineARHeuristic {
 	// this is done we can just retrieve the annotations from Lucene - cutting down on
 	// run-time computation requirements.
 	System.out.println("Cant sentences: "+l_BestSentence.length);
-	String[] l_POSTaggedBestSentence = m_ModulePOS.ProcessText(l_BestSentence);
+	String[] l_POSTaggedBestSentence = StanfordAPI.getInstance().pos.ProcessText(l_BestSentence);
 
 	
 	// Variable used to hold the extracted answer (eventually) and the passage from which
@@ -481,7 +481,7 @@ public class BaselineARHeuristic {
 
 			// Attempt to find strings tagged as LOCATION by the NER
 			Pattern l_Pattern = Pattern.compile("(([A-Za-z\\.,]+)/LOCATION)( ([A-Za-z\\.,]+)/LOCATION)*");
-			String[] l_CandidateSentences = m_ModuleNER.ProcessText(l_BestSentence);
+			String[] l_CandidateSentences = StanfordAPI.getInstance().ner.ProcessText(l_BestSentence);
 			LinkedList<String> l_Candidates = new LinkedList<String>();
 			LinkedList<String> l_OriginalAnswerStrings = new LinkedList<String>();
 			for (String l_CandidateSentence : l_CandidateSentences) {
@@ -1156,7 +1156,7 @@ public class BaselineARHeuristic {
 
 
 		// Invoke NER
-		String[] l_CandidateSentences = m_ModuleNER.ProcessText(a_Sentences);
+		String[] l_CandidateSentences = StanfordAPI.getInstance().ner.ProcessText(a_Sentences);
 
 
 		// Extract candidates

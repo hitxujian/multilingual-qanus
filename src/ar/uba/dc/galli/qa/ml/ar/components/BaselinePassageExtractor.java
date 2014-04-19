@@ -27,7 +27,7 @@ public class BaselinePassageExtractor {
 		
 		if(sentences.length == 1)
 		{
-			System.out.println("No pude splittear un documento y lo tire");
+			//System.out.println("No pude splittear un documento y lo tire");
 			sentences = new String[0];
 		}
 		
@@ -43,7 +43,7 @@ public class BaselinePassageExtractor {
 	}
 	
 
-	public static String[] extractPassages(String l_Query, ScoreDoc[] l_RetrievedDocs, LuceneInformationBaseQuerier m_InformationBase, boolean a_Analysis, DataItem l_AnalysisResults, FreelingAPI free) {
+	public static String[] extractPassages(String l_Query, ScoreDoc[] l_RetrievedDocs, LuceneInformationBaseQuerier m_InformationBase, boolean a_Analysis, DataItem l_AnalysisResults) {
 		// Perform search and process results for answers
 		
 			// Iterate over the Documents in the Hits object

@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import edu.upc.freeling.ListSentence;
+
 import sg.edu.nus.wing.qanus.framework.commons.DataItem;
 import sg.edu.nus.wing.qanus.framework.commons.IRegisterableModule;
 import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
@@ -73,21 +75,21 @@ public class Question {
 		old_group_entities= in_group_entities;
 	}
 
-	public void annotate(StanfordAPI stan, StanfordNER l_ModNER, StanfordPOSTagger l_ModPOSTagger, TextEntity[] in_first_question_ners)
+	public void annotate(TextEntity[] in_first_question_ners)
 	{
 		first_question_ners = in_first_question_ners;
-		stanfordAnnotation(stan,l_ModNER, l_ModPOSTagger);
+		stanfordAnnotation();
 		freelingAnnotation();
 		
 	
 	}
 	
-	public void stanfordAnnotation(StanfordAPI stan, StanfordNER l_ModNER, StanfordPOSTagger l_ModPOSTagger)
+	public void stanfordAnnotation()
 	{
 		String[] question = {this.getQuestionEn()};
-		setQCType(stan);
-		l_annotatedNER = l_ModNER.ProcessText(question);
-		l_annotatedPOS = l_ModPOSTagger.ProcessText(question);
+		setQCType();
+		l_annotatedNER = StanfordAPI.getInstance().ner.ProcessText(question);
+		l_annotatedPOS = StanfordAPI.getInstance().pos.ProcessText(question);
 	}
 	
 	public void freelingAnnotation()
@@ -95,11 +97,11 @@ public class Question {
 		FreelingAPI free = FreelingAPI.getInstance();
 		if(!nlp_processed)
 		{
-			free.process(question);
-			entities = free.getEntities();
-			verbs = free.getVerbs();
-			nouns = free.getNouns();	
-			adjectives = free.getAdjectives();
+			ListSentence ls = free.process(question);
+			entities = free.getEntities(ls);
+			verbs = free.getVerbs(ls);
+			nouns = free.getNouns(ls);	
+			adjectives = free.getAdjectives(ls);
 			nlp_processed = true;
 			//print();
 		}
@@ -332,8 +334,9 @@ public class Question {
 		return getText()+" "+first_in_group.getText();
 	}
 
-	public void setQCType(StanfordAPI stan)
+	public void setQCType()
 	{
+		StanfordAPI stan = StanfordAPI.getInstance();
 		stan.load(this.getQuestionEn());
 		try {
 			stan.qc();

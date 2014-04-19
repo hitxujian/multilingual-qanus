@@ -95,11 +95,11 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 
 	// Temporary annotation modules
 	// While we are still building this into our Lucene index
-	private StanfordPOSTagger m_ModulePOS;
-	private StanfordNER m_ModuleNER; // TODO remove after the information is included into Lucene index
+	//private StanfordPOSTagger m_ModulePOS;
+	//private StanfordNER m_ModuleNER; // TODO remove after the information is included into Lucene index
 	//private StanfordNERWebService m_ModuleNER; // TODO remove after the information is included into Lucene index
 
-	private FreelingAPI m_free;
+	//private FreelingAPI m_free;
 	// Used to query Freebase to make sure some answers are "sane".
 	// I mean, we want to be sure we return a country when asked for a country.
 	private FreebaseQuerier m_FBQ;
@@ -110,14 +110,14 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	
 
 
-	public FeatureScoringStrategy(File a_IBFolder, StanfordAPI stan) {
+	public FeatureScoringStrategy(File a_IBFolder) {
 
 		// Initialise required components
 		m_InformationBase = new LuceneInformationBaseQuerier(a_IBFolder, RESULTS_TO_RETRIEVE);
 
 		// Processing modules
-		m_ModulePOS =stan.pos; 
-		m_ModuleNER =stan.ner; 
+		//m_ModulePOS =stan.pos; 
+		//m_ModuleNER =stan.ner; 
 		//m_ModuleNER = new StanfordNERWebService();
 		
 		// Validation modules
@@ -201,7 +201,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			System.exit(1);
 		}
 		
-		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults, m_free);
+		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults);
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
 			for (String l_Sentence : l_BestSentence) {
@@ -210,7 +210,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		}
 		
 		System.out.println("Comenzando heuristicas");
-		BaselineARHeuristic ar = new BaselineARHeuristic(m_ModuleNER,m_ModulePOS, m_FBQ, m_InformationBase);
+		BaselineARHeuristic ar = new BaselineARHeuristic( m_FBQ, m_InformationBase);
 		DataItem res = ar.execute(l_BestSentence, l_ExpectedAnswerType, question.toDataItem(), a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
 		return res;
 		// Pattern-based answer extraction

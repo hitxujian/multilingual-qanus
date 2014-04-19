@@ -68,11 +68,6 @@ public class AnswerRetriever{
 
 	protected FeatureScoringStrategy m_Module;
 
-	protected FreelingAPI m_free;
-	protected StanfordAPI m_stan;
-	private StanfordNER m_ModuleNER;
-	private StanfordPOSTagger m_ModulePOS;
-
 	/**
 	 * Constructor.
 	 * @param a_QuestionsSource [in] folder containing annotated questions in XML files
@@ -88,14 +83,10 @@ public class AnswerRetriever{
 		m_LangYear = a_LangYear;
 		
 		FreelingAPI.getInstance(m_LangYear);
-		//String simple4 = "Articles related to the science of Geology, the study of the earth's surface.";
-		//String[] res = m_free.splitString(simple4);
+		StanfordAPI.getInstance();
 		
-		m_stan = new StanfordAPI();
-		m_Module = new FeatureScoringStrategy(m_LuceneFolder, m_stan);
-		m_ModulePOS = m_stan.pos;
-		m_ModuleNER = m_stan.ner;
-		
+		m_Module = new FeatureScoringStrategy(m_LuceneFolder);
+
 	} 
 
 
@@ -194,7 +185,7 @@ public class AnswerRetriever{
 	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
 		
 		DataItem result;
-		question.annotate(m_stan, m_ModuleNER, m_ModulePOS, first_question_ners);
+		question.annotate(first_question_ners);
 		result = m_Module.GetAnswerForQuestion(question);
 		if(result == null)
 		{

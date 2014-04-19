@@ -19,7 +19,7 @@ public class TextEntity extends Object
     
     
     public String term;
-    public String type;
+    public String tag;
     public String subtype;
     public String lang;
     public String recognized_by;
@@ -35,11 +35,18 @@ public class TextEntity extends Object
     
     
   
-
-	public TextEntity(String in_term,String  in_type)
+    public TextEntity(String in_term,String  in_tag, String in_recognized_by)
     {
         term = in_term;
-        type = in_type;
+        tag = in_tag;
+        recognized_by = in_recognized_by;
+            
+    }
+    
+	public TextEntity(String in_term,String  in_tag)
+    {
+        term = in_term;
+        tag = in_tag;
             
     }
 	
@@ -48,7 +55,7 @@ public class TextEntity extends Object
     public TextEntity(String in_term,String in_type, String in_db_field, String in_value, String comp)
     {
         term = in_term;
-        type = in_type;
+        tag = in_type;
         matched_str = in_value;
         subtype = in_db_field;
         comparator_used = comp;
@@ -59,7 +66,7 @@ public class TextEntity extends Object
     public TextEntity(String in_term,String  in_type, String in_matched_str, String in_subtype, String in_comparator, EnumTypes in_qc_type)
     {
     	term = in_term;
-    	type = in_type;
+    	tag = in_type;
     	matched_str = in_matched_str;
     	subtype = in_subtype;
         comparator_used = in_comparator;
@@ -108,7 +115,7 @@ public class TextEntity extends Object
     public void print()
     {
     	if(HTML_PRINT)System.out.print("<span style='color:red'>");
-    	String res = "{term: "+term+", type: "+type;
+    	String res = "{term: "+term+", type: "+tag;
     	if(subtype != null) res+=", subtype: "+subtype.toLowerCase();
     	if(matched_str != null) res+=", matched: "+matched_str;
     	if(comparator_used != null) res+=", comp: "+comparator_used;

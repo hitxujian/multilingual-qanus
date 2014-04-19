@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import sg.edu.nus.wing.qanus.textprocessing.StopWordsFilter;
 
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import ar.uba.dc.galli.qa.ml.utils.Utils;
 
 public class BaselineQueryGenerator {
 
@@ -261,7 +262,7 @@ public class BaselineQueryGenerator {
 						String l_POSTag = l_POSEntity.substring(l_DelimPos + 1);
 						if (l_POSTag.substring(0, 2).compareToIgnoreCase("NN") == 0) {
 							// Match all NN tags like NNS NNP NN NNPS
-							String l_Term = StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
+							String l_Term = Utils.StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
 							if (!l_UsedTerms.contains(l_Term)) {
 
 								l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
@@ -271,7 +272,7 @@ public class BaselineQueryGenerator {
 						}
 						if (l_POSTag.substring(0, 2).compareToIgnoreCase("VB") == 0) {
 							// Match all VB tags like VB VBZ VBG VBD
-							String l_Term = StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
+							String l_Term = Utils.StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
 							if (!l_UsedTerms.contains(l_Term)) {
 
 								l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
@@ -280,7 +281,7 @@ public class BaselineQueryGenerator {
 						}
 						if (l_POSTag.substring(0, 2).compareToIgnoreCase("JJ") == 0) {
 							// Match all NN tags like NNS NNP NN NNPS
-							String l_Term = StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
+							String l_Term = Utils.StripXMLChar(l_POSEntity.substring(0, l_DelimPos));
 							if (!l_UsedTerms.contains(l_Term)) {
 
 								l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
@@ -302,7 +303,7 @@ public class BaselineQueryGenerator {
 			StringTokenizer l_QnST = new StringTokenizer(a_Question);
 			while (l_QnST.hasMoreTokens()) {
 				String l_Qn = l_QnST.nextToken();
-				String l_Term = StripXMLChar(l_Qn);
+				String l_Term = Utils.StripXMLChar(l_Qn);
 				if (l_StopWords.IsStopWord(l_Term)) {
 					continue;
 				}
@@ -346,43 +347,7 @@ public class BaselineQueryGenerator {
 
 	} // end UpdateQuery()
 
-	/**
-	 * Removes any XML encoded escape chars in a given string.
-	 *
-	 * For example Bush&apos;s is actually Bush's
-	 * We just strip away the apostrophes.
-	 *
-	 * &quot;Bush&quot; is actually "Bush"
-	 * We also strip away the quotes.
-	 *
-	 * D&ampG is D&G, we replace accordingly.
-	 *
-	 * TODO < and > also
-	 *
-	 * @param a_String
-	 * @return string with XML characters replaced
-	 */
-	private static String StripXMLChar(String a_String) {
-
-		Pattern l_Pattern_APOSS = Pattern.compile("&apos;s");
-		Matcher l_Matcher_APOSS = l_Pattern_APOSS.matcher(a_String);
-		a_String = l_Matcher_APOSS.replaceAll("");
-
-		Pattern l_Pattern_APOS = Pattern.compile("&apos;");
-		Matcher l_Matcher_APOS = l_Pattern_APOS.matcher(a_String);
-		a_String = l_Matcher_APOS.replaceAll("'");
-
-		Pattern l_Pattern_QUOT = Pattern.compile("&quot;");
-		Matcher l_Matcher_QUOT = l_Pattern_QUOT.matcher(a_String);
-		a_String = l_Matcher_QUOT.replaceAll("");
-
-		Pattern l_Pattern_AMP = Pattern.compile("&amp;");
-		Matcher l_Matcher_AMP = l_Pattern_AMP.matcher(a_String);
-		a_String = l_Matcher_AMP.replaceAll("&");
-
-		return a_String;
-
-	} // end StripXMLChar()
+	
 
 	
 }

@@ -3,6 +3,8 @@ package ar.uba.dc.galli.qa.ml.utils;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -121,6 +123,43 @@ public class Utils {
 
 	}
 
+	/**
+	 * Removes any XML encoded escape chars in a given string.
+	 *
+	 * For example Bush&apos;s is actually Bush's
+	 * We just strip away the apostrophes.
+	 *
+	 * &quot;Bush&quot; is actually "Bush"
+	 * We also strip away the quotes.
+	 *
+	 * D&ampG is D&G, we replace accordingly.
+	 *
+	 * TODO < and > also
+	 *
+	 * @param a_String
+	 * @return string with XML characters replaced
+	 */
+	public static String StripXMLChar(String a_String) {
+
+		Pattern l_Pattern_APOSS = Pattern.compile("&apos;s");
+		Matcher l_Matcher_APOSS = l_Pattern_APOSS.matcher(a_String);
+		a_String = l_Matcher_APOSS.replaceAll("");
+
+		Pattern l_Pattern_APOS = Pattern.compile("&apos;");
+		Matcher l_Matcher_APOS = l_Pattern_APOS.matcher(a_String);
+		a_String = l_Matcher_APOS.replaceAll("'");
+
+		Pattern l_Pattern_QUOT = Pattern.compile("&quot;");
+		Matcher l_Matcher_QUOT = l_Pattern_QUOT.matcher(a_String);
+		a_String = l_Matcher_QUOT.replaceAll("");
+
+		Pattern l_Pattern_AMP = Pattern.compile("&amp;");
+		Matcher l_Matcher_AMP = l_Pattern_AMP.matcher(a_String);
+		a_String = l_Matcher_AMP.replaceAll("&");
+
+		return a_String;
+
+	} // end StripXMLChar()
 
 
 }

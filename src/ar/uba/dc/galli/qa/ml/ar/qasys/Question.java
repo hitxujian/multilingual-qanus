@@ -40,17 +40,22 @@ public class Question {
 	
 
 	private boolean nlp_processed = false;
-	public TextEntity[] entities;
-	public TextEntity[] verbs;
-	public TextEntity[] nouns;
-	public TextEntity[] adjectives;
+	public TextEntity[] free_entities;
+	public TextEntity[] free_verbs;
+	public TextEntity[] free_nouns;
+	public TextEntity[] free_adjectives;
+	
+	public TextEntity[] stan_entities;
+	public TextEntity[] stan_verbs;
+	public TextEntity[] stan_nouns;
+	public TextEntity[] stan_adjectives;
 	
 	public String[] l_annotatedNER;
 	public String[] l_annotatedPOS;
 	
-	public EnumTypes qc_class;
-	public EnumTypes qc_subclass;
-	public double qc_confidence;
+	public String qc_all;
+	public String qc_class;
+	public String qc_subclass;
 
 	public TextEntity[] first_question_ners = {};
 	
@@ -60,7 +65,7 @@ public class Question {
 	public void setProcessed(boolean processed) {this.processed = processed;}
 
 	public Logger LOGGER = Logger.getLogger(Controller.class .getName());
-	public String qc_all;
+	
 
 	
 	public Question(String id, String group, String question, String answer, String question_en, String[] in_group_entities, String q_type, String q_ans, String support) {
@@ -87,9 +92,14 @@ public class Question {
 	public void stanfordAnnotation()
 	{
 		String[] question = {this.getQuestionEn()};
+		StanfordAPI stan = StanfordAPI.getInstance();
 		setQCType();
-		l_annotatedNER = StanfordAPI.getInstance().ner.ProcessText(question);
-		l_annotatedPOS = StanfordAPI.getInstance().pos.ProcessText(question);
+		l_annotatedNER = stan.ner.ProcessText(question);
+		l_annotatedPOS = stan.pos.ProcessText(question);
+		stan_entities = stan.getEntities(l_annotatedNER[0]);
+		stan_verbs = stan.getVerbs(l_annotatedPOS[0]);
+		stan_nouns = stan.getNouns(l_annotatedPOS[0]);
+		stan_adjectives = stan.getAdjectives(l_annotatedPOS[0]);
 	}
 	
 	public void freelingAnnotation()
@@ -98,10 +108,10 @@ public class Question {
 		if(!nlp_processed)
 		{
 			ListSentence ls = free.process(question);
-			entities = free.getEntities(ls);
-			verbs = free.getVerbs(ls);
-			nouns = free.getNouns(ls);	
-			adjectives = free.getAdjectives(ls);
+			free_entities = free.getEntities(ls);
+			free_verbs = free.getVerbs(ls);
+			free_nouns = free.getNouns(ls);	
+			free_adjectives = free.getAdjectives(ls);
 			nlp_processed = true;
 			//print();
 		}
@@ -109,10 +119,9 @@ public class Question {
 		
 	private void print() {
 		
-		
 		System.out.format("%n%nPregunta: %s ner: %s, verb: %s, noun: %s, adj: %s, gne: %s %n", this.getText(), 
-				Utils.toJson(entities), Utils.toJson(verbs), Utils.toJson(nouns), 
-				Utils.toJson(adjectives), Utils.toJson(first_question_ners));
+				Utils.toJson(free_entities), Utils.toJson(free_verbs), Utils.toJson(free_nouns), 
+				Utils.toJson(free_adjectives), Utils.toJson(first_question_ners));
 		// TODO Auto-generated method stub
 		
 	}
@@ -129,32 +138,32 @@ public class Question {
 	
 	public boolean hasOnlyOneEntity()
 	{
-		return entities.length == 1;
+		return free_entities.length == 1;
 	}
 
 	public TextEntity[] getEntities()
 	{
-		return entities;
+		return free_entities;
 	}
 
 	public TextEntity[] getVerbs()
 	{
-		return verbs;
+		return free_verbs;
 	}
 
 	public TextEntity[] getNouns()
 	{
-		return nouns;
+		return free_nouns;
 	}
 
 	public String entity()
 	{
-		return entities[0].term;
+		return free_entities[0].term;
 	}
 	
 	public String getNersAndNounsString()
 	{
-		return Utils.concatString(Utils.flattenTextEntities(entities))+" "+Utils.concatString(Utils.flattenTextEntities(nouns))+" "+Utils.concatString(Utils.flattenTextEntities(adjectives));
+		return Utils.concatString(Utils.flattenTextEntities(free_entities))+" "+Utils.concatString(Utils.flattenTextEntities(free_nouns))+" "+Utils.concatString(Utils.flattenTextEntities(free_adjectives));
 	}
 	
 	public String getGroupEntity()
@@ -163,11 +172,11 @@ public class Question {
 			return getNersAndNounsString();
 		
 		
-		if(entities.length > 0 ) 
-			return Utils.concatString(Utils.flattenTextEntities(entities));
+		if(free_entities.length > 0 ) 
+			return Utils.concatString(Utils.flattenTextEntities(free_entities));
 		
-		if(nouns.length > 0)
-			return Utils.concatString(Utils.flattenTextEntities(nouns));
+		if(free_nouns.length > 0)
+			return Utils.concatString(Utils.flattenTextEntities(free_nouns));
 		
 		return clean(getText());
 			
@@ -217,10 +226,10 @@ public class Question {
 			queries = ArrayUtils.add(queries, String.format("TITLE:(%s)^100", group_entity));
 		}
 		
-		for(TextEntity e : entities)
+		for(TextEntity e : free_entities)
 			queries = ArrayUtils.add(queries, String.format("TITLE:(\"%s\")^2", e.term));
 
-		String all_entities = Utils.concatString(Utils.flattenTextEntities(entities));
+		String all_entities = Utils.concatString(Utils.flattenTextEntities(free_entities));
 		
 
 		if(!all_entities.isEmpty()){
@@ -228,12 +237,12 @@ public class Question {
 			queries = ArrayUtils.add(queries, String.format("ALL:(%s %s)", group_entity,all_entities));	
 		}
 
-		String all = all_entities+" "+Utils.concatString(Utils.flattenTextEntities(nouns));
+		String all = all_entities+" "+Utils.concatString(Utils.flattenTextEntities(free_nouns));
 
 		queries = ArrayUtils.add(queries, String.format("TITLE:(%s %s)^2", group_entity, all));
 		queries = ArrayUtils.add(queries, String.format("ALL:(%s %s)", group_entity,all));	
 
-		all+=" "+Utils.concatString(Utils.flattenTextEntities(verbs));;
+		all+=" "+Utils.concatString(Utils.flattenTextEntities(free_verbs));;
 		
 		queries = ArrayUtils.add(queries,String.format("ALL:(%s %s)", group_entity,all));
 		queries = ArrayUtils.add(queries,String.format("ALL:(%s %s)", group_entity,clean(question)));
@@ -263,10 +272,10 @@ public class Question {
 			queries = ArrayUtils.add(queries, String.format("TITLE:(%s)^100", group_entity));
 		}
 		
-		for(TextEntity e : entities)
+		for(TextEntity e : free_entities)
 			queries = ArrayUtils.add(queries, String.format("TITLE:(\"%s\")^2", e.term));
 
-		String all_entities = Utils.concatString(Utils.flattenTextEntities(entities));
+		String all_entities = Utils.concatString(Utils.flattenTextEntities(free_entities));
 		
 
 		if(!all_entities.isEmpty()){
@@ -274,12 +283,12 @@ public class Question {
 			queries = ArrayUtils.add(queries, String.format("ALL:(%s %s)", group_entity,all_entities));	
 		}
 
-		String all = all_entities+" "+Utils.concatString(Utils.flattenTextEntities(nouns));
+		String all = all_entities+" "+Utils.concatString(Utils.flattenTextEntities(free_nouns));
 
 		queries = ArrayUtils.add(queries, String.format("TITLE:(%s %s)^2", group_entity, all));
 		queries = ArrayUtils.add(queries, String.format("ALL:(%s %s)", group_entity,all));	
 
-		all+=" "+Utils.concatString(Utils.flattenTextEntities(verbs));;
+		all+=" "+Utils.concatString(Utils.flattenTextEntities(free_verbs));;
 		
 		queries = ArrayUtils.add(queries,String.format("ALL:(%s %s)", group_entity,all));
 		queries = ArrayUtils.add(queries,String.format("ALL:(%s %s)", group_entity,clean(question)));
@@ -336,19 +345,17 @@ public class Question {
 
 	public void setQCType()
 	{
-		StanfordAPI stan = StanfordAPI.getInstance();
-		stan.load(this.getQuestionEn());
+
 		try {
-			stan.qc();
+			qc_all = StanfordAPI.getInstance().qc(this.getQuestionEn());
 		} catch (FileNotFoundException e) {
 
 			e.printStackTrace();
 		}
 		
-		qc_all = stan.qc_res;
-		qc_class = stan.qc_class;
-		qc_subclass = stan.qc_subclass;
-		qc_confidence =  Double.parseDouble(stan.qc_confidence);
+		qc_class = StanfordAPI.getInstance().getQcClass(qc_all);
+		qc_subclass = StanfordAPI.getInstance().getQcSubclass(qc_all);
+		//qc_confidence =  Double.parseDouble(qc_res[1]);
 
 
 	}

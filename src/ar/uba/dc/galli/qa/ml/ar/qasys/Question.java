@@ -73,31 +73,26 @@ public class Question {
 		old_group_entities= in_group_entities;
 	}
 
-	public void annotate(StanfordAPI stan, StanfordNER l_ModNER, StanfordPOSTagger l_ModPOSTagger)
+	public void annotate(StanfordAPI stan, StanfordNER l_ModNER, StanfordPOSTagger l_ModPOSTagger, TextEntity[] in_first_question_ners)
 	{
+		first_question_ners = in_first_question_ners;
+		stanfordAnnotation(stan,l_ModNER, l_ModPOSTagger);
+		freelingAnnotation();
 		
+	
+	}
+	
+	public void stanfordAnnotation(StanfordAPI stan, StanfordNER l_ModNER, StanfordPOSTagger l_ModPOSTagger)
+	{
 		String[] question = {this.getQuestionEn()};
 		setQCType(stan);
 		l_annotatedNER = l_ModNER.ProcessText(question);
 		l_annotatedPOS = l_ModPOSTagger.ProcessText(question);
-		
+	}
 	
-	}
-	public void annotate(FreelingAPI free, StanfordAPI stan, TextEntity[] in_first_question_ners)
+	public void freelingAnnotation()
 	{
-		setQCType(stan);
-		nlpProcess(free, in_first_question_ners);
-		
-		
-	}
-
-	public void nlpProcess(FreelingAPI free, TextEntity[] in_first_question_ners)
-	{
-		first_question_ners = in_first_question_ners;
-		nlpProcess(free);
-	}
-	public void nlpProcess(FreelingAPI free)
-	{
+		FreelingAPI free = FreelingAPI.getInstance();
 		if(!nlp_processed)
 		{
 			free.process(question);
@@ -109,7 +104,7 @@ public class Question {
 			//print();
 		}
 	}
-	
+		
 	private void print() {
 		
 		
@@ -179,7 +174,7 @@ public class Question {
 	private String[] generateQueries1(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries1");
-		nlpProcess(free);
+		freelingAnnotation();
 		String[] queries = {};
 
 		queries = ArrayUtils.add(queries,String.format("ALL:(%s)",clean(question)));
@@ -191,7 +186,7 @@ public class Question {
 	private String[] generateQueries2(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries1");
-		nlpProcess(free);
+		freelingAnnotation();
 		String[] queries = {};
 
 		if(!group_entity.isEmpty())
@@ -210,7 +205,7 @@ public class Question {
 	private String[] generateQueries3(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries4");
-		nlpProcess(free);
+		freelingAnnotation();
 		String[] queries = {};
 
 
@@ -257,7 +252,7 @@ public class Question {
 	private String[] generateQueries4(FreelingAPI free, String group_entity)
 	{
 		//LOGGER.info("generateQueries4");
-		nlpProcess(free);
+		freelingAnnotation();
 		String[] queries = {};
 
 		if(!group_entity.isEmpty())

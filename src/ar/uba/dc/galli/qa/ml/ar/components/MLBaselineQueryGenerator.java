@@ -26,6 +26,8 @@ public class MLBaselineQueryGenerator {
 	{
 	
 		String l_Query;
+		l_Query = FormQuery(l_QuestionTarget, question);
+		/*
 		QuestionSubType l_SubType = GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
 		switch (l_SubType) {
 		case HUM_IND_TYPE1:
@@ -45,7 +47,9 @@ public class MLBaselineQueryGenerator {
 			l_Query = FormQuery(l_QuestionTarget, question);				
 			break;
 		} // end switch
+		*/
 		return l_Query;
+		
 	}
 	
 	

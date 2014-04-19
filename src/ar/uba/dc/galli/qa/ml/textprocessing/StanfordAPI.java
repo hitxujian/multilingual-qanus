@@ -35,26 +35,9 @@ public class StanfordAPI {
 	public StanfordPOSTagger pos;
 	public StanfordNER ner;
 	public QuestionClassifierWithStanfordClassifier qc;
+//	public PorterStemmer ps;
+//	public StanfordGrammarParser gr;
 
-	
-	/**
-	 * This appears to be a normalization of the word (looks arbitrary to me) 
-	 */
-	public PorterStemmer ps;
-	
-	public StanfordGrammarParser gr;
-
-	public String input_string;
-	public String[] internal_string;
-	
-	public String ner_res;
-	public String pos_res;
-	public String qc_res;
-	public String qc_confidence;
-    
-	public EnumTypes qc_class;
-    public EnumTypes qc_subclass;
-    public EnumTypes asked_entity;
 	
 	private static final boolean VERBOSE_LOAD = true;
 	
@@ -95,29 +78,13 @@ public class StanfordAPI {
 	public void loadQC()
 	{
 	   try{
-		
 		   qc = new QuestionClassifierWithStanfordClassifier(Configuration.BASELIBDIR+"lib"+ File.separator +"trec_classifier.stanford-classifier", "choppingboard" + File.separator + "temp");
 		  
 	    }catch (Exception ex) {System.out.println("Error al iniciar QC:" + ex);}
 	}
 	
-	/**
-	 * 
-	 */
-	public void ner()
-	{
-		 String[] in = {internal_string[0].replace("¿", "")};
-		 String[] aux = ner.ProcessText(in);
-		 ner_res = aux[0];
-	}
-	
-	public void pos()
-	{
-		 String[] aux = pos.ProcessText(internal_string);
-		 pos_res = aux[0];
-	}
-	
-	public void qc() throws FileNotFoundException
+
+	public String qc(String input) throws FileNotFoundException
 	{
 		PrintStream stderr = System.err;
 		File file = new File("qc-loading.log");
@@ -125,23 +92,33 @@ public class StanfordAPI {
 		PrintStream ps = new PrintStream(fos);
 		System.setErr(ps);
 		
-		 String[] aux = qc.ProcessText(internal_string);
-		 qc_res = aux[0];
-		 qc_class = EnumTypes.val(this.getQcClass(false));
-		 qc_subclass = EnumTypes.val(this.getQcClass(true));
-		 //qc_confidence = aux[1];
-		 qc_confidence = "1.0";
-		 System.setErr(stderr);
+		String[] param = {input};
+		String[] aux = qc.ProcessText(param);
+		
+		
+		/*qc_res = aux[0];
+		qc_class = EnumTypes.val(this.getQcClass(false));
+		qc_subclass = EnumTypes.val(this.getQcClass(true));
+		//qc_confidence = aux[1];
+		qc_confidence = "1.0";
+		*/
+		
+		
+		System.setErr(stderr);
+		
+		return aux[0];
+		
+		
 	}
 	
-    public TextEntity setQcType(TextEntity question_word)
+    public TextEntity setQcType(TextEntity question_word, String posAnnotatedSentence)
     {
     	 
     	EnumTypes asked_entity;
     	boolean which = question_word.term.compareToIgnoreCase("which") == 0 || question_word.matched_str.compareToIgnoreCase("WDT") == 0;
     	boolean where = question_word.term.compareToIgnoreCase("where") == 0 || question_word.matched_str.compareToIgnoreCase("WRB") == 0;
     	boolean who = question_word.term.compareToIgnoreCase("who") == 0 || question_word.matched_str.compareToIgnoreCase("WP") == 0;
-    	boolean whom = question_word.term.compareToIgnoreCase("whom") == 0 || (question_word.matched_str.compareToIgnoreCase("WP") == 0 && wordPOSExists("IN"));
+    	boolean whom = question_word.term.compareToIgnoreCase("whom") == 0 || (question_word.matched_str.compareToIgnoreCase("WP") == 0 && wordPOSExists("IN", posAnnotatedSentence));
     	
         if (where) asked_entity = EnumTypes.val("WHERE");
         else if (who && !whom) asked_entity = EnumTypes.val("WHO");
@@ -159,10 +136,10 @@ public class StanfordAPI {
     	
     }
 	   
-    public boolean wordPOSExists(String type)
+    public boolean wordPOSExists(String type, String posAnnotatedSentence)
     {
     
-    	StringTokenizer tokens = new StringTokenizer(pos_res);
+    	StringTokenizer tokens = new StringTokenizer(posAnnotatedSentence);
         
 		 while (tokens.hasMoreTokens()) 
 		 {
@@ -184,27 +161,23 @@ public class StanfordAPI {
 			
     }
     //Parte un string qc_class:qc_subclass
-    public String getQcClass(Boolean get_subclass)
+    public String getQcClass(String qc_all)
     {
-
-      if(!get_subclass)
-      {
-          return qc_res.substring(0, qc_res.indexOf(":"));
-      }
-      else
-      {
-          return qc_res.substring( qc_res.indexOf(":")+1, qc_res.length());
-      }
-      
+    	return qc_all.substring(0, qc_all.indexOf(":"));
+    }
+    
+    public String getQcSubclass(String qc_all)
+    {
+    	return qc_all.substring( qc_all.indexOf(":")+1, qc_all.length());
     }
 	
 	
-	public String[] getEntities(String type)
+	public String[] getEntities(String type, String nerAnnotatedSentence)
     {
 
         ArrayList<String> res = new ArrayList<String>();
         
-        StringTokenizer tokens = new StringTokenizer(ner_res);
+        StringTokenizer tokens = new StringTokenizer(nerAnnotatedSentence);
         
         String last_ner = "";
         String entity = "";
@@ -284,11 +257,11 @@ public class StanfordAPI {
 
     }
 	
-	public TextEntity[] getEntities()
+	public TextEntity[] getEntities(String nerAnnotatedSentence)
 	{
-		String[] persons = getEntities("PERSON");
-		String[] locations = getEntities("LOCATION");
-	    String[] organizations = getEntities("ORGANIZATION");
+		String[] persons = getEntities("PERSON", nerAnnotatedSentence);
+		String[] locations = getEntities("LOCATION", nerAnnotatedSentence);
+	    String[] organizations = getEntities("ORGANIZATION", nerAnnotatedSentence);
 		
 	    LinkedList<TextEntity> res = new LinkedList<TextEntity>();
 	    
@@ -300,10 +273,10 @@ public class StanfordAPI {
 		
 	}
 	
-	public TextEntity[] getVerbs()
+	public TextEntity[] getVerbs(String posAnnotatedSentence)
     {
 	    ArrayList<TextEntity> res = new ArrayList<TextEntity>();
-        StringTokenizer tokens = new StringTokenizer(pos_res);
+        StringTokenizer tokens = new StringTokenizer(posAnnotatedSentence);
         int delim_pos;
         String word;
         String pos_tag;
@@ -331,10 +304,10 @@ public class StanfordAPI {
     }
 	
 	
-	public TextEntity[] getNouns()
+	public TextEntity[] getNouns(String posAnnotatedSentence)
     {
 	    ArrayList<TextEntity> res = new ArrayList<TextEntity>();
-        StringTokenizer tokens = new StringTokenizer(pos_res);
+        StringTokenizer tokens = new StringTokenizer(posAnnotatedSentence);
         int delim_pos;
         String word;
         String pos_tag;
@@ -362,12 +335,12 @@ public class StanfordAPI {
     }
 	
 	
-    public TextEntity[] getQWords()
+    public TextEntity[] getQWords(String posAnnotatedSentence)
     {
     
 		ArrayList<TextEntity> res = new ArrayList<TextEntity>();
         
-        StringTokenizer tokens = new StringTokenizer(pos_res);
+        StringTokenizer tokens = new StringTokenizer(posAnnotatedSentence);
         
 		while (tokens.hasMoreTokens()) 
         {
@@ -382,7 +355,7 @@ public class StanfordAPI {
 					String posTag = word.substring(delimPos+1);
 					if (posTag.substring(0,1).compareToIgnoreCase("W") == 0) 
 					{
-						res.add(setQcType(new TextEntity((word.substring(0, delimPos)), "QWord", "StanfordPOS", posTag.substring(0,2), "en")));
+						res.add(setQcType(new TextEntity((word.substring(0, delimPos)), "QWord", "StanfordPOS", posTag.substring(0,2), "en"), posAnnotatedSentence));
 					}
 				} catch (Exception ex) 
 				{
@@ -395,45 +368,10 @@ public class StanfordAPI {
     }
 	
 
-	
-    /**
-     * calling this function executes Stanford analysis over input string
-     * @param text
-     */
-	public void process(String text)
-	{
-        input_string = text;
-        
-		internal_string = new String[1];
-        internal_string[0] = input_string;
-        
-        
-        ner();
-        pos();
-        try {
-			qc();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		
-	}
-    
-	
-	public void load(String text)
-	{
-        input_string = text;
-        
-		internal_string = new String[1];
-        internal_string[0] = input_string;
-        		
-	}
-
-	public boolean isEntity(String str)
+	public boolean isEntity(String str, String nerAnnotatedSentence)
 	{
 		boolean res = false;
-		for(TextEntity e : getEntities())
+		for(TextEntity e : getEntities(nerAnnotatedSentence))
 		{
 			if(e.term.compareToIgnoreCase(str) == 0)
 			{
@@ -459,19 +397,47 @@ public class StanfordAPI {
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
 		// TODO Auto-generated method stub
-		StanfordAPI api = new StanfordAPI();
+		StanfordAPI api = StanfordAPI.getInstance();
 		String[] some_questions = {"What's his name?", "Where do you come from?", "What's your phone number?", "How old are you?", "When were you born?",
 									"What does he look like?", "In what school does Harry Potter study?"};
 		
 		for (int i = 0; i < some_questions.length; i++) {
-			api.process(some_questions[i]);
-			api.qc();	
-			System.out.format("%s & %s & %s \\\\ \\hline \n", some_questions[i], api.qc_res, api.qc_confidence.subSequence(0, 4));
+			String res = api.qc(some_questions[i]);	
+			System.out.format("%s & %s \\\\ \\hline \n", some_questions[i], res);
 		}
 		
 		//System.out.println(api.qc_res);
 		//System.out.println(api.qc_confidence);
 
+	}
+
+	public TextEntity[] getAdjectives(String posAnnotatedSentence) {
+	  ArrayList<TextEntity> res = new ArrayList<TextEntity>();
+        StringTokenizer tokens = new StringTokenizer(posAnnotatedSentence);
+        int delim_pos;
+        String word;
+        String pos_tag;
+		while (tokens.hasMoreTokens()) 
+        {
+			word = tokens.nextToken();
+			delim_pos = word.indexOf('/');
+            
+			if (delim_pos != -1) 
+            {
+			try 
+              {
+				pos_tag = word.substring(delim_pos+1);
+                
+				if(pos_tag.substring(0,2).compareToIgnoreCase("JJ") == 0) 
+                { 
+                	// Match all NN tags like NNS NNP NN NNPS
+					res.add( new TextEntity(word.substring(0, delim_pos), pos_tag));
+				}
+			 } catch (Exception ex) {continue;}
+		    }
+         }
+
+        return res.toArray(new TextEntity[0]);
 	}
 	
 }

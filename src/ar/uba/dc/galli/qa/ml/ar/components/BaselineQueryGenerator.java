@@ -21,6 +21,33 @@ public class BaselineQueryGenerator {
 		// TODO Auto-generated constructor stub
 	}
 	
+
+	public static String generateQuery(String l_QuestionTarget, String l_QuestionText, String l_QuestionPOS, String l_ExpectedAnswerType)
+	{
+	
+		String l_Query;
+		QuestionSubType l_SubType = GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
+		switch (l_SubType) {
+		case HUM_IND_TYPE1:
+			//System.out.println(l_QuestionText + " - TYPE1");
+			l_Query = GetSubjectOfHumIndQuestion(l_QuestionText, l_QuestionPOS, l_SubType);
+			break;
+		case HUM_IND_TYPE1_IC:
+			//System.out.println(l_QuestionText + " - TYPE1-IC");
+			l_Query = GetSubjectOfHumIndQuestion(l_QuestionText, l_QuestionPOS, l_SubType);
+			l_Query += " " + l_QuestionTarget;
+			break;
+		case HUM_IND_TYPE2:				
+			l_Query = GetSubjectOfHumIndQuestion(l_QuestionText, l_QuestionPOS, l_SubType);				
+			break;
+		default:				
+			// Build a query string from the question information
+			l_Query = FormQuery(l_QuestionTarget, l_QuestionPOS);				
+			break;
+		} // end switch
+		return l_Query;
+	}
+	
 	
 	/**
 	 * Attempt to further classify questions into certain specially identified sub-types.
@@ -72,31 +99,6 @@ public class BaselineQueryGenerator {
 	} // end GetQuestionSubType()
 
 
-	public static String generateQuery(String l_QuestionTarget, String l_QuestionText, String l_QuestionPOS, String l_ExpectedAnswerType)
-	{
-	
-		String l_Query;
-		QuestionSubType l_SubType = GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
-		switch (l_SubType) {
-		case HUM_IND_TYPE1:
-			//System.out.println(l_QuestionText + " - TYPE1");
-			l_Query = GetSubjectOfHumIndQuestion(l_QuestionText, l_QuestionPOS, l_SubType);
-			break;
-		case HUM_IND_TYPE1_IC:
-			//System.out.println(l_QuestionText + " - TYPE1-IC");
-			l_Query = GetSubjectOfHumIndQuestion(l_QuestionText, l_QuestionPOS, l_SubType);
-			l_Query += " " + l_QuestionTarget;
-			break;
-		case HUM_IND_TYPE2:				
-			l_Query = GetSubjectOfHumIndQuestion(l_QuestionText, l_QuestionPOS, l_SubType);				
-			break;
-		default:				
-			// Build a query string from the question information
-			l_Query = FormQuery(l_QuestionTarget, l_QuestionPOS);				
-			break;
-		} // end switch
-		return l_Query;
-	}
 	
 	/**
 	 * We can identify the "subject" of a Type 1 HUM:ind question
@@ -244,12 +246,6 @@ public class BaselineQueryGenerator {
 
 		// Use POS if available
 		if (a_Question.length() > 0) {
-
-			// Used to look up synonyms and related words
-			// Commented out because it doesn't seem useful
-			// But keeping the code around just in case it turns out to be useful
-			// subsequently
-			//Thesaurus l_Thesaurus = new Thesaurus();
 
 			// Process every token in question
 			StringTokenizer l_POSST = new StringTokenizer(a_Question);

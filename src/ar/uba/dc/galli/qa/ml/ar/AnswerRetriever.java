@@ -152,7 +152,7 @@ public class AnswerRetriever{
 				*/
 		//Utils.println("total-questions: "+(up_to)+", w+", without: "+without_answer);
 		//WriteResultsToFile();
-		for (int k = Configuration.FROM_QUESTION; k < up_to; k++) {
+		/*for (int k = Configuration.FROM_QUESTION; k < up_to; k++) {
 			
 				
 				System.out.print(qs[k].getQuestionEn()+" & ");
@@ -169,7 +169,7 @@ public class AnswerRetriever{
 			
 			
 				
-		}
+		}*/
 		
 		// Signal the error analysis engine that everything is over.
 		if (m_ErrorAnalyzer != null) {

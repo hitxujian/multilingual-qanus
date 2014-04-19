@@ -23,6 +23,7 @@ import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import ar.uba.dc.galli.qa.ml.utils.Utils;
 import ar.uba.dc.galli.qa.ml.utils.EnumTypes.QuestionSubType;
 
 import sg.edu.nus.wing.qanus.framework.commons.IStrategyModule;
@@ -160,7 +161,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		}
 
 		String l_QuestionID = question.getId();
-		String l_QuestionTarget = question.getQuestionEn();
+		String l_QuestionTarget = question.getTarget();
 
 		String 	l_ExpectedAnswerType =question.qc_all;
 		// Retreive actual question string
@@ -180,10 +181,13 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		// Query to use depends on question type
 		// First identify question type and subtype
 		String l_Query = null;
+		
 		QuestionSubType l_SubType = MLBaselineQueryGenerator.GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
 		l_Query = MLBaselineQueryGenerator.generateQuery(l_QuestionTarget, l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType, question);
 		
-		
+		question.print();
+		System.out.println(l_Query);
+		if(true)return null;
 		
 		ScoreDoc[] l_RetrievedDocs = null;
 		

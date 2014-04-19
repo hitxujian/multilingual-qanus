@@ -94,7 +94,7 @@ public class StanfordPOSTagger implements ITextProcessingModule {
 		// Parse each sentence
 		for (String l_Sentence : a_Sentences) {
 			
-			System.out.println(l_Sentence);
+			//System.out.println(l_Sentence);
 			if(l_Sentence.length() < 23000)
 			{
 				try {
@@ -104,6 +104,7 @@ public class StanfordPOSTagger implements ITextProcessingModule {
 					continue;
 				}	
 			}
+			
 			
 			
 		} // end for

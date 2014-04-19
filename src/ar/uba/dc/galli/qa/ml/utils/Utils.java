@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.google.gson.Gson;
+
 import ar.uba.dc.galli.qa.ml.utils.comparatos.EqualNoPunctComparator;
 
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
@@ -120,8 +122,13 @@ public class Utils {
 	public static String toJson(TextEntity[] in)
 	{
 		return textEntitiesToJson(in);
-
 	}
+	
+	public static String toGson(Object obj) {
+		Gson gson = new Gson();
+		return gson.toJson(obj);
+	}
+
 
 	/**
 	 * Removes any XML encoded escape chars in a given string.

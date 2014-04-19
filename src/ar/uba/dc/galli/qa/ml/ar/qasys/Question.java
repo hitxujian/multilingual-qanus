@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.google.gson.Gson;
+
 import edu.upc.freeling.ListSentence;
 
 import sg.edu.nus.wing.qanus.framework.commons.DataItem;
@@ -117,11 +119,18 @@ public class Question {
 		}
 	}
 		
-	private void print() {
+	public void print() {
 		
-		System.out.format("%n%nPregunta: %s ner: %s, verb: %s, noun: %s, adj: %s, gne: %s %n", this.getText(), 
-				Utils.toJson(free_entities), Utils.toJson(free_verbs), Utils.toJson(free_nouns), 
-				Utils.toJson(free_adjectives), Utils.toJson(first_question_ners));
+		System.out.format("Q: '%s' free:{ ner: %s, verb: %s, noun: %s, adj: %s} stan:{ ner: %s, verb: %s, noun: %s, adj: %s} %n", 
+						this.getText(), 
+						Utils.toJson(free_entities), 
+						Utils.toJson(free_verbs), 
+						Utils.toJson(free_nouns),
+						Utils.toJson(free_adjectives), 
+						Utils.toJson(stan_entities), 
+						Utils.toJson(stan_verbs), 
+						Utils.toJson(stan_nouns),
+						Utils.toJson(stan_adjectives));
 		// TODO Auto-generated method stub
 		
 	}
@@ -327,9 +336,12 @@ public class Question {
 			return null;
 		}
 		
-		
-
-
+	}
+	
+	public String getTarget()
+	{
+		return "";
+		//return clean(this.getText());
 	}
 
 	public String clean(String in)
@@ -451,6 +463,12 @@ public class Question {
 		*/
 		return me;
 	}
+	
+	public String toGson() {
+		Gson gson = new Gson();
+		return gson.toJson(this);
+	}
+
 	
 
 

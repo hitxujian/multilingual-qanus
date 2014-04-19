@@ -90,6 +90,7 @@ public class Controller extends BasicController {
 		// Don't proceed if the requirements for a successfull execution are not met
 		if (!l_OkSoFar) return false;
 		
+		Configuration.setLangYear((String)GetOptionArgument("run"));
 		m_StageEngine = new AnswerRetriever(new File(l_LuceneFolder), new File(l_QuestionFile),new File(l_TargetFolder), (String)GetOptionArgument("run"));
 
 

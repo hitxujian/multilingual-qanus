@@ -33,7 +33,7 @@ public class Configuration {
 	
 	public static boolean USE_STANFORD = false;
 	
-	
+	private static String LANG_YEAR = "";
 	
 	public static boolean SUPPORT_WIKI = true;
 	public static boolean SUPPORT_NIL = true;
@@ -163,6 +163,16 @@ public class Configuration {
 	public static String GetTargetFile() {
 		// TODO Auto-generated method stub
 		return "/tmp/ml-qa/";
+	}
+
+	public static void setLangYear(String getOptionArgument) {
+		// TODO Auto-generated method stub
+		LANG_YEAR = getOptionArgument;
+	}
+	
+	public static String getLang()
+	{
+		return langFromLangYear(LANG_YEAR);
 	}
 }
 

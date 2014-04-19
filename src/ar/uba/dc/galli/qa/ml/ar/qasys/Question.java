@@ -340,7 +340,7 @@ public class Question {
 	
 	public String getTarget()
 	{
-		return "";
+		return Utils.concatString(Utils.flattenTextEntities(getEntities()));
 		//return clean(this.getText());
 	}
 

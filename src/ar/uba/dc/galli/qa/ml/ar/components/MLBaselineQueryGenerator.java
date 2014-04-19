@@ -42,7 +42,7 @@ public class MLBaselineQueryGenerator {
 			break;
 		default:				
 			// Build a query string from the question information
-			l_Query = FormQuery(l_QuestionTarget, l_QuestionPOS, question);				
+			l_Query = FormQuery(l_QuestionTarget, question);				
 			break;
 		} // end switch
 		return l_Query;
@@ -220,14 +220,13 @@ public class MLBaselineQueryGenerator {
 	 * @param question 
 	 * @return string containing query formed from the question.
 	 */
-	private static String FormQuery(String a_Target, String a_Question, Question question) {
+	private static String FormQuery(String a_Target, Question question) {
 
 		// Tracks used word to ensure no repteition of terms in resulting query
-		LinkedList<String> l_UsedTerms = new LinkedList<String>();
-
+		LinkedList<String> l_UsedTerms = new LinkedList<String>();  
 		// Used to remove stop words and stem the query
 		String[] l_StopWordsFileNames = new String[1];
-		l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-english-words.txt";
+		l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-word-"+Configuration.getLang()+".txt";
 		StopWordsFilter l_StopWords = new StopWordsFilter(l_StopWordsFileNames);
 
 		// Build seach terms dynamically, incorporating relevant information where possible
@@ -245,32 +244,16 @@ public class MLBaselineQueryGenerator {
 			}
 		}
 
-		// Use POS if available
-		if (a_Question.length() > 0) {
-			
-			for(TextEntity l_Term : question.getNouns())
-				l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
-			
-			for(TextEntity l_Term : question.getVerbs())
-				l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
-			
-			for(TextEntity l_Term : question.getAdjectives())
-				l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
-			
-		} else {
+		// Use POS if available (Always available
+		for(TextEntity l_Term : question.getNouns())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getVerbs())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getAdjectives())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
 
-			// No POS information, just use individual tokens from question
-			StringTokenizer l_QnST = new StringTokenizer(a_Question);
-			while (l_QnST.hasMoreTokens()) {
-				String l_Qn = l_QnST.nextToken();
-				String l_Term = Utils.StripXMLChar(l_Qn);
-				if (l_StopWords.IsStopWord(l_Term)) {
-					continue;
-				}
-				l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
-			} // end while
-
-		} // end if (l_QuestionPOS.length() ...
 
 
 

@@ -185,9 +185,9 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		QuestionSubType l_SubType = MLBaselineQueryGenerator.GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
 		l_Query = MLBaselineQueryGenerator.generateQuery(l_QuestionTarget, l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType, question);
 		
+		
 		question.print();
-		System.out.println(l_Query);
-		if(true)return null;
+		System.out.println("Fin de la generacion de queries");
 		
 		ScoreDoc[] l_RetrievedDocs = null;
 		
@@ -202,7 +202,12 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			Logger.getLogger("QANUS").logp(Level.WARNING, FeatureScoringStrategy.class.getName(), "GetAnswerForQuestion", "General exception");
 			System.exit(1);
 		}
-		
+
+		System.out.format("Se obtuvieron %d documento ejecutando la query '%s' %n", l_RetrievedDocs.length, l_Query); 
+		for (int i = 0; i < l_RetrievedDocs.length; i++) {
+			ScoreDoc doc = l_RetrievedDocs[i];
+			System.out.format("Doc %d: %s %n", i, m_InformationBase.GetDoc(doc.doc).get("TITLE"));
+		}
 		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults);
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
@@ -210,6 +215,8 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 				l_AnalysisResults.AddField("Stage2", l_Sentence);
 			}
 		}
+		System.out.format("Se obtuvieron %d oraciones con BaselinePassageExtractor %n", l_BestSentence.length);
+		if(true)return null;
 		
 		System.out.println("Comenzando heuristicas");
 		BaselineARHeuristic ar = new BaselineARHeuristic( m_FBQ, m_InformationBase);

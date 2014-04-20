@@ -71,7 +71,7 @@ public class BaselinePassageExtractor {
 
 			} // end for i
 
-			System.out.println("BaselinePassageExtractor: Se seleccionan "+Configuration.N_PASSAGES+" de "+l_FScorer.documentStoreSize()+" oraciones");
+		
 			// Retrieve the N-best passages from all the retrieved documents
 			return l_FScorer.RetrieveTopDocuments(l_Query, Configuration.N_PASSAGES);
 			

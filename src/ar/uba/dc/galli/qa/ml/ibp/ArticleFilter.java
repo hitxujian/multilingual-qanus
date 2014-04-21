@@ -73,6 +73,7 @@ class ArticleFilter implements IArticleFilter {
 			IBPAnalysis.NULLS++;
 			return;
 		}
+		
 		if(page.getText().startsWith("#REDIRECT ") || page.getText().startsWith("#redirect "))
 		{
 			IBPAnalysis.REDIRECTS++;
@@ -87,6 +88,7 @@ class ArticleFilter implements IArticleFilter {
 			//System.out.println("Other: "+IBPAnalysis.OTHER + " "+page.getTitle());
 			return;
 		}
+		
 	
 		
 		
@@ -99,7 +101,6 @@ class ArticleFilter implements IArticleFilter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 
 		String texto = page.getText();
 		// Zap headings ==some text== or ===some text===
@@ -119,10 +120,29 @@ class ArticleFilter implements IArticleFilter {
 		Pattern del_pattern = Pattern.compile("\\[\\[([^\\|:\\[\\]]{0,30})(:)([^\\|:\\[\\]]{0,30})\\]\\]");
 		Pattern strip_pattern = Pattern.compile("\\[\\[([^\\|:\\[\\]]{0,30})([^\\|:\\[\\]]{0,30})\\]\\]");
 		Pattern second_pattern = Pattern.compile("\\[\\[([^\\|:\\[\\]]{0,30})(\\|)([^\\|:\\[\\]]{0,30})\\]\\]");
+		Pattern triplequote_pattern = Pattern.compile("'''([^']*)'''");
 		Pattern doublequote_pattern = Pattern.compile("''([^']*)''");
+		
 		Matcher matcher;
 
+		matcher = triplequote_pattern.matcher(texto);
+		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
+		while (matcher.find()) {
+
+			start.add(matcher.start(0));
+			end.add(matcher.end(0));
+			replacements.add(matcher.group(1));
+			//System.out.format("start: %d, end:%d, match: %s %n",matcher.start(0), matcher.end(0), matcher.group(1));
+		}
+		
+		for (int i = start.size()-1; i >= 0; i--)
+		{
+			texto = texto.substring(0, start.get(i))+"'"+replacements.get(i)+"'"+texto.substring(end.get(i), texto.length());
+		}
+		//System.out.println(texto);
+		
 		matcher = doublequote_pattern.matcher(texto);
+		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
 		while (matcher.find()) {
 
 			start.add(matcher.start(0));
@@ -184,7 +204,7 @@ class ArticleFilter implements IArticleFilter {
 		//" \"%s\", \"%s\",\"%s\" ,\"%s\" \n",matcher.group(0), matcher.group(1),  matcher.group(2), matcher.group(3));
 
 		//System.out.println(texto);
-
+		//System.out.println("texto:"+texto);
 		String wikiText = texto.
 				replaceAll("[=]+[A-Za-z+\\s-]+[=]+", " ").
 				replaceAll("\\{\\{[A-Za-z0-9+\\s-]+\\}\\}"," ").
@@ -201,6 +221,7 @@ class ArticleFilter implements IArticleFilter {
 		boolean first = true;
 		//out.println(page.getTitle());
 		String text = "";
+		
 		while (regexMatcher.find())
 		{
 			// Get sentences with 6 or more words
@@ -211,11 +232,20 @@ class ArticleFilter implements IArticleFilter {
 				text+=" "+sentence;
 			}
 		}
+		
+		
 		//if(page.getTitle().compareToIgnoreCase("Gustave Flaubert") == 0)
 		//{
 		//System.out.println("FLAUBERT: text: "+text);
 		//System.out.println(text);
 		IBPAnalysis.VALID++;
+		//String plainStrs = wikiModel.render(new PlainTextConverter(), page.getText());
+		//System.out.println(page.getText());
+		//System.out.println(text);
+	    //if(IBPAnalysis.VALID > 0) System.exit(1);
+		//if(true) return;
+	    
+		
 		add(page.getId(), page.getTitle(), page.getTimeStamp(), text);
 		//}
 		// System.out.println(matcher.group(0)+"  "+matcher.group(1));

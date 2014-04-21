@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.apache.lucene.search.ScoreDoc;
 
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
+import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 public class IBPAnalysis {
@@ -25,22 +26,43 @@ public class IBPAnalysis {
 	 */
 	public static void main(String[] args) {
 		
-		Pattern p = Pattern.compile("^[a-zA-Z]+([0-9]+).*");
-		Matcher m = p.matcher("Testing123Testing");
-
-		String x = "testing: algo";
-		x.matches("(.*):.*");
-		if (m.find()) {
-		    System.out.println(m.group(1));
-		}
-		
-		System.exit(1);
 		// TODO Auto-generated method stu
-		LuceneInformationBaseQuerier lq = new LuceneInformationBaseQuerier(new File("/home/julian/tesis/lucene-indexes/index-simple/"), 100);
-		ScoreDoc[] sd = (ScoreDoc[]) lq.SearchQuery("Article Discussion");
+		//^((?!hede).)*$
+		//
+		
+		LuceneInformationBaseQuerier lq = new LuceneInformationBaseQuerier(new File("/home/julian/tesis/lucene-indexes/index-es-2006/"), 1);
+		ScoreDoc[] sd = (ScoreDoc[]) lq.SearchQuery("algo");
 		for (int i = 0; i < sd.length; i++) {
 			ScoreDoc doc = sd[i];
-			System.out.format("Doc %d: %s %n", i, lq.GetDoc(doc.doc).get("TITLE"));
+			String body = lq.GetDoc(doc.doc).get("BODY");
+			
+			String[] sentences = FreelingAPI.getInstance("es-06").splitString(body);
+			
+			/*System.out.format("Sentences: %d %n", sentences.length);
+			for (int j = 0; j < sentences.length; j++) {
+				System.out.format("%d: %s %n", j+1, sentences[j]);
+			}*/
+			if(sentences.length ==1 )
+			{
+				Pattern pattern = Pattern.compile("\\.(.+)");
+		        Matcher  matcher = pattern.matcher(sentences[0]);
+		        int count = 0;
+		        while (matcher.find())
+		            count++;
+		        if(count > 0 )
+		        	System.out.format("%d %s : (%d) %s %n", i+1, lq.GetDoc(doc.doc).get("TITLE"), count, body);
+				
+				//System.out.println("No pude splittear un documento y lo tire");
+				//System.out.println("DOC:: "+sentences[0]);
+				sentences = new String[0];
+			}
+			else
+			{
+				System.out.format("%d %s : (sentences: %d) %s %n", i+1, lq.GetDoc(doc.doc).get("TITLE"),sentences.length, body);
+			}
+			
+			
+			
 		}
 		
 	}

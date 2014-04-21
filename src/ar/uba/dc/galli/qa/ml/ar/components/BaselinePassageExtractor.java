@@ -2,6 +2,8 @@ package ar.uba.dc.galli.qa.ml.ar.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.ScoreDoc;
@@ -25,10 +27,31 @@ public class BaselinePassageExtractor {
 		//System.out.println("Body: "+body);
 		String[] sentences = FreelingAPI.getInstance().splitString(body);
 		
-		if(sentences.length == 1)
+		
+		if(sentences == null)
 		{
-			//System.out.println("No pude splittear un documento y lo tire");
+			//System.out.println("Freeling Devolvio NULL: "+body);
 			sentences = new String[0];
+		}
+		else if(sentences.length ==1 )
+		{
+			//
+			//Pattern pattern = Pattern.compile("\\.(.+)");
+	        //Matcher  matcher = pattern.matcher(sentences[0]);
+	        //int count = 0;
+	        //while (matcher.find())
+	        //    count++;
+	        
+	        //if(count == 1)
+	        	//System.out.format("(%d) %s %n",count, body);
+			
+			//System.out.println("No pude splittear un documento y lo tire");
+			//System.out.println("DOC:: "+sentences[0]);
+			//sentences = new String[0];
+		}
+		else
+		{
+			//System.out.format("(sentences: %d) %s %n", sentences.length, body);
 		}
 		
 		//for (int i = 0; i < sentences.length; i++) {

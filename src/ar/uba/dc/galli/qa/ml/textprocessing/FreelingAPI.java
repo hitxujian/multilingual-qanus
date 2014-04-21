@@ -122,11 +122,17 @@ public class FreelingAPI {
 		
 		loadMaco(lang); 
 		tg = new HmmTagger( DATA + lang + "/tagger.dat", true, 2 );
-	    //parser = new ChartParser(   DATA + LANG + "/chunker/grammar-chunk.dat" );
-	    //dep = new DepTxala( DATA + LANG + "/dep/dependences.dat",parser.getStartSymbol() );
+	    
 		ner = new Ner(DATA + lang + "/np.dat");
 		neclass = new Nec( DATA + lang + "/nerc/nec/nec-ab-poor1.dat" );
 	    
+		
+		
+		//parser = new ChartParser(   DATA + LANG + "/chunker/grammar-chunk.dat" );
+	    //dep = new DepTxala( DATA + LANG + "/dep/dependences.dat",parser.getStartSymbol() );
+		
+		
+		
 	    
 	    //sen = new Senses(DATA + LANG + "/senses.dat" ); // sense dictionary
 	    //dis = new Ukb( DATA + LANG + "/ukb.dat" ); // sense disambiguator
@@ -189,8 +195,12 @@ public class FreelingAPI {
 		ListWord list_word;
 		if(sentences.size() == 0)
 		{
-			String[] res = {text};
-			return res;
+			//String[] res = {text};
+			//return res;
+			//System.out.println(text);
+			return null;
+
+			
 		}
 			
 		String[] results = new String[(int) sentences.size()];

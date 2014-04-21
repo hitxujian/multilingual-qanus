@@ -67,6 +67,7 @@ class ArticleFilter implements IArticleFilter {
 	public void process(WikiArticle page, Siteinfo siteinfo) throws SAXException {
 
 		IBPAnalysis.ALL++;
+
 		//if(page.getTitle().compareToIgnoreCase("Gustave Flaubert") != 0) return; 
 		if(page == null || page.getText() == null )
 		{
@@ -74,7 +75,7 @@ class ArticleFilter implements IArticleFilter {
 			return;
 		}
 		
-		if(page.getText().startsWith("#REDIRECT ") || page.getText().startsWith("#redirect "))
+		if(page.getText().startsWith("#REDIRECT") || page.getText().startsWith("#redirect"))
 		{
 			IBPAnalysis.REDIRECTS++;
 			return;
@@ -120,11 +121,76 @@ class ArticleFilter implements IArticleFilter {
 		Pattern del_pattern = Pattern.compile("\\[\\[([^\\|:\\[\\]]{0,30})(:)([^\\|:\\[\\]]{0,30})\\]\\]");
 		Pattern strip_pattern = Pattern.compile("\\[\\[([^\\|:\\[\\]]{0,30})([^\\|:\\[\\]]{0,30})\\]\\]");
 		Pattern second_pattern = Pattern.compile("\\[\\[([^\\|:\\[\\]]{0,30})(\\|)([^\\|:\\[\\]]{0,30})\\]\\]");
+		
+		Pattern fivequote_strong_pattern = Pattern.compile("'''''(.{0,60})'''''");
+		Pattern triplequote_strong_pattern = Pattern.compile("'''(.{0,60})'''");
+		Pattern doublequote_strong_pattern = Pattern.compile("''(.{0,60})''");
+		
+		Pattern fivequote_pattern = Pattern.compile("'''''([^']*)'''''");
 		Pattern triplequote_pattern = Pattern.compile("'''([^']*)'''");
 		Pattern doublequote_pattern = Pattern.compile("''([^']*)''");
 		
 		Matcher matcher;
 
+		matcher = fivequote_strong_pattern.matcher(texto);
+		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
+		while (matcher.find()) {
+
+			if(matcher.group(1).matches(".*'''''.*")) continue;
+			start.add(matcher.start(0));
+			end.add(matcher.end(0));
+			replacements.add(matcher.group(1));
+			//System.out.format("start: %d, end:%d, match: %s %n",matcher.start(0), matcher.end(0), matcher.group(1));
+		}
+		
+		for (int i = start.size()-1; i >= 0; i--)
+			texto = texto.substring(0, start.get(i))+""+replacements.get(i)+""+texto.substring(end.get(i), texto.length());
+		
+		matcher = triplequote_strong_pattern.matcher(texto);
+		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
+		while (matcher.find()) {
+
+			if(matcher.group(1).matches(".*'''.*")) continue;
+			start.add(matcher.start(0));
+			end.add(matcher.end(0));
+			replacements.add(matcher.group(1));
+			//System.out.format("start: %d, end:%d, match: %s %n",matcher.start(0), matcher.end(0), matcher.group(1));
+		}
+		
+		for (int i = start.size()-1; i >= 0; i--)
+			texto = texto.substring(0, start.get(i))+""+replacements.get(i)+""+texto.substring(end.get(i), texto.length());
+		
+		matcher = doublequote_strong_pattern.matcher(texto);
+		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
+		while (matcher.find()) {
+
+			if(matcher.group(1).matches(".*''.*")) continue;
+			start.add(matcher.start(0));
+			end.add(matcher.end(0));
+			replacements.add(matcher.group(1));
+			//System.out.format("start: %d, end:%d, match: %s %n",matcher.start(0), matcher.end(0), matcher.group(1));
+		}
+		
+		for (int i = start.size()-1; i >= 0; i--)
+			texto = texto.substring(0, start.get(i))+""+replacements.get(i)+""+texto.substring(end.get(i), texto.length());
+		
+		
+		matcher = fivequote_pattern.matcher(texto);
+		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
+		while (matcher.find()) {
+
+			start.add(matcher.start(0));
+			end.add(matcher.end(0));
+			replacements.add(matcher.group(1));
+			//System.out.format("start: %d, end:%d, match: %s %n",matcher.start(0), matcher.end(0), matcher.group(1));
+		}
+		
+		for (int i = start.size()-1; i >= 0; i--)
+		{
+			texto = texto.substring(0, start.get(i))+""+replacements.get(i)+""+texto.substring(end.get(i), texto.length());
+		}
+		
+		
 		matcher = triplequote_pattern.matcher(texto);
 		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
 		while (matcher.find()) {
@@ -137,7 +203,7 @@ class ArticleFilter implements IArticleFilter {
 		
 		for (int i = start.size()-1; i >= 0; i--)
 		{
-			texto = texto.substring(0, start.get(i))+"'"+replacements.get(i)+"'"+texto.substring(end.get(i), texto.length());
+			texto = texto.substring(0, start.get(i))+""+replacements.get(i)+""+texto.substring(end.get(i), texto.length());
 		}
 		//System.out.println(texto);
 		
@@ -150,7 +216,7 @@ class ArticleFilter implements IArticleFilter {
 			replacements.add(matcher.group(1));
 		}
 
-		for (int i = start.size()-1; i >= 0; i--) texto = texto.substring(0, start.get(i))+" '"+replacements.get(i)+"' "+texto.substring(end.get(i), texto.length());
+		for (int i = start.size()-1; i >= 0; i--) texto = texto.substring(0, start.get(i))+""+replacements.get(i)+""+texto.substring(end.get(i), texto.length());
 
 		matcher = del_pattern.matcher(texto);
 		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
@@ -162,6 +228,7 @@ class ArticleFilter implements IArticleFilter {
 
 		for (int i = start.size()-1; i >= 0; i--) texto = texto.substring(0, start.get(i))+" "+texto.substring(end.get(i), texto.length());
 
+		
 		matcher = strip_pattern.matcher(texto);
 		start = new LinkedList<Integer>(); end = new LinkedList<Integer>(); replacements =new LinkedList<String>();
 		while (matcher.find()) {
@@ -173,7 +240,7 @@ class ArticleFilter implements IArticleFilter {
 
 
 		matcher = img_pattern.matcher(texto);
-		start = new LinkedList<Integer>(); end = new LinkedList<Integer>();
+		start = new LinkedList<Integer>(); end = new LinkedList<Integer>();replacements =new LinkedList<String>();
 		while (matcher.find()) {
 			//System.out.println(matcher.group(0));
 			start.add(matcher.start(0));
@@ -234,7 +301,24 @@ class ArticleFilter implements IArticleFilter {
 		}
 		
 		
-		//if(page.getTitle().compareToIgnoreCase("Gustave Flaubert") == 0)
+		
+		
+			/*if(page.getTitle().compareToIgnoreCase("Harry Potter 3") == 0)
+				System.out.println(page.getTitle()+" "+page.getText());
+			if(page.getTitle().compareToIgnoreCase("Harry Potter y el prisionero de Azkabán") == 0)
+				System.out.println(page.getTitle()+" "+page.getText());
+			*/
+		/*	if(page.getTitle().compareToIgnoreCase("Harry Potter y el prisionero de Azkaban") == 0)
+			{
+				System.out.println(page.getTitle()+" "+page.getText());
+				System.out.println(text);
+			}
+		*/		
+			
+			
+		
+		
+		
 		//{
 		//System.out.println("FLAUBERT: text: "+text);
 		//System.out.println(text);

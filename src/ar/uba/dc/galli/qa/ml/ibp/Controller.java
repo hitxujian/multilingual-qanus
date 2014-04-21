@@ -15,6 +15,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.xml.sax.SAXException;
 
+import ar.uba.dc.galli.qa.ml.ar.components.IBPAnalysis;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 import sg.edu.nus.wing.qanus.framework.commons.BasicController;
@@ -93,6 +94,8 @@ public class Controller extends BasicController {
 
 		long finish = System.currentTimeMillis();
 		System.out.println("Success creating index [" + ((finish - start) /1000) + " secs]");
+		System.out.format("%s & %s & %s & %s & %s \\\\ \\hline %n", "total", "nulos", "redirects","otros", "validos");
+		System.out.format("%d & %d & %d & %d & %d \\\\ \\hline %n", IBPAnalysis.ALL, IBPAnalysis.NULLS, IBPAnalysis.REDIRECTS, IBPAnalysis.OTHER, IBPAnalysis.VALID);
 
 		
 		return true;

@@ -18,7 +18,6 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.xml.sax.SAXException;
 
-import ar.uba.dc.galli.qa.ml.ar.components.IBPAnalysis;
 
 /**
  * Print title an content of all the wiki pages in the dump.

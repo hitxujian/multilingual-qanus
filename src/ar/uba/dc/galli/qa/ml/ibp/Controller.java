@@ -15,7 +15,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.xml.sax.SAXException;
 
-import ar.uba.dc.galli.qa.ml.ar.components.IBPAnalysis;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
 import sg.edu.nus.wing.qanus.framework.commons.BasicController;

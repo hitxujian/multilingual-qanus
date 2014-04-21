@@ -1,4 +1,4 @@
-package ar.uba.dc.galli.qa.ml.ar.components;
+package ar.uba.dc.galli.qa.ml.ibp;
 
 import java.io.File;
 import java.util.regex.Matcher;

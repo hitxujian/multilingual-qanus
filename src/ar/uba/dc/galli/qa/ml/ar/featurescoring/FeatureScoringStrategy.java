@@ -203,11 +203,12 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			System.exit(1);
 		}
 
-		System.out.format("Se obtuvieron %d documento ejecutando la query '%s' %n", l_RetrievedDocs.length, l_Query); 
+		/*System.out.format("Se obtuvieron %d documento ejecutando la query '%s' %n", l_RetrievedDocs.length, l_Query); 
 		for (int i = 0; i < l_RetrievedDocs.length; i++) {
 			ScoreDoc doc = l_RetrievedDocs[i];
 			System.out.format("Doc %d: %s %n", i, m_InformationBase.GetDoc(doc.doc).get("TITLE"));
-		}
+		}*/
+		
 		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults);
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
@@ -216,10 +217,10 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			}
 		}
 		System.out.format("Se obtuvieron %d oraciones con BaselinePassageExtractor %n", l_BestSentence.length);
-		if(true)return null;
+		//if(true)return null;
 		
 		System.out.println("Comenzando heuristicas");
-		BaselineARHeuristic ar = new BaselineARHeuristic( m_FBQ, m_InformationBase);
+		MLBaselineARHeuristic ar = new MLBaselineARHeuristic( m_FBQ, m_InformationBase);
 		DataItem res = ar.execute(l_BestSentence, l_ExpectedAnswerType, question.toDataItem(), a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
 		return res;
 		// Pattern-based answer extraction
@@ -227,15 +228,6 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 
 	} // end GetAnswerForQuestion()
-
-
-
-
-	
-
-
-
-	
 
 	
 	/**

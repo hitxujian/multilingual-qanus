@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.ScoreDoc;
 
+import edu.upc.freeling.ListSentence;
+
 import sg.edu.nus.wing.qanus.framework.commons.DataItem;
 import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
 import sg.edu.nus.wing.qanus.textprocessing.StanfordPOSTagger;
@@ -20,6 +22,7 @@ import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermCoverage;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermProximity;
 import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
+import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 import ar.uba.dc.galli.qa.ml.utils.EnumTypes.QuestionSubType;
@@ -263,20 +266,8 @@ public class MLBaselineARHeuristic {
 	private DataItem humGrOrEntyCrematCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 
-		// HUM:gr - Human groups (companies, organisations)
+		// HUM:gr - Human groups (companies, organizations)
 		// ENTY:cremat - Entities
-
-		// Can try to identify the subject of the question, i.e. company, university, etc
-		// Heuristically, this is usually the /NN after a /WDT or /WP.
-
-		// Tried some ideas, but gave up on them as they are not helping. One thing tried:
-		// 0. Identified the "subject" of the question. For example in "what company...", the subject is "company".
-		// 1. Ran a web search for candidate answer and the subject and score the number of hits matched
-		// 2. Combined this with other scores like proximity etc
-		// Conclusion: Helped for some queries, but when we try to query "us" and "university" for example, these
-		//   are very generic terms, it didn't help.
-
-		
 
 		// Now we try to extract candidate answers --- these would be the proper nouns (NNP)
 		// We extract them from all the ranked sentences
@@ -284,64 +275,30 @@ public class MLBaselineARHeuristic {
 		// i.e. Tiger/NNP Woods/NNP form one NNP
 		LinkedList<String> l_CandidateAnswers = new LinkedList<String>();
 		LinkedList<String> l_AnswerSources = new LinkedList<String>();
-		for (String l_POSTaggedSentence : l_POSTaggedBestSentence) {
-
-			String l_CandidateAnswer = "";
-			StringTokenizer l_ST = new StringTokenizer(l_POSTaggedSentence);
-			while (l_ST.hasMoreTokens()) {
-				try {
-					String l_Token = l_ST.nextToken();
-					// Check POS
-					int l_DelimIndex = l_Token.indexOf('/');
-					if (l_DelimIndex == -1) {
-						continue; // POS tag not found
+	
+		for(String sentence: l_BestSentence)
+		{
+			FreelingAPI free = FreelingAPI.getInstance();
+			ListSentence ls = free.process(sentence);
+			String[] free_entities = free.getEntitiesStr(ls);
+			for(String l_CandidateAnswer: free_entities)
+			{
+				if (l_CandidateAnswer.length() > 0) {
+		
+					l_CandidateAnswer = l_CandidateAnswer.trim();
+					Matcher l_EndingPuncMatcher = Pattern.compile("[\\.,\\?\\!']$").matcher(l_CandidateAnswer);
+					if (l_EndingPuncMatcher.find()) {
+						l_CandidateAnswer = l_EndingPuncMatcher.replaceAll("");
 					}
-					String l_POSTag = l_Token.substring(l_DelimIndex + 1, l_Token.length());
-					if (l_POSTag.length() >= 3 && l_POSTag.substring(0, 3).compareToIgnoreCase("NNP") == 0) {
-						if (l_CandidateAnswer.length() > 0) {
-							l_CandidateAnswer += " ";
-						}
-						l_CandidateAnswer += l_Token.substring(0, l_DelimIndex);
-					} else {
-						if (l_CandidateAnswer.length() > 0) {
-							// Break in NN sequence.
-							// TODO refactor
-							l_CandidateAnswer = l_CandidateAnswer.trim();
-							Matcher l_EndingPuncMatcher = Pattern.compile("[\\.,\\?\\!']$").matcher(l_CandidateAnswer);
-							if (l_EndingPuncMatcher.find()) {
-								l_CandidateAnswer = l_EndingPuncMatcher.replaceAll("");
-							}
-							if (IsReasonableAnswerForHUMGR(l_CandidateAnswer)) {
-								l_CandidateAnswers.add(l_CandidateAnswer);
-								l_AnswerSources.add(l_POSTaggedSentence);
-							}
-							l_CandidateAnswer = "";
-
-						}
+					if (IsReasonableAnswerForHUMGR(l_CandidateAnswer)) {
+						l_CandidateAnswers.add(l_CandidateAnswer);
+						l_AnswerSources.add(sentence);
 					}
-				} catch (Exception ex) {
-					// Generally somethign went wrong;
-					continue;
-				} // end try-catch
-			} // end while
-			if (l_CandidateAnswer.length() > 0) {
-				// Break in NN sequence.
-				// TODO refactor
-				l_CandidateAnswer = l_CandidateAnswer.trim();
-				Matcher l_EndingPuncMatcher = Pattern.compile("[\\.,\\?\\!']$").matcher(l_CandidateAnswer);
-				if (l_EndingPuncMatcher.find()) {
-					l_CandidateAnswer = l_EndingPuncMatcher.replaceAll("");
+					l_CandidateAnswer = "";
 				}
-				if (IsReasonableAnswerForHUMGR(l_CandidateAnswer)) {
-					l_CandidateAnswers.add(l_CandidateAnswer);
-					l_AnswerSources.add(l_POSTaggedSentence);
-				}
-				l_CandidateAnswer = "";
 			}
-
-		} // end for String l_POSTaggedSentence...
-
-
+			
+		}
 		
 		// Score each candidate answer relative to the subject and question target
 		// We re-use these modules found in the FeatureScorer to help us compute coverage and proximity scores
@@ -352,8 +309,10 @@ public class MLBaselineARHeuristic {
 		double l_BestScore = Double.NEGATIVE_INFINITY;
 		int l_CurrIndex = 0;
 		int l_NumCandidates = l_CandidateAnswers.size();
+		
 		for (String l_Candidate : l_CandidateAnswers) {
 		
+			//System.out.println(l_Candidate);
 			// Retrieve the sentence where this answer came from
 			String l_SourceString = l_AnswerSources.get(l_CurrIndex);
 
@@ -408,7 +367,7 @@ public class MLBaselineARHeuristic {
 				l_AnalysisResults.AddField("Stage3", l_Candidate);
 			}
 		}
-
+		System.out.println(l_Answer);
 		DataItem result = new DataItem("response");
 		result.AddAttribute("answer", l_Answer);
 		result.AddAttribute("original_string", l_OriginalAnswerString);

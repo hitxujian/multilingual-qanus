@@ -23,6 +23,7 @@ import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 import ar.uba.dc.galli.qa.ml.utils.EnumTypes.QuestionSubType;
+import ar.uba.dc.galli.qa.ml.utils.TextEntity;
 
 public class MLBaselineARHeuristic {
 
@@ -52,7 +53,6 @@ public class MLBaselineARHeuristic {
 		System.out.println("Cant sentences: "+l_BestSentence.length);
 		String[] l_POSTaggedBestSentence = StanfordAPI.getInstance().pos.ProcessText(l_BestSentence);
 	
-		
 		// Variable used to hold the extracted answer (eventually) and the passage from which
 		// it is extracted
 		String l_Answer = "";
@@ -118,11 +118,12 @@ public class MLBaselineARHeuristic {
 	private DataItem switchCases(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 
+
 		DataItem result = new DataItem("response");
 		System.out.println(l_ExpectedAnswerType);
 		// Start of pattern based answer extraction - based on the identified expected
 		// answer types of the questions we are handling
-		if (l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
+		if ( l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
 			
 			result = abbrExpCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
@@ -198,20 +199,9 @@ public class MLBaselineARHeuristic {
 
 		// Identify the abbreviation we want to expand.
 		// Typically this should have been labeled as an "ORGANISATION" by the NER.
-		LinkedList<String> l_Candidates = new LinkedList<String>();
-		String l_NERLabel = null;
-		DataItem[] l_NERItems = a_QuestionItem.GetFieldValues("Q-NER");
-		if (l_NERItems != null) {
-			l_NERLabel = (l_NERItems[0].GetValue())[0];
+		
 
-			// Look for organisations
-			Pattern l_Pattern = Pattern.compile("([A-Za-z]+)/ORGANIZATION");
-			Matcher l_Matcher = l_Pattern.matcher(l_NERLabel);
-			while (l_Matcher.find()) {
-				// Grab the matching results
-				l_Candidates.add(l_NERLabel.substring(l_Matcher.start(), l_Matcher.end()));
-			}
-		} // end if
+		String[] l_Candidates = question.getOrganizationNers(true);
 
 		// l_Candidates now contain the identified possible abbreviations within the question
 
@@ -220,7 +210,10 @@ public class MLBaselineARHeuristic {
 		// a new reg ex string
 		LinkedList<String> l_Answers = new LinkedList<String>();
 		LinkedList<String> l_OriginalAnswerStrings = new LinkedList<String>();
-		for (String l_Candidate : l_Candidates) {
+		
+		for (String l_Candidate : l_Candidates)
+		{
+			
 			String l_Regex = "";
 			for (int i = 0; i < l_Candidate.length(); ++i) {
 				if (Character.isLetter(l_Candidate.charAt(i))) {
@@ -231,8 +224,10 @@ public class MLBaselineARHeuristic {
 					break;
 				}
 			}
+			
 			l_Regex = l_Regex.trim();
 			Pattern l_Pattern = Pattern.compile(l_Regex);
+			
 			for (int i = 0; i < l_BestSentence.length; ++i) {
 				// Find possible matches within top N passages
 				Matcher l_Matcher = l_Pattern.matcher(l_BestSentence[i]);

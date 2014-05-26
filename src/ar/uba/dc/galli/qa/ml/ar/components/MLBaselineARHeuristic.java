@@ -96,6 +96,7 @@ public class MLBaselineARHeuristic {
 			l_Answer = "NA";
 		}
 	
+		System.out.println(l_Answer);
 	
 		// Build the data item to return as result of this function
 		DataItem l_Result = new DataItem("Result");
@@ -126,15 +127,15 @@ public class MLBaselineARHeuristic {
 		System.out.println(l_ExpectedAnswerType);
 		// Start of pattern based answer extraction - based on the identified expected
 		// answer types of the questions we are handling
-		if ( l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
+		if ( false && l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
 			
 			result = abbrExpCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
-		} else if (l_ExpectedAnswerType.compareToIgnoreCase("ABBR:abb") == 0) {
+		} else if (false && l_ExpectedAnswerType.compareToIgnoreCase("ABBR:abb") == 0) {
 
 			// Abbreviations : Contractions -> What can we do?
 			
-		} else if ((l_ExpectedAnswerType.length() >= 6
+		} else if (false && (l_ExpectedAnswerType.length() >= 6
 				&& l_ExpectedAnswerType.substring(0, 6).compareToIgnoreCase("HUM:gr") == 0)
 				|| (l_ExpectedAnswerType.length() >= 11
 				&& l_ExpectedAnswerType.substring(0, 11).compareToIgnoreCase("ENTY:cremat") == 0)) {
@@ -142,7 +143,7 @@ public class MLBaselineARHeuristic {
 				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 
-		} else if (l_ExpectedAnswerType.length() >= 7
+		} else if (true || l_ExpectedAnswerType.length() >= 7
 				&& l_ExpectedAnswerType.substring(0, 7).compareTo("HUM:ind") == 0) {
 
 			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -367,7 +368,7 @@ public class MLBaselineARHeuristic {
 				l_AnalysisResults.AddField("Stage3", l_Candidate);
 			}
 		}
-		System.out.println(l_Answer);
+		
 		DataItem result = new DataItem("response");
 		result.AddAttribute("answer", l_Answer);
 		result.AddAttribute("original_string", l_OriginalAnswerString);
@@ -424,6 +425,7 @@ public class MLBaselineARHeuristic {
 			String[] l_StopWordsProcessArr = { l_Query };
 			String l_CleanedQuery = l_StopWords.ProcessText(l_StopWordsProcessArr)[0];
 			String[] l_ProximityStrings = {l_CleanedQuery, l_CandidateAnswerString};
+			
 			double l_ProximityScore = l_FS_Proximity.GetScore(l_ProximityStrings, l_CandidateAnswerSource);
 
 			// Score based on how many words of the target or subject (if available) appear in the source passage

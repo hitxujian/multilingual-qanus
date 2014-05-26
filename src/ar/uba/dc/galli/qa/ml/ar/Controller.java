@@ -54,7 +54,7 @@ public class Controller extends BasicController {
 	public Controller() {
 
 		// The command line options expected to use with this Controller
-		AddOptionWithRequiredArgument("run", "Options are: 'pt-07' and 'es-06'", String.class);
+		AddOptionWithRequiredArgument("run", "Options are: 'pt-07' and 'es-06' and 'simple-07", String.class);
 			MakeOptionCompulsory("run");
 			
 	}

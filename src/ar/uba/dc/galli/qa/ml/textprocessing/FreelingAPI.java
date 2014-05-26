@@ -124,7 +124,7 @@ public class FreelingAPI {
 		tg = new HmmTagger( DATA + lang + "/tagger.dat", true, 2 );
 	    
 		ner = new Ner(DATA + lang + "/np.dat");
-		neclass = new Nec( DATA + lang + "/nerc/nec/nec-ab-poor1.dat" );
+		neclass = new Nec( DATA + lang + "/nerc/nec/nec-ab-rich.dat" );
 	    
 		
 		
@@ -518,6 +518,38 @@ public class FreelingAPI {
 		return false;
 			
     }
+    
+	public String[] getEntitiesStr(ListSentence ls)
+	{
+		
+		LinkedList<String> res = new LinkedList<String>();
+		ListWord list_word;
+		Word word;
+		String form, tag;
+		EnumTypes ner_type;
+		
+		for (int i = 0; i < ls.size(); i++)
+	    {
+	    	list_word = ls.get(i);
+	    	for (int j = 0; j < list_word.size(); j++) 
+	    	{
+	    		word = list_word.get(j);
+	    		if(isNer(word))
+				{
+	    			
+	    			ner_type = this.getNerType(word);
+	    			form =	cleanUnderscores(word.getForm());
+	    			
+	    			if(form.length() == 1)continue;
+	    			
+	    			tag  = word.getTag()+lang;
+					res.add(form);
+					
+				}
+			}
+		}
+		return res.toArray(new String[0]);
+	}
 	
 	public TextEntity[] getEntities(ListSentence ls)
 	{

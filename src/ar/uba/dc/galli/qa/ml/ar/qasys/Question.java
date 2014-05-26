@@ -29,7 +29,7 @@ public class Question {
 
 	private String id;
 	private String group;
-	private String question;
+	public String question;
 	private String answer;
 	private String question_en;
 	
@@ -154,6 +154,47 @@ public class Question {
 	{
 		if(Configuration.USE_STANFORD)return stan_entities;
 		return free_entities;
+	}
+	
+	public String[] getANerType(EnumTypes type, boolean add_others)
+	{
+		if(Configuration.USE_STANFORD)
+		{
+			System.out.println("Configuration.USE_STANFORD + getOrganizationNers() not implemented");
+			System.exit(1);
+		}
+		
+		String[] res = new String[0];
+		
+		for(TextEntity e: free_entities)
+		{
+			if(e.qc_type ==  type || (add_others && e.qc_type == EnumTypes.OTHER))
+			{
+				res = ArrayUtils.add(res, e.term);
+			}
+		}
+		return res;
+		
+	}
+	
+	public String[] getOrganizationNers(boolean add_others)
+	{
+		return getANerType(EnumTypes.ORGANIZATION, add_others);
+	}
+	
+	public String[] getPersonNers(boolean add_others)
+	{
+		return getANerType(EnumTypes.PERSON, add_others);
+	}
+	
+	public String[] getLocationNers(boolean add_others)
+	{
+		return getANerType(EnumTypes.LOCATION, add_others);
+	}
+	
+	public String[] getOtherNers(boolean add_others)
+	{
+		return getANerType(EnumTypes.OTHER, false);
 	}
 
 	public TextEntity[] getAdjectives()

@@ -530,67 +530,26 @@ public class MLBaselineARHeuristic {
 		// All other types of HUMAN questions
 		
 
-		// Take the best ranked sentence, extract the first NNP from it and use that as the answer
-		StringTokenizer l_ST = new StringTokenizer(l_POSTaggedBestSentence[0]);
-		while (l_ST.hasMoreTokens()) {
-			try {
-				String l_Token = l_ST.nextToken();
-				// Check POS
-				int l_DelimIndex = l_Token.indexOf('/');
-				if (l_DelimIndex == -1) {
-					continue; // POS tag not found
-				}
-				String l_POSTag = l_Token.substring(l_DelimIndex + 1, l_Token.length());
-				if (l_POSTag.substring(0, 3).compareToIgnoreCase("NNP") == 0) {
-					if (l_Answer.length() > 0) {
-						l_Answer += " ";
-					}
-					l_Answer += l_Token.substring(0, l_DelimIndex);
-				} else {
-					if (l_Answer.length() > 0) {
-						// break in NN, so we can return the answer already
-						l_OriginalAnswerString = l_POSTaggedBestSentence[0];
-						break;
-					}
-				}
-			} catch (Exception ex) {
-				// Generally somethign went wrong;
-				continue;
-			} // end try-catch
-		}
-		
-		LinkedList<String> l_CandidateAnswers = new LinkedList<String>();
-		LinkedList<String> l_AnswerSources = new LinkedList<String>();
 	
+		FreelingAPI free = FreelingAPI.getInstance();
 		for(String sentence: l_BestSentence)
 		{
-			FreelingAPI free = FreelingAPI.getInstance();
 			ListSentence ls = free.process(sentence);
 			String[] free_entities = free.getEntitiesStr(ls);
-			for(String l_CandidateAnswer: free_entities)
+			for(String answer: free_entities)
 			{
-				if (l_CandidateAnswer.length() > 0) {
-		
-					l_CandidateAnswer = l_CandidateAnswer.trim();
-					Matcher l_EndingPuncMatcher = Pattern.compile("[\\.,\\?\\!']$").matcher(l_CandidateAnswer);
-					if (l_EndingPuncMatcher.find()) {
-						l_CandidateAnswer = l_EndingPuncMatcher.replaceAll("");
-					}
-					if (IsReasonableAnswerForHUMGR(l_CandidateAnswer)) {
-						l_CandidateAnswers.add(l_CandidateAnswer);
-						l_AnswerSources.add(sentence);
-					}
-					l_CandidateAnswer = "";
+				if (answer.length() > 0) {
+					l_Answer = answer;
+					l_OriginalAnswerString = sentence;
+					break;
 				}
 			}
 			
 		}
 		
-		
-		
 		if (l_Answer.length() > 0) {
 			// break in NN, so we can return the answer already
-			l_OriginalAnswerString = l_POSTaggedBestSentence[0];
+			//l_OriginalAnswerString = l_BestSentence[0];
 
 
 			// If analysis is to be performed, we track the sentences that are retrieved

@@ -185,6 +185,10 @@ public class AnswerRetriever{
 	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
 		
 		DataItem result;
+		
+		//OJO!!!!
+		question.question = question.getQuestionEn();
+		
 		question.annotate(first_question_ners);
 		result = m_Module.GetAnswerForQuestion(question);
 		if(result == null)

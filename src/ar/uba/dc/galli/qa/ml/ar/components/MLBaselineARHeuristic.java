@@ -25,6 +25,7 @@ import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
+import ar.uba.dc.galli.qa.ml.utils.EnumTypes;
 import ar.uba.dc.galli.qa.ml.utils.EnumTypes.QuestionSubType;
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
 
@@ -137,7 +138,7 @@ public class MLBaselineARHeuristic {
 			
 		} else if (false && (l_ExpectedAnswerType.length() >= 6
 				&& l_ExpectedAnswerType.substring(0, 6).compareToIgnoreCase("HUM:gr") == 0)
-				|| (l_ExpectedAnswerType.length() >= 11
+				|| false && (l_ExpectedAnswerType.length() >= 11
 				&& l_ExpectedAnswerType.substring(0, 11).compareToIgnoreCase("ENTY:cremat") == 0)) {
 
 				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -145,7 +146,7 @@ public class MLBaselineARHeuristic {
 
 		} else if (true || l_ExpectedAnswerType.length() >= 7
 				&& l_ExpectedAnswerType.substring(0, 7).compareTo("HUM:ind") == 0) {
-
+			System.out.println("Entre");
 			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
@@ -379,7 +380,8 @@ public class MLBaselineARHeuristic {
 	private DataItem humIndCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// HUM:ind - Humans - individuals
-
+		
+		question.print();
 
 		// We make use of some of the functions within these classes to process the text
 		FeatureSearchTermProximity l_FS_Proximity = new FeatureSearchTermProximity();
@@ -388,9 +390,13 @@ public class MLBaselineARHeuristic {
 		// Get the subject, could be used subsequently to score sentences if needed
 		// The subject is only applicable to identified TYPE1 and TYPE2 sentences.
 		String l_Subject = "";
-		if (l_SubType == QuestionSubType.HUM_IND_TYPE1 || l_SubType == QuestionSubType.HUM_IND_TYPE1_IC || l_SubType == QuestionSubType.HUM_IND_TYPE2) {
+		
+		//TODO: definir que hacer
+		/*
+		 
 			l_Subject = BaselineQueryGenerator.GetSubjectOfHumIndQuestion(l_QuestionText, l_QuestionPOS, l_SubType);
 		}
+		*/
 
 		// Extract proper nouns from all ranked sentences
 		LinkedList<AnswerCandidate> l_CandidateAnswers = GetProperNounsOfPersons(l_BestSentence, l_POSTaggedBestSentence);
@@ -1244,29 +1250,24 @@ public class MLBaselineARHeuristic {
 		if (a_Sentences == null) {
 			return null;
 		}
-
-
-		// Invoke NER
-		String[] l_CandidateSentences = StanfordAPI.getInstance().ner.ProcessText(a_Sentences);
-
-
-		// Extract candidates
-		Pattern l_NERPattern = Pattern.compile("(([A-Za-z-\\.,\\?!']+)/PERSON)([ ]+([A-Za-z-\\.,\\?!']+)/PERSON)*");
+		
 		int l_CurrIndex = 0;
 		LinkedList<AnswerCandidate> l_Candidates = new LinkedList<AnswerCandidate>();
-		for (String l_Sentence : l_CandidateSentences) {
-
-
-			Matcher l_NERMatcher = l_NERPattern.matcher(l_Sentence);
-			while (l_NERMatcher.find()) {
-				String l_RawCandidate = l_Sentence.substring(l_NERMatcher.start(), l_NERMatcher.end());
+		
+		FreelingAPI free = FreelingAPI.getInstance();
+		
+		for(String sentence : a_Sentences)
+		{
+			ListSentence ls = free.process(sentence);
+			String[] persons = free.getEntitiesStr(ls, EnumTypes.PERSON, false);
+			for(String l_RawCandidate : persons)
+			{
 				l_Candidates.add(new AnswerCandidate(l_RawCandidate, a_Sentences[l_CurrIndex]));
-			} // end while
-
-			l_CurrIndex++;
-
-		} // end for
-
+				l_CurrIndex++;
+			}
+				
+		}
+		
 		return l_Candidates;
 
 	} // end GetProperNounsOfPersons()

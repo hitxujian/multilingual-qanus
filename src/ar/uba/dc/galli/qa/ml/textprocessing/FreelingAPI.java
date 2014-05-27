@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.google.gson.Gson;
 
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
@@ -518,6 +520,43 @@ public class FreelingAPI {
 		return false;
 			
     }
+    	
+	public String[] getEntitiesStr(ListSentence ls, EnumTypes type, boolean add_others)
+	{
+		
+		LinkedList<String> res = new LinkedList<String>();
+		ListWord list_word;
+		Word word;
+		String form, tag;
+		EnumTypes ner_type;
+		
+		for (int i = 0; i < ls.size(); i++)
+	    {
+	    	list_word = ls.get(i);
+	    	for (int j = 0; j < list_word.size(); j++) 
+	    	{
+	    		word = list_word.get(j);
+	    		if(isNer(word))
+				{
+	    			
+	    			ner_type = this.getNerType(word);
+	    			form =	cleanUnderscores(word.getForm());
+	    			
+	    			if(form.length() == 1)continue;
+	    			
+	    			if(ner_type ==  type || (add_others && ner_type == EnumTypes.OTHER))
+	    			{
+	    				res.add(form);
+	    			}
+	    			
+	    			//tag  = word.getTag()+lang;
+				}
+			}
+		}
+		
+		return res.toArray(new String[0]);
+	}
+
     
 	public String[] getEntitiesStr(ListSentence ls)
 	{

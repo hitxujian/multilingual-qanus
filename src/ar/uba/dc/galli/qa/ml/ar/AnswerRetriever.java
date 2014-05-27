@@ -187,7 +187,7 @@ public class AnswerRetriever{
 		DataItem result;
 		
 		//OJO!!!!
-		question.question = question.getQuestionEn();
+		//question.question = question.getQuestionEn();
 		
 		question.annotate(first_question_ners);
 		result = m_Module.GetAnswerForQuestion(question);

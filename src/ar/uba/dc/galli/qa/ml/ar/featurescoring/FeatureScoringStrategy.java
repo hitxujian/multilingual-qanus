@@ -187,7 +187,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 		
 		question.print();
-		System.out.println("Fin de la generacion de queries");
+		System.out.println("Fin de la generacion de queries:"+l_Query);
 		
 		ScoreDoc[] l_RetrievedDocs = null;
 		
@@ -219,9 +219,10 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		System.out.format("Se obtuvieron %d oraciones con BaselinePassageExtractor %n", l_BestSentence.length);
 		//if(true)return null;
 		
-		System.out.println("Comenzando heuristicas");
+		//System.out.println("Comenzando heuristicas");
 		MLBaselineARHeuristic ar = new MLBaselineARHeuristic( m_FBQ, m_InformationBase);
 		DataItem res = ar.execute(question, l_BestSentence, l_ExpectedAnswerType, question.toDataItem(), a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
+		System.out.println("Respuesta: "+res.GetAttribute("answer"));
 		return res;
 		// Pattern-based answer extraction
 		// Use expected question answer type, try to see if we can find a similar type in best sentence

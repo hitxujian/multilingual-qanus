@@ -54,7 +54,7 @@ public class MLBaselineARHeuristic {
 		// This is currently being built into the Lucene index. It will take some time. Once
 		// this is done we can just retrieve the annotations from Lucene - cutting down on
 		// run-time computation requirements.
-		System.out.println("Cant sentences: "+l_BestSentence.length);
+		//System.out.println("Cant sentences: "+l_BestSentence.length);
 		String[] l_POSTaggedBestSentence = StanfordAPI.getInstance().pos.ProcessText(l_BestSentence);
 	
 		// Variable used to hold the extracted answer (eventually) and the passage from which
@@ -97,7 +97,7 @@ public class MLBaselineARHeuristic {
 			l_Answer = "NA";
 		}
 	
-		System.out.println("Respuesta:"+l_Answer);
+		//System.out.println("Respuesta:"+l_Answer);
 	
 		// Build the data item to return as result of this function
 		DataItem l_Result = new DataItem("Result");
@@ -125,54 +125,54 @@ public class MLBaselineARHeuristic {
 
 
 		DataItem result = new DataItem("response");
-		System.out.println(l_ExpectedAnswerType);
+		//System.out.println(l_ExpectedAnswerType);
 		// Start of pattern based answer extraction - based on the identified expected
 		// answer types of the questions we are handling
-		if ( false && l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
+		if (  l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
 			
 			result = abbrExpCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
-		} else if (false && l_ExpectedAnswerType.compareToIgnoreCase("ABBR:abb") == 0) {
+		} else if ( l_ExpectedAnswerType.compareToIgnoreCase("ABBR:abb") == 0) {
 
 			// Abbreviations : Contractions -> What can we do?
 			
-		} else if (false && (l_ExpectedAnswerType.length() >= 6
+		} else if ( (l_ExpectedAnswerType.length() >= 6
 				&& l_ExpectedAnswerType.substring(0, 6).compareToIgnoreCase("HUM:gr") == 0)
-				|| false && (l_ExpectedAnswerType.length() >= 11
+				|| (l_ExpectedAnswerType.length() >= 11
 				&& l_ExpectedAnswerType.substring(0, 11).compareToIgnoreCase("ENTY:cremat") == 0)) {
 
 				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 
-		} else if (false && l_ExpectedAnswerType.length() >= 7
+		} else if (l_ExpectedAnswerType.length() >= 7
 				&& l_ExpectedAnswerType.substring(0, 7).compareTo("HUM:ind") == 0) {
 		
 			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 
-		} else if (false && l_ExpectedAnswerType.length() >= 4
+		} else if (l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("HUM:") == 0) {
 			
 			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (false && l_ExpectedAnswerType.length() >= 4
+		} else if ( l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("LOC:") == 0) {
 
 			result = locCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
-		} else if (false &&  l_ExpectedAnswerType.length() >= 8
+		} else if (  l_ExpectedAnswerType.length() >= 8
 				&& l_ExpectedAnswerType.substring(0, 8).compareToIgnoreCase("NUM:date") == 0) {
 
 			result = numDateCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
-		} else if (false && l_ExpectedAnswerType.compareToIgnoreCase("NUM:period") == 0) {
+		} else if ( l_ExpectedAnswerType.compareToIgnoreCase("NUM:period") == 0) {
 
 			result = numPeriodCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (false && l_ExpectedAnswerType.compareToIgnoreCase("NUM:count") == 0) {
+		} else if (l_ExpectedAnswerType.compareToIgnoreCase("NUM:count") == 0) {
 
 			result = numCountCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 

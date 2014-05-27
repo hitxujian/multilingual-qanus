@@ -97,7 +97,7 @@ public class MLBaselineARHeuristic {
 			l_Answer = "NA";
 		}
 	
-		System.out.println(l_Answer);
+		System.out.println("Respuesta:"+l_Answer);
 	
 		// Build the data item to return as result of this function
 		DataItem l_Result = new DataItem("Result");
@@ -144,16 +144,16 @@ public class MLBaselineARHeuristic {
 				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 
-		} else if (true || l_ExpectedAnswerType.length() >= 7
+		} else if (false && l_ExpectedAnswerType.length() >= 7
 				&& l_ExpectedAnswerType.substring(0, 7).compareTo("HUM:ind") == 0) {
-			System.out.println("Entre");
+		
 			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 
-		} else if (l_ExpectedAnswerType.length() >= 4
+		} else if (true || l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("HUM:") == 0) {
-
+			
 			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
@@ -381,7 +381,6 @@ public class MLBaselineARHeuristic {
 	{
 		// HUM:ind - Humans - individuals
 		
-		question.print();
 
 		// We make use of some of the functions within these classes to process the text
 		FeatureSearchTermProximity l_FS_Proximity = new FeatureSearchTermProximity();
@@ -403,13 +402,13 @@ public class MLBaselineARHeuristic {
 
 		// Choose the highest scoring candidate from all the candidates
 		double l_BestScore = Double.NEGATIVE_INFINITY;
-		Pattern l_NERPattern = Pattern.compile("/PERSON");
+		
 		int l_NumCandidates = l_CandidateAnswers.size();
 		int l_CurrIndex = 0;
 		LinkedHashMap<String, Double> l_CandidatesAndScores = new LinkedHashMap<String, Double>();
 		for (AnswerCandidate l_CandidateAnswer : l_CandidateAnswers) {
 
-			String l_CandidateAnswerStringwNER = l_CandidateAnswer.GetAnswer();
+			String l_CandidateAnswerString = l_CandidateAnswer.GetAnswer();
 			String l_CandidateAnswerSource = l_CandidateAnswer.GetOrigSource();
 			
 
@@ -419,14 +418,11 @@ public class MLBaselineARHeuristic {
 			// Some matches may need the punctuations to be removed though. Where needed,
 			// RemoveTrailingPunctuations() is used.
 
-			// Remove POS tag from candidate answer before storing it
-			Matcher l_NERMatcher = l_NERPattern.matcher(l_CandidateAnswerStringwNER);
-			String l_CandidateAnswerString = l_NERMatcher.replaceAll("");
 
 			// Clear stop words from the query, we will use this to score the proximity.
 			// That is how near the query appears to the candidate answer in the source passage
 			String[] l_StopWordsFileNames = new String[1];
-			l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-english-words.txt";
+			l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-word-"+Configuration.getLang()+".txt";
 			StopWordsFilter l_StopWords = new StopWordsFilter(l_StopWordsFileNames);
 			String[] l_StopWordsProcessArr = { l_Query };
 			String l_CleanedQuery = l_StopWords.ProcessText(l_StopWordsProcessArr)[0];
@@ -562,6 +558,36 @@ public class MLBaselineARHeuristic {
 				continue;
 			} // end try-catch
 		}
+		
+		LinkedList<String> l_CandidateAnswers = new LinkedList<String>();
+		LinkedList<String> l_AnswerSources = new LinkedList<String>();
+	
+		for(String sentence: l_BestSentence)
+		{
+			FreelingAPI free = FreelingAPI.getInstance();
+			ListSentence ls = free.process(sentence);
+			String[] free_entities = free.getEntitiesStr(ls);
+			for(String l_CandidateAnswer: free_entities)
+			{
+				if (l_CandidateAnswer.length() > 0) {
+		
+					l_CandidateAnswer = l_CandidateAnswer.trim();
+					Matcher l_EndingPuncMatcher = Pattern.compile("[\\.,\\?\\!']$").matcher(l_CandidateAnswer);
+					if (l_EndingPuncMatcher.find()) {
+						l_CandidateAnswer = l_EndingPuncMatcher.replaceAll("");
+					}
+					if (IsReasonableAnswerForHUMGR(l_CandidateAnswer)) {
+						l_CandidateAnswers.add(l_CandidateAnswer);
+						l_AnswerSources.add(sentence);
+					}
+					l_CandidateAnswer = "";
+				}
+			}
+			
+		}
+		
+		
+		
 		if (l_Answer.length() > 0) {
 			// break in NN, so we can return the answer already
 			l_OriginalAnswerString = l_POSTaggedBestSentence[0];
@@ -1263,8 +1289,8 @@ public class MLBaselineARHeuristic {
 			for(String l_RawCandidate : persons)
 			{
 				l_Candidates.add(new AnswerCandidate(l_RawCandidate, a_Sentences[l_CurrIndex]));
-				l_CurrIndex++;
 			}
+			l_CurrIndex++;
 				
 		}
 		

@@ -669,110 +669,17 @@ public class MLBaselineARHeuristic {
 	
 	private DataItem numDateCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
-		// Dates (or the number of years also)
-
-		// There are two main types of answer
-		// 1. a real date, such as 25-Oct-06
-		// 2. a year, such as 1999
-		// Best differentiator seems to be to detect the word 'year' in the question
-		if (l_QuestionText.contains("year")) {
-
-			Pattern l_YearPattern = Pattern.compile("[12][0-9][0-9][0-9]");
-
-			// Look through ranked sentences
-			for (String l_Sentence : l_BestSentence) {
-
-				Matcher l_YearMatcher = l_YearPattern.matcher(l_Sentence);
-
-				if (l_YearMatcher.find()) {
-					l_Answer = l_Sentence.substring(l_YearMatcher.start(), l_YearMatcher.end());
-					l_OriginalAnswerString = l_Sentence;
-
-					// If analysis is to be performed, we track the sentences that are retrieved
-					if (a_Analysis) {
-						l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-					}
-
-					break; // Stop when we have an answer
-				}
-
-			} // end for (String l_Sentence...
-
-
-		} else {
-
-			// Output a real date
-
-			// Since the AQUAINT-2 corpus consist largely of news paper reports, can we just
-			// use the date of the article as the result?
-
-			ScoreDoc l_ScoreDoc = l_RetrievedDocs[0];
-			
-			Document l_Doc = m_InformationBase.GetDoc(l_ScoreDoc.doc);
-			String l_DocID = l_Doc.get("DocID");
-			String l_Captured = l_DocID;
-			
-			/*Pattern l_Pattern = Pattern.compile("[A-Za-z_]+([0-9]+)\\..");
-			Matcher l_Matcher = l_Pattern.matcher(l_DocID);
-			String l_Captured = "";
-			if (l_Matcher.find()) {
-				// Get all groups for this match
-				for (int i = 0; i <= l_Matcher.groupCount(); i++) {
-					l_Captured = l_Matcher.group(i);
-				}
-			}*/
-
-			if(true)
-			{
-				l_Answer= l_Doc.get("TITLE");
+	
+		
+		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, true, false);
+		if (l_ExtractedResult[0].length() > 0) {
+			l_Answer = l_ExtractedResult[0];
+			l_OriginalAnswerString = l_ExtractedResult[1];
+			// If analysis is to be performed, we track the sentences that are retrieved
+			if (a_Analysis) {
+				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
 			}
-			// Change the YYYYMMDD format into DD-MM-YY
-			/*String l_Month = "";
-			if (l_Captured.substring(4, 6).compareTo("01") == 0) {
-				l_Month = "Jan";
-			} else if (l_Captured.substring(4, 6).compareTo("02") == 0) {
-				l_Month = "Feb";
-			} else if (l_Captured.substring(4, 6).compareTo("03") == 0) {
-				l_Month = "Mar";
-			} else if (l_Captured.substring(4, 6).compareTo("04") == 0) {
-				l_Month = "Apr";
-			} else if (l_Captured.substring(4, 6).compareTo("05") == 0) {
-				l_Month = "May";
-			} else if (l_Captured.substring(4, 6).compareTo("06") == 0) {
-				l_Month = "Jun";
-			} else if (l_Captured.substring(4, 6).compareTo("07") == 0) {
-				l_Month = "Jul";
-			} else if (l_Captured.substring(4, 6).compareTo("08") == 0) {
-				l_Month = "Aug";
-			} else if (l_Captured.substring(4, 6).compareTo("09") == 0) {
-				l_Month = "Sep";
-			} else if (l_Captured.substring(4, 6).compareTo("10") == 0) {
-				l_Month = "Oct";
-			} else if (l_Captured.substring(4, 6).compareTo("11") == 0) {
-				l_Month = "Nov";
-			} else if (l_Captured.substring(4, 6).compareTo("12") == 0) {
-				l_Month = "Dec";
-			}
-			if (l_Captured.charAt(6) == '0') {
-				l_Answer = l_Captured.substring(7, 8);
-			} else {
-				l_Answer = l_Captured.substring(6, 8);
-			}
-			l_Answer += "-" + l_Month + "-" + l_Captured.substring(2, 4);
-			 */
-			
-			// Extract first sentence as answer string
-			String[] l_ArrText = BaselinePassageExtractor.passagesFromBody(l_Doc.get("BODY"));
-			if (l_ArrText != null && l_ArrText.length > 0) {
-				l_OriginalAnswerString = l_ArrText[0];
-				// If analysis is to be performed, we track the sentences that are retrieved
-				if (a_Analysis) {
-					l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-				}
-			}
-
-
-		} // end if (a_QuestionText...
+		}
 
 		DataItem result = new DataItem("response");
 		result.AddAttribute("answer", l_Answer);

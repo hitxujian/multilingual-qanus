@@ -126,6 +126,8 @@ public class FreelingAPI {
 		tg = new HmmTagger( DATA + lang + "/tagger.dat", true, 2 );
 	    
 		ner = new Ner(DATA + lang + "/np.dat");
+		//ner = new Ner(DATA + lang + "/nerc/ner/ner-ab-rich.dat");
+		
 		neclass = new Nec( DATA + lang + "/nerc/nec/nec-ab-rich.dat" );
 	    
 		

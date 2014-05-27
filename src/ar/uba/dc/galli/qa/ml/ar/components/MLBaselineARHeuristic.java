@@ -151,13 +151,13 @@ public class MLBaselineARHeuristic {
 
 
 
-		} else if (true || l_ExpectedAnswerType.length() >= 4
+		} else if (false && l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("HUM:") == 0) {
 			
 			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (l_ExpectedAnswerType.length() >= 4
+		} else if (true ||l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("LOC:") == 0) {
 
 			result = locCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -570,30 +570,25 @@ public class MLBaselineARHeuristic {
 	{
 		// Location questions
 
-		// Attempt to find strings tagged as LOCATION by the NER
-		Pattern l_Pattern = Pattern.compile("(([A-Za-z\\.,]+)/LOCATION)( ([A-Za-z\\.,]+)/LOCATION)*");
-		String[] l_CandidateSentences = StanfordAPI.getInstance().ner.ProcessText(l_BestSentence);
 		LinkedList<String> l_Candidates = new LinkedList<String>();
 		LinkedList<String> l_OriginalAnswerStrings = new LinkedList<String>();
-		for (String l_CandidateSentence : l_CandidateSentences) {
 
-			// Extract NER information -- Look for LOCATION words
-			Matcher l_Matcher = l_Pattern.matcher(l_CandidateSentence);
-			while (l_Matcher.find()) {
-				// Grab the matching results
-				String l_RawCandidate = l_CandidateSentence.substring(l_Matcher.start(), l_Matcher.end());
-				// Remove NER tags from candidate string
-				Pattern l_NERPattern = Pattern.compile("/LOCATION");
-				Matcher l_NERMatcher = l_NERPattern.matcher(l_RawCandidate);
-				String l_Candidate = l_NERMatcher.replaceAll("");
-				// Save candidate answer and string the answer is derived from
-				l_Candidates.add(l_Candidate.trim());
-				l_OriginalAnswerStrings.add(l_CandidateSentence);
+		FreelingAPI free = FreelingAPI.getInstance();
+		int l_CurrIndex = 0;
+		for(String sentence : l_BestSentence)
+		{
+			ListSentence ls = free.process(sentence);
+			String[] locations = free.getEntitiesStr(ls, EnumTypes.LOCATION, true);
+			for(String l_RawCandidate : locations)
+			{
+				System.out.println("FREE:"+l_RawCandidate);
+				l_Candidates.add(l_RawCandidate );
+				l_OriginalAnswerStrings.add(l_BestSentence[l_CurrIndex]);
 			}
-
-
-		} // end for (String l_CandidateSentence...
-
+			
+			l_CurrIndex++;
+				
+		}
 
 		// With the list of candidates, try to score them with some heuristics
 
@@ -603,7 +598,7 @@ public class MLBaselineARHeuristic {
 
 		// Find the highest scoring candidate
 		double l_BestScore = Double.NEGATIVE_INFINITY;
-		int l_CurrIndex = 0;
+		l_CurrIndex = 0;
 		int l_NumCandidates = l_Candidates.size();
 		for (String l_Candidate : l_Candidates) {
 

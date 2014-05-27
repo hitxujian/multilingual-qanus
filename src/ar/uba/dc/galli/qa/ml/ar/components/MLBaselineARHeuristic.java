@@ -177,7 +177,7 @@ public class MLBaselineARHeuristic {
 			result = numCountCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (true || l_ExpectedAnswerType.length() >= 4
+		} else if ( l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("NUM:") == 0) {
 
 			result = numGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -783,145 +783,18 @@ public class MLBaselineARHeuristic {
 	
 	private DataItem numPeriodCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
-		// Handle the special case for questions resembling :
-		// "How old is XXX ...?
-		Pattern l_SubjPattern = Pattern.compile("[hH]ow/WRB old/JJ (is/VBZ|was/VBD) ([A-Za-z\\?\\.,]+/NNP( [A-Za-z\\?\\.,]+/NNP)*)");
-		Matcher l_SubjMatcher = l_SubjPattern.matcher(l_QuestionPOS);
-		// group(0) by Java's convenion is the original string
-		// group(1) is the 'is' or 'was' part
-		// group(2) is the NNP after the "how many" phrase
-		String l_Subject = "";
-		if (l_SubjMatcher.find()) {
-			// groupCount() does not include this whole string
-			// so we check to see if group(3) exists by checking >= 2
-			for (int i = 0; i < l_SubjMatcher.groupCount() && i < 3; ++i) {
-				if (i == 2) {
-					l_Subject = l_QuestionPOS.substring(l_SubjMatcher.start(i), l_SubjMatcher.end(i));
-					// Remove POS tags from subject
-					Pattern l_POSPattern = Pattern.compile("[,\\.\\?\\!]?/[A-Z]+");
-					Matcher l_POSMatcher = l_POSPattern.matcher(l_Subject);
-					l_Subject = l_POSMatcher.replaceAll("");
-				} else {
-					l_SubjMatcher.group(i);
-				}
-			} // end for i
-		} // end if
-
-
-		// Go through candidate passages, identify patterns for "age".
-		// such as /NNP /NNP, ??/CD,
-		// or ??-year-old
-		if (l_Subject.length() == 0) {
-
-			// We are unable to retrieve any "subject" from the question
-			// Fall back to our default strategy
-			String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
-			if (l_ExtractedResult[0].length() > 0) {
-				l_Answer = l_ExtractedResult[0];
-				l_OriginalAnswerString = l_ExtractedResult[1];
-				// If analysis is to be performed, we track the sentences that are retrieved
-				if (a_Analysis) {
-					l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-				}
-			}
-
-		} else {
-
-
-			// With the subject, we try to extract candidate age patterns and score them
-			// with their relative proximity to occurences of the subject within
-			// the given passage
-
-			// Used to score and choose best candidate answer
-			double l_BestScore = Double.NEGATIVE_INFINITY;
-			FeatureSearchTermProximity l_FS_P = new FeatureSearchTermProximity();
-			FeatureSearchTermCoverage l_FS_C = new FeatureSearchTermCoverage();
-			int l_NumCandidates = l_POSTaggedBestSentence.length;
-			int l_CurrIndex = 0;
-
-			for (String l_POSSentence : l_POSTaggedBestSentence) {
-
-				// Retrieve occurences of the subuject within the candidate passage
-
-				// If occurences found, proceed to extract all /CD from passage
-				// and score the CD
-				// The scoring includes the proximity between the /CD and subject
-				// as well as the current rank of the sentence
-
-
-				Pattern l_AgePattern1 = Pattern.compile(", ?([0-9]+)[,\\.]?/CD[,\\.\\?\\!]?");
-				Matcher l_AgeMatcher1 = l_AgePattern1.matcher(l_POSSentence);
-				while (l_AgeMatcher1.find()) {
-
-					String l_RawCDString = l_POSSentence.substring(l_AgeMatcher1.start(), l_AgeMatcher1.end());
-
-					String[] l_Strings = {l_RawCDString, l_Subject};
-					double l_ProximityScore = l_FS_P.GetScore(l_Strings, l_POSSentence);
-					double l_SentenceRankScore = (l_NumCandidates - l_CurrIndex) / (double) l_NumCandidates;
-
-					double l_TotalScore = (0.8 * l_ProximityScore)
-							+ (0.2 * l_SentenceRankScore);
-
-					if (l_TotalScore > l_BestScore) {
-						l_BestScore = l_TotalScore;
-						
-						l_Answer = l_RawCDString;
-						l_OriginalAnswerString = l_POSSentence;
-					} // end if (l_TotalScore..
-
-
-				} // end while
-
-				Pattern l_AgePattern2 = Pattern.compile("([0-9]+)-year-old");
-				Matcher l_AgeMatcher2 = l_AgePattern2.matcher(l_POSSentence);
-				while (l_AgeMatcher2.find()) {
-
-					if (l_AgeMatcher2.groupCount() < 2) {
-						continue;
-					}
-
-					l_AgeMatcher2.group(0);
-					String l_RawCDString = l_AgeMatcher2.group(1);
-
-					String[] l_Strings = {l_RawCDString, l_Subject};
-					double l_ProximityScore = l_FS_P.GetScore(l_Strings, l_POSSentence);
-					double l_SentenceRankScore = (l_NumCandidates - l_CurrIndex) / (double) l_NumCandidates;
-
-					double l_TotalScore = (0.8 * l_ProximityScore)
-							+ (0.2 * l_SentenceRankScore);
-
-					if (l_TotalScore > l_BestScore) {
-						l_BestScore = l_TotalScore;
-						
-						l_Answer = l_RawCDString;
-						l_OriginalAnswerString = l_POSSentence;
-					} // end if (l_TotalScore..
-
-
-				} // end while
-
-				l_CurrIndex++;
-
-			} // end for String...
-
-
-			// Fall back strategy, if after the FOR loop, no candidate /CDs found
-			// We are unable to retrieve any "subject" from the question
-			// Fall back to our default strategy
-			if (l_Answer.length() == 0) {
-				String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
-				if (l_ExtractedResult[0].length() > 0) {
-					l_Answer = l_ExtractedResult[0];
-					l_OriginalAnswerString = l_ExtractedResult[1];
-				}
-			}
-
+		
+		// We are unable to retrieve any "subject" from the question
+		// Fall back to our default strategy
+		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, true, true);
+		if (l_ExtractedResult[0].length() > 0) {
+			l_Answer = l_ExtractedResult[0];
+			l_OriginalAnswerString = l_ExtractedResult[1];
 			// If analysis is to be performed, we track the sentences that are retrieved
 			if (a_Analysis) {
 				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
 			}
-
-		} // end if (l_Subject,.lengtt...
+		}
 
 		DataItem result = new DataItem("response");
 		result.AddAttribute("answer", l_Answer);
@@ -934,122 +807,20 @@ public class MLBaselineARHeuristic {
 	{
 		// Counts
 
-		// Identify the subject of the question
-		// For example : "How many miners.."..
-		// The subject is "miners"
-		Pattern l_SubjPattern = Pattern.compile("[hH]ow/WRB many/JJ ([A-Za-z0-9]+/NN[SP]? ([A-Za-z0-9]+/NN[SP]?)*)");
-		Matcher l_SubjMatcher = l_SubjPattern.matcher(l_QuestionPOS);
-		// group(0) by Java's convenion is the original string
-		// group(2) is the NN after the "how many" phrase
-		String l_Subject = "";
-		if (l_SubjMatcher.find()) {
-			// groupCount() does not include this whole string
-			// so we check to see if group(3) exists by checking >= 2
-			for (int i = 0; i < l_SubjMatcher.groupCount() && i < 2; ++i) {
-				if (i == 1) {
-					l_Subject = l_QuestionPOS.substring(l_SubjMatcher.start(i), l_SubjMatcher.end(i));
-					// Remove POS tags from subject
-					Pattern l_POSPattern = Pattern.compile("/[A-Z]+");
-					Matcher l_POSMatcher = l_POSPattern.matcher(l_Subject);
-					l_Subject = l_POSMatcher.replaceAll("");
-				} else {
-					l_SubjMatcher.group(i);
-				}
-			} // end for i
-		} // end if
-
-
-		if (l_Subject.length() == 0) {
-
-			// We are unable to retrieve any "subject" from the question
-			// Fall back to our default strategy
-			String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
-			if (l_ExtractedResult[0].length() > 0) {
-				l_Answer = l_ExtractedResult[0];
-				l_OriginalAnswerString = l_ExtractedResult[1];
-
-				// If analysis is to be performed, we track the sentences that are retrieved
-				if (a_Analysis) {
-					l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-				}
-			}
-
-		} else {
-
-
-			// With the subject, we try to extract candidate /CD s are score them
-			// with their relative proximity to occurences of the subject within
-			// the given passage
-
-			// Used to score and choose best candidate answer
-			double l_BestScore = Double.NEGATIVE_INFINITY;
-			FeatureSearchTermProximity l_FS_P = new FeatureSearchTermProximity();
-			FeatureSearchTermCoverage l_FS_C = new FeatureSearchTermCoverage();
-			int l_NumCandidates = l_POSTaggedBestSentence.length;
-			int l_CurrIndex = 0;
-
-			for (String l_POSSentence : l_POSTaggedBestSentence) {
-
-				// Retrieve occurences of the subuject within the candidate passage
-
-				// If occurences found, proceed to extract all /CD from passage
-				// and score the CD
-				// The scoring includes the proximity between the /CD and subject
-				// as well as the current rank of the sentence
-
-
-				Pattern l_RawCDPattern = Pattern.compile("([0-9]+(,[0-9]+)*)[\\.!\\?]?/CD");
-				Matcher l_RawCDMatcher = l_RawCDPattern.matcher(l_POSSentence);
-
-				while (l_RawCDMatcher.find()) {
-
-					String l_RawCDString = l_POSSentence.substring(l_RawCDMatcher.start(), l_RawCDMatcher.end());
-					String[] l_Strings = {l_RawCDString, l_Subject};
-
-					double l_ProximityScore = l_FS_P.GetScore(l_Strings, l_POSSentence);
-					double l_SentenceRankScore = (l_NumCandidates - l_CurrIndex) / (double) l_NumCandidates;
-
-					double l_TotalScore = (0.8 * l_ProximityScore)
-							+ (0.2 * l_SentenceRankScore);
-
-					if (l_TotalScore > l_BestScore) {
-						l_BestScore = l_TotalScore;
-
-						// Retrieve only the number from the raw candidate CD string								
-						Matcher l_NumberMatcher = l_RawCDPattern.matcher(l_RawCDString);
-						if (l_NumberMatcher.find()) {
-							l_NumberMatcher.group(0);
-							l_Answer = l_NumberMatcher.group(1);
-							l_OriginalAnswerString = l_POSSentence;
-						} // end if (l_NumberMatcher...
-
-					} // end if (l_TotalScore..
-
-
-				} // end while
-
-				l_CurrIndex++;
-
-			} // end for String...
-
-
-			// Fall back strategy, if after the FOR loop, no candidate /CDs found
-			// We are unable to retrieve any "subject" from the question
-			// Fall back to our default strategy
-			if (l_Answer.length() == 0) {
-				String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
-				if (l_ExtractedResult[0].length() > 0) {
-					l_Answer = l_ExtractedResult[0];
-					l_OriginalAnswerString = l_ExtractedResult[1];
-				}
-			}
+		// We are unable to retrieve any "subject" from the question
+		// Fall back to our default strategy
+		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, false, true);
+		if (l_ExtractedResult[0].length() > 0) {
+			l_Answer = l_ExtractedResult[0];
+			l_OriginalAnswerString = l_ExtractedResult[1];
 
 			// If analysis is to be performed, we track the sentences that are retrieved
 			if (a_Analysis) {
 				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
 			}
+		}
 
-		} // end if (l_Subject,.lengtt...
+
 
 		DataItem result = new DataItem("response");
 		result.AddAttribute("answer", l_Answer);
@@ -1061,7 +832,7 @@ public class MLBaselineARHeuristic {
 	private DataItem numGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Default strategy, look for the first /CD we come across
-		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
+		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, true, true);
 		if (l_ExtractedResult[0].length() > 0) {
 			l_Answer = l_ExtractedResult[0];
 			l_OriginalAnswerString = l_ExtractedResult[1];
@@ -1291,7 +1062,7 @@ public class MLBaselineARHeuristic {
 	 * @return an array, 1st element is extracted number, 2nd element is the sentence from which it is extracted.
 	 *				or an empty array of 2 elements if no answer found.
 	 */
-	private String[] RetrieveBestCD( String[] a_Sentences) {
+	private String[] RetrieveBestCD( String[] a_Sentences, boolean dates, boolean others) {
 
 		String[] l_Result = new String[2];
 		l_Result[0] = ""; // Answer string
@@ -1308,7 +1079,7 @@ public class MLBaselineARHeuristic {
 		for(String sentence: a_Sentences)
 		{
 			ListSentence ls = free.process(sentence);
-			String[] free_numbers = free.getNumbersStr(ls, true, true);
+			String[] free_numbers = free.getNumbersStr(ls, dates, others);
 			for(String answer: free_numbers)
 			{
 				if (answer.length() > 0 && answer.compareToIgnoreCase("a") != 0 && answer.compareToIgnoreCase("an") != 0) {

@@ -674,6 +674,48 @@ public class FreelingAPI {
 	}
 	
 	
+	public String[] getNumbersStr(ListSentence ls, boolean dates, boolean other)
+	{
+		LinkedList<String> res = new LinkedList<String>();
+		for(TextEntity e : getNumbers(ls, dates, other))
+		{
+			res.add(e.term);
+		}
+		
+		return res.toArray(new String[0]);
+	}
+	
+
+	public TextEntity[] getNumbers(ListSentence ls, boolean dates, boolean other)
+	{
+		
+		LinkedList<TextEntity> res = new LinkedList<TextEntity>()
+				;
+		ListWord list_word;
+		Word word;
+		String lemma;
+		String tag;
+		
+		for (int i = 0; i < ls.size(); i++)
+	    {
+	    	list_word = ls.get(i);
+	    	for (int i1 = 0; i1 < list_word.size(); i1++) 
+	    	{
+	    		word = list_word.get(i1);
+	    		if(isNumber(word, dates, other))
+				{
+	    			lemma =	cleanUnderscores(word.getLemma());
+		    		tag  = word.getTag();
+		    		res.add(new TextEntity(cleanUnderscores(word.getForm()), tag, lemma, "FreelingAPI("+lang+")", "NUMBER"));
+					
+				}
+			}
+		}
+		return res.toArray(new TextEntity[0]);
+	}
+	
+	
+	
 	public TextEntity[] getNouns(ListSentence ls)
 	{
 		
@@ -826,6 +868,11 @@ public class FreelingAPI {
 	}
 	
 	
+	public boolean isNumber(Word word, boolean dates, boolean other)
+	{
+		return (other && word.getTag().substring(0,1).compareTo("Z") == 0 ) || (dates && word.getTag().length() == 1 && word.getTag().substring(0,1).compareTo("W") == 0 );
+	}
+	
 	/**
 	 * 
 	 * @param word
@@ -860,7 +907,7 @@ public class FreelingAPI {
 	     FreelingAPI free_pt = FreelingAPI.getInstance("simple-06");
 	     
 	     String simple2 = "A ' 'priest' ' or ' 'priestess' ' is a person who is allowed to do religious rites. Their office or position is the ' 'priesthood' ', a word which can also be used for such persons collectively. In most religions and cultures in history there have been priests, although they have a lot of different names, and follow different rules. A ' 'priest' ' is a member of a church that has been told to look after his (spiritual) community. He is the head of a parish. Most protestant religions know nothing about ordaining priests. To become a catholic priest, you are required to study Theology. The Orthodox and Protestant Churches also have laymen as clergy. Catholic priests are not allowed to marry. Orthodox priests can be married, but they must not marry after they become a priest. The Catholic Church does not allow women to become priests.";
-	     String simple3 = "The car door is open. Pixar animated movie which debuted in 2003. It stars the voices of Albert Brooks, Alexander Gould, and Ellen Degeneres as fish. The movie is about Nemo, a clownfish who gets lost in the ocean around Australia. His father, Marlin, and Marlin's new friend, Dory, spend the entire movie looking for him. The movie won an Oscar in 2004 for \"Best Animated Film.\"";
+	     String simple3 = "The car door is open but it won about two thousand million dollars. Pixar animated movie which debuted in 2003. It stars the voices of Albert Brooks, Alexander Gould, and Ellen Degeneres as fish. The movie is about Nemo, a clownfish who gets lost in the ocean around Australia. His father, Marlin, and Marlin's new friend, Dory, spend the entire movie looking for him. The movie won an Oscar in 2004 for \"Best Animated Film.\"";
 	     String simple = "Something is wrong here. Something is just maybe wrong. Something must be done now. Dr Pepe Sanchez was on boarding to New York. What the hell. What the fucking hell! Oh my god, Oh my god. Who is him, my lord? Who is the Majestic that you pointed out as 'superior'? Very ''superior '' you said. Really what if. i. just. start bothering you... LOL! now i start correctly trying to make myself understandable.";
 	     String simple4 = " Marshall Bruce Mathers III' ') (born October 17, 1972) is a famous rap artist from Michigan. Eminem has a daughter named Hailie Jade Scott and an ex-wife (and soon to be wife again) named Kim Scott. He has 5 albums under his name that have been released ' 'worldwide' '. He is currently contemplating what to do next with his career; the rumour that he will retire may well be true but has been dismissed by Eminem himself, adding he is just taking time out to see what he wants to do next.";
 	     String[] res = free_pt.splitString(simple4);
@@ -869,7 +916,7 @@ public class FreelingAPI {
 		}*/
 	     
 	     ListSentence ls_old = free_pt.process(simple3);
-	     for(TextEntity e: free_pt.getContinuousNouns(ls_old))
+	     for(TextEntity e: free_pt.getNumbers(ls_old, true, true))
 	     {
 	    	 e.print();
 	     }

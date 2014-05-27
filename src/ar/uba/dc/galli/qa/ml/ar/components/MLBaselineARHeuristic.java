@@ -177,13 +177,13 @@ public class MLBaselineARHeuristic {
 			result = numCountCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (false && l_ExpectedAnswerType.length() >= 4
+		} else if (true || l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("NUM:") == 0) {
 
 			result = numGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (true || l_ExpectedAnswerType.substring(0, 5).compareTo("ENTY:") == 0) {
+		} else if ( l_ExpectedAnswerType.substring(0, 5).compareTo("ENTY:") == 0) {
 
 			result = entyGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);			
 
@@ -530,7 +530,7 @@ public class MLBaselineARHeuristic {
 		// All other types of HUMAN questions
 		
 
-	
+		boolean answer_found = false;
 		FreelingAPI free = FreelingAPI.getInstance();
 		for(String sentence: l_BestSentence)
 		{
@@ -541,10 +541,13 @@ public class MLBaselineARHeuristic {
 				if (answer.length() > 0) {
 					l_Answer = answer;
 					l_OriginalAnswerString = sentence;
+					answer_found = true;
 					break;
 				}
+				
 			}
 			
+			if(answer_found)break;
 		}
 		
 		if (l_Answer.length() > 0) {
@@ -812,7 +815,7 @@ public class MLBaselineARHeuristic {
 
 			// We are unable to retrieve any "subject" from the question
 			// Fall back to our default strategy
-			String[] l_ExtractedResult = RetrieveBestCD(l_POSTaggedBestSentence);
+			String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
 			if (l_ExtractedResult[0].length() > 0) {
 				l_Answer = l_ExtractedResult[0];
 				l_OriginalAnswerString = l_ExtractedResult[1];
@@ -906,7 +909,7 @@ public class MLBaselineARHeuristic {
 			// We are unable to retrieve any "subject" from the question
 			// Fall back to our default strategy
 			if (l_Answer.length() == 0) {
-				String[] l_ExtractedResult = RetrieveBestCD(l_POSTaggedBestSentence);
+				String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
 				if (l_ExtractedResult[0].length() > 0) {
 					l_Answer = l_ExtractedResult[0];
 					l_OriginalAnswerString = l_ExtractedResult[1];
@@ -960,7 +963,7 @@ public class MLBaselineARHeuristic {
 
 			// We are unable to retrieve any "subject" from the question
 			// Fall back to our default strategy
-			String[] l_ExtractedResult = RetrieveBestCD(l_POSTaggedBestSentence);
+			String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
 			if (l_ExtractedResult[0].length() > 0) {
 				l_Answer = l_ExtractedResult[0];
 				l_OriginalAnswerString = l_ExtractedResult[1];
@@ -1034,7 +1037,7 @@ public class MLBaselineARHeuristic {
 			// We are unable to retrieve any "subject" from the question
 			// Fall back to our default strategy
 			if (l_Answer.length() == 0) {
-				String[] l_ExtractedResult = RetrieveBestCD(l_POSTaggedBestSentence);
+				String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
 				if (l_ExtractedResult[0].length() > 0) {
 					l_Answer = l_ExtractedResult[0];
 					l_OriginalAnswerString = l_ExtractedResult[1];
@@ -1058,7 +1061,7 @@ public class MLBaselineARHeuristic {
 	private DataItem numGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Default strategy, look for the first /CD we come across
-		String[] l_ExtractedResult = RetrieveBestCD(l_POSTaggedBestSentence);
+		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence);
 		if (l_ExtractedResult[0].length() > 0) {
 			l_Answer = l_ExtractedResult[0];
 			l_OriginalAnswerString = l_ExtractedResult[1];
@@ -1081,7 +1084,7 @@ public class MLBaselineARHeuristic {
 		// Default strategy
 
 		// Look for any nouns and return the first one as the answer
-
+		boolean answer_found = false;
 		FreelingAPI free = FreelingAPI.getInstance();
 		for(String sentence: l_BestSentence)
 		{
@@ -1092,10 +1095,11 @@ public class MLBaselineARHeuristic {
 				if (answer.length() > 0) {
 					l_Answer = answer;
 					l_OriginalAnswerString = sentence;
+					answer_found = true;
 					break;
 				}
 			}
-			
+			if(answer_found)break;
 		}
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
@@ -1115,6 +1119,7 @@ public class MLBaselineARHeuristic {
 
 		//System.out.println("First answer:"+l_Answer);
 
+		boolean answer_found = false;
 		FreelingAPI free = FreelingAPI.getInstance();
 		for(String sentence: l_BestSentence)
 		{
@@ -1125,9 +1130,11 @@ public class MLBaselineARHeuristic {
 				if (answer.length() > 0) {
 					l_Answer = answer;
 					l_OriginalAnswerString = sentence;
+					answer_found = true;
 					break;
 				}
 			}
+			if(answer_found)break;
 			
 		}
 		
@@ -1284,54 +1291,37 @@ public class MLBaselineARHeuristic {
 	 * @return an array, 1st element is extracted number, 2nd element is the sentence from which it is extracted.
 	 *				or an empty array of 2 elements if no answer found.
 	 */
-	private String[] RetrieveBestCD(String[] a_POSTaggedSentences) {
+	private String[] RetrieveBestCD( String[] a_Sentences) {
 
 		String[] l_Result = new String[2];
 		l_Result[0] = ""; // Answer string
 		l_Result[1] = ""; // Answer source
 
 		// Sanity check
-		if (a_POSTaggedSentences == null) {
+		if (a_Sentences == null) {
 			return l_Result;
 		}
 
-		// Get first/ CD we come across
-		for (String l_Sentence : a_POSTaggedSentences) {
 
-			StringTokenizer l_ST = new StringTokenizer(l_Sentence);
-			while (l_ST.hasMoreTokens()) {
-				try {
-					String l_Token = l_ST.nextToken();
-					// Check POS
-					int l_DelimIndex = l_Token.indexOf('/');
-					if (l_DelimIndex == -1) {
-						continue; // POS tag not found
-					}
-					String l_POSTag = l_Token.substring(l_DelimIndex + 1, l_Token.length());
-					if (l_POSTag.compareToIgnoreCase("CD") == 0) {
-						if (l_Result[0].length() > 0) {
-							l_Result[0] += " ";
-						}
-						l_Result[0] += l_Token.substring(0, l_DelimIndex);
-						l_Result[1] = l_Sentence;
-					} else {
-						if (l_Result[0].length() > 0) {
-							break;
-						}
-					}
-				} catch (Exception ex) {
-					// Generally something went wrong;
-					continue;
-				} // end try-catch
-			} // end while
-
-			// If we already have an answer we can stop
-			if (l_Result[0].length() > 0) {
-				break;
+		boolean answer_found = false;
+		FreelingAPI free = FreelingAPI.getInstance();
+		for(String sentence: a_Sentences)
+		{
+			ListSentence ls = free.process(sentence);
+			String[] free_numbers = free.getNumbersStr(ls, true, true);
+			for(String answer: free_numbers)
+			{
+				if (answer.length() > 0 && answer.compareToIgnoreCase("a") != 0 && answer.compareToIgnoreCase("an") != 0) {
+					l_Result[0] = answer;
+					l_Result[1] = sentence;
+					System.out.println("Second answer:"+l_Result[0]);
+					answer_found = true;
+					break;
+				}
 			}
-
-		} // end for
-
+			if(answer_found)break;
+		}
+		
 
 		return l_Result;
 

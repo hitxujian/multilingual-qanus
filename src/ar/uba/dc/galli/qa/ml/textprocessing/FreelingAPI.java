@@ -624,6 +624,56 @@ public class FreelingAPI {
 		return res.toArray(new TextEntity[0]);
 	}
 	
+	public String[] getContinuousNounsStr(ListSentence ls)
+	{
+		LinkedList<String> res = new LinkedList<String>();
+		for(TextEntity e : getContinuousNouns(ls))
+		{
+			res.add(e.term);
+		}
+		
+		return res.toArray(new String[0]);
+	}
+	
+	public TextEntity[] getContinuousNouns(ListSentence ls)
+	{
+		
+		LinkedList<TextEntity> res = new LinkedList<TextEntity>()
+				;
+		ListWord list_word;
+		Word word;
+		String lemma;
+		String tag;
+		String continuous_noun;
+		
+		for (int i = 0; i < ls.size(); i++)
+	    {
+	    	list_word = ls.get(i);
+	    	continuous_noun = "";
+	    	for (int i1 = 0; i1 < list_word.size(); i1++) 
+	    	{
+	    		word = list_word.get(i1);
+	    		if(isNoun(word) || isNer(word))
+				{
+	    			lemma =	cleanUnderscores(word.getLemma());
+		    		tag  = word.getTag();
+		    		continuous_noun+= cleanUnderscores(word.getForm())+" ";
+				}
+	    		else if(continuous_noun.length() > 0)
+	    		{
+	    			res.add(new TextEntity(continuous_noun.trim(), "", "", "FreelingAPI("+lang+")", "NOUN"));
+	    			continuous_noun = "";
+	    		}
+	    		
+	    		
+	    		
+			}
+		}
+		
+		return res.toArray(new TextEntity[0]);
+	}
+	
+	
 	public TextEntity[] getNouns(ListSentence ls)
 	{
 		
@@ -810,27 +860,33 @@ public class FreelingAPI {
 	     FreelingAPI free_pt = FreelingAPI.getInstance("simple-06");
 	     
 	     String simple2 = "A ' 'priest' ' or ' 'priestess' ' is a person who is allowed to do religious rites. Their office or position is the ' 'priesthood' ', a word which can also be used for such persons collectively. In most religions and cultures in history there have been priests, although they have a lot of different names, and follow different rules. A ' 'priest' ' is a member of a church that has been told to look after his (spiritual) community. He is the head of a parish. Most protestant religions know nothing about ordaining priests. To become a catholic priest, you are required to study Theology. The Orthodox and Protestant Churches also have laymen as clergy. Catholic priests are not allowed to marry. Orthodox priests can be married, but they must not marry after they become a priest. The Catholic Church does not allow women to become priests.";
-	     String simple3 = "Pixar animated movie which debuted in 2003. It stars the voices of Albert Brooks, Alexander Gould, and Ellen Degeneres as fish. The movie is about Nemo, a clownfish who gets lost in the ocean around Australia. His father, Marlin, and Marlin's new friend, Dory, spend the entire movie looking for him. The movie won an Oscar in 2004 for \"Best Animated Film.\"";
+	     String simple3 = "The car door is open. Pixar animated movie which debuted in 2003. It stars the voices of Albert Brooks, Alexander Gould, and Ellen Degeneres as fish. The movie is about Nemo, a clownfish who gets lost in the ocean around Australia. His father, Marlin, and Marlin's new friend, Dory, spend the entire movie looking for him. The movie won an Oscar in 2004 for \"Best Animated Film.\"";
 	     String simple = "Something is wrong here. Something is just maybe wrong. Something must be done now. Dr Pepe Sanchez was on boarding to New York. What the hell. What the fucking hell! Oh my god, Oh my god. Who is him, my lord? Who is the Majestic that you pointed out as 'superior'? Very ''superior '' you said. Really what if. i. just. start bothering you... LOL! now i start correctly trying to make myself understandable.";
 	     String simple4 = " Marshall Bruce Mathers III' ') (born October 17, 1972) is a famous rap artist from Michigan. Eminem has a daughter named Hailie Jade Scott and an ex-wife (and soon to be wife again) named Kim Scott. He has 5 albums under his name that have been released ' 'worldwide' '. He is currently contemplating what to do next with his career; the rumour that he will retire may well be true but has been dismissed by Eminem himself, adding he is just taking time out to see what he wants to do next.";
 	     String[] res = free_pt.splitString(simple4);
-	     for (int i = 0; i < res.length; i++) {
+	     /*for (int i = 0; i < res.length; i++) {
 	    	 System.out.println(res[i]);	
-		}
+		}*/
 	     
-	     res = free_pt.splitString(simple2);
+	     ListSentence ls_old = free_pt.process(simple3);
+	     for(TextEntity e: free_pt.getContinuousNouns(ls_old))
+	     {
+	    	 e.print();
+	     }
+	     
+	     /*res = free_pt.splitString(simple2);
 	     for (int i = 0; i < res.length; i++) {
 	    	 System.out.println(res[i]);	
-		}
+		}*/
 	     
 	     System.exit(1);
 	     String pt = "Na parte inicial da sua história, a astronomia envolveu somente a observação e a previsão dos movimentos dos objetos no céu que podiam ser vistos a olho nu. O Rigveda refere-se aos 27 asterismos ou nakshatras associados aos movimentos do Sol e também às 12 divisões Zodíaco do céu. Os Grécia Antiga fizeram importantes contribuições para a astronomia, entre elas a definição de magnitude aparente. A Bíblia contém um número de afirmações sobre a posição da Terra no universo e sobre a natureza das estrelas e dos planetas, a maioria das quais são poéticas e não devem ser interpretadas literalmente; ver Cosmologia Bíblica. Nos anos 500, Aryabhata apresentou um sistema matemático que considerava que a Terra rodava em torno do seu eixo e que os planetas se deslocavam em relação ao Sol.";
 	     
 	     System.out.println("Analizando "+pt);
-	     ListSentence ls_old = free_pt.process(pt);
+	     ls_old = free_pt.process(pt);
 	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getEntities(ls_old))));
 	     Utils.println("");
-	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getNouns(ls_old))));
+	     Utils.print("nouns:"+Utils.concatString(Utils.flattenTextEntities(free_pt.getNouns(ls_old))));
 	     Utils.println("");
 	     Utils.print(Utils.concatString(Utils.flattenTextEntities(free_pt.getVerbs(ls_old))));
 	     

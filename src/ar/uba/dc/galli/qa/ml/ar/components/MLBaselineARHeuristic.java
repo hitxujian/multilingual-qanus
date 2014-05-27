@@ -157,33 +157,33 @@ public class MLBaselineARHeuristic {
 			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (true ||l_ExpectedAnswerType.length() >= 4
+		} else if (false && l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("LOC:") == 0) {
 
 			result = locCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
-		} else if (l_ExpectedAnswerType.length() >= 8
+		} else if (false &&  l_ExpectedAnswerType.length() >= 8
 				&& l_ExpectedAnswerType.substring(0, 8).compareToIgnoreCase("NUM:date") == 0) {
 
 			result = numDateCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
-		} else if (l_ExpectedAnswerType.compareToIgnoreCase("NUM:period") == 0) {
+		} else if (false && l_ExpectedAnswerType.compareToIgnoreCase("NUM:period") == 0) {
 
 			result = numPeriodCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (l_ExpectedAnswerType.compareToIgnoreCase("NUM:count") == 0) {
+		} else if (false && l_ExpectedAnswerType.compareToIgnoreCase("NUM:count") == 0) {
 
 			result = numCountCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (l_ExpectedAnswerType.length() >= 4
+		} else if (false && l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("NUM:") == 0) {
 
 			result = numGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (l_ExpectedAnswerType.substring(0, 5).compareTo("ENTY:") == 0) {
+		} else if (false && l_ExpectedAnswerType.substring(0, 5).compareTo("ENTY:") == 0) {
 
 			result = entyGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);			
 
@@ -581,7 +581,6 @@ public class MLBaselineARHeuristic {
 			String[] locations = free.getEntitiesStr(ls, EnumTypes.LOCATION, true);
 			for(String l_RawCandidate : locations)
 			{
-				System.out.println("FREE:"+l_RawCandidate);
 				l_Candidates.add(l_RawCandidate );
 				l_OriginalAnswerStrings.add(l_BestSentence[l_CurrIndex]);
 			}
@@ -1130,39 +1129,27 @@ public class MLBaselineARHeuristic {
 	private DataItem generalCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Default case, return the first noun we come across
-		
 
-		StringTokenizer l_ST = new StringTokenizer(l_POSTaggedBestSentence[0]);
-		while (l_ST.hasMoreTokens()) {
-			try {
-				String l_Token = l_ST.nextToken();
-				// Check POS
-				int l_DelimIndex = l_Token.indexOf('/');
-				if (l_DelimIndex == -1) {
-					continue; // POS tag not found
+		//System.out.println("First answer:"+l_Answer);
+
+		FreelingAPI free = FreelingAPI.getInstance();
+		for(String sentence: l_BestSentence)
+		{
+			ListSentence ls = free.process(sentence);
+			String[] free_nouns = free.getContinuousNounsStr(ls);
+			for(String answer: free_nouns)
+			{
+				if (answer.length() > 0) {
+					l_Answer = answer;
+					l_OriginalAnswerString = sentence;
+					break;
 				}
-				String l_POSTag = l_Token.substring(l_DelimIndex + 1, l_Token.length());
-				if (l_POSTag.length() >= 2 && l_POSTag.substring(0, 2).compareToIgnoreCase("NN") == 0) {
-					if (l_Answer.length() > 0) {
-						l_Answer += " ";
-					}
-					l_Answer += l_Token.substring(0, l_DelimIndex);
-				} else {
-					if (l_Answer.length() > 0) {
-						// break in NN, so we can return the answer already
-						break;
-					}
-				}
-			} catch (Exception ex) {
-				// Generally somethign went wrong;
-				continue;
-			} // end try-catch
-		} // end while
-		if (l_Answer.length() > 0) {
-			// Save the supporting answer string
-			l_OriginalAnswerString = l_BestSentence[0];
+			}
+			
 		}
-
+		
+		//System.out.println("Second answer:"+l_Answer);
+	
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
 			l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);

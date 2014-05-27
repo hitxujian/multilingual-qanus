@@ -183,7 +183,7 @@ public class MLBaselineARHeuristic {
 			result = numGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (false && l_ExpectedAnswerType.substring(0, 5).compareTo("ENTY:") == 0) {
+		} else if (true || l_ExpectedAnswerType.substring(0, 5).compareTo("ENTY:") == 0) {
 
 			result = entyGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);			
 
@@ -1082,38 +1082,21 @@ public class MLBaselineARHeuristic {
 
 		// Look for any nouns and return the first one as the answer
 
-		StringTokenizer l_ST = new StringTokenizer(l_POSTaggedBestSentence[0]);
-		while (l_ST.hasMoreTokens()) {
-			try {
-				String l_Token = l_ST.nextToken();
-				// Check POS
-				int l_DelimIndex = l_Token.indexOf('/');
-				if (l_DelimIndex == -1) {
-					continue; // POS tag not found
+		FreelingAPI free = FreelingAPI.getInstance();
+		for(String sentence: l_BestSentence)
+		{
+			ListSentence ls = free.process(sentence);
+			String[] free_nouns = free.getContinuousNounsStr(ls);
+			for(String answer: free_nouns)
+			{
+				if (answer.length() > 0) {
+					l_Answer = answer;
+					l_OriginalAnswerString = sentence;
+					break;
 				}
-				String l_POSTag = l_Token.substring(l_DelimIndex + 1, l_Token.length());
-				if (l_POSTag.substring(0, 2).compareToIgnoreCase("NN") == 0) {
-					if (l_Answer.length() > 0) {
-						l_Answer += " ";
-					}
-					l_Answer += l_Token.substring(0, l_DelimIndex);
-				} else {
-					if (l_Answer.length() > 0) {
-						// break in NN, so we can retunr the answer already
-						l_OriginalAnswerString = l_POSTaggedBestSentence[0];
-						break;
-					}
-				}
-			} catch (Exception ex) {
-				// Generally somethign went wrong;
-				continue;
-			} // end try-catch
-		} // end while
-		if (l_Answer.length() > 0) {
-			// break in NN, so we can retunr the answer already
-			l_OriginalAnswerString = l_POSTaggedBestSentence[0];
+			}
+			
 		}
-
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
 			l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);

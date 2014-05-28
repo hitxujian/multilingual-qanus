@@ -62,60 +62,56 @@ public class MLBaselineARHeuristic {
 		String l_Answer = "";
 		String l_OriginalAnswerString = "";
 		// -----
-		DataItem[] response;
-		response = switchCases( question, l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query, l_QuestionID);
+		 DataItem[] response = switchCases( question, l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query, l_QuestionID);
 		
-		
-		l_Answer = response[0].GetAttribute("answer");
-		l_OriginalAnswerString = response[0].GetAttribute("original_string");
-		l_AnalysisResults = response[0].GetFieldValues("analysis_results");
-		
-		//System.out.println(response);
-		
-		// Final post-processing
-		// 1. Remove punctuation from the end of answers which invariably get extracted too
-		if (l_Answer.length() > 0) {
-			if (l_Answer.charAt(l_Answer.length() - 1) == '.'
-					|| l_Answer.charAt(l_Answer.length() - 1) == ','
-					|| l_Answer.charAt(l_Answer.length() - 1) == ':'
-					|| l_Answer.charAt(l_Answer.length() - 1) == '"'
-					|| l_Answer.charAt(l_Answer.length() - 1) == '?'
-					|| l_Answer.charAt(l_Answer.length() - 1) == '\'') {
-				l_Answer = l_Answer.substring(0, l_Answer.length() - 1);
+		for (int i = 0; i < response.length; i++) {
+			if(response[i] != null)
+			{
+				l_Answer = response[i].GetAttribute("answer");
+				l_OriginalAnswerString = response[i].GetAttribute("original_string");
+				//System.out.println(response);
+				
+				// Final post-processing
+				// 1. Remove punctuation from the end of answers which invariably get extracted too
+				if (l_Answer.length() > 0) {
+					if (l_Answer.charAt(l_Answer.length() - 1) == '.'
+							|| l_Answer.charAt(l_Answer.length() - 1) == ','
+							|| l_Answer.charAt(l_Answer.length() - 1) == ':'
+							|| l_Answer.charAt(l_Answer.length() - 1) == '"'
+							|| l_Answer.charAt(l_Answer.length() - 1) == '?'
+							|| l_Answer.charAt(l_Answer.length() - 1) == '\'') {
+						l_Answer = l_Answer.substring(0, l_Answer.length() - 1);
+					}
+				}
+				// more punctionation cleansing
+				if (l_Answer.length() > 1) {
+					if (l_Answer.substring(l_Answer.length() - 2, l_Answer.length()).compareToIgnoreCase("'s") == 0) {
+						l_Answer = l_Answer.substring(0, l_Answer.length() - 2);
+					}
+				}
+				if (l_Answer.startsWith("``")) {
+					l_Answer = l_Answer.substring(2);
+				}
+			
+			
+				// No answer found =(
+				if (l_Answer.length() == 0) {
+					l_Answer = "NIL";
+				}
 			}
-		}
-		// more punctionation cleansing
-		if (l_Answer.length() > 1) {
-			if (l_Answer.substring(l_Answer.length() - 2, l_Answer.length()).compareToIgnoreCase("'s") == 0) {
-				l_Answer = l_Answer.substring(0, l_Answer.length() - 2);
+			else
+			{
+				l_Answer = "NIL";
+				l_OriginalAnswerString = "NIL";
 			}
+			
+			response[i] = new DataItem("response");
+			response[i].AddAttribute("answer", l_Answer);
+			response[i].AddAttribute("original_string", l_OriginalAnswerString);
 		}
-		if (l_Answer.startsWith("``")) {
-			l_Answer = l_Answer.substring(2);
-		}
+		 
+		return response;
 	
-	
-		// No answer found =(
-		if (l_Answer.length() == 0) {
-			l_Answer = "NIL";
-		}
-	
-		//System.out.println("Respuesta:"+l_Answer);
-
-		// Build the data item to return as result of this function
-		DataItem[] l_Result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		l_Result[0] = new DataItem("response");
-		l_Result[0].AddAttribute("QID", l_QuestionID);
-		l_Result[0].AddAttribute("answer", l_Answer);
-		l_Result[0].AddAttribute("questionType", l_ExpectedAnswerType);
-		l_Result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		
-		// Return either analysis results of answer to question
-		if (a_Analysis) {
-			return l_AnalysisResults;
-		} else {
-			return l_Result;
-		}
 	}
 	
 	
@@ -127,7 +123,7 @@ public class MLBaselineARHeuristic {
 		//System.out.println(l_ExpectedAnswerType);
 		// Start of pattern based answer extraction - based on the identified expected
 		// answer types of the questions we are handling
-		if (  l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
+		if ( true || l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
 			
 			result = abbrExpCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,    l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
@@ -242,19 +238,26 @@ public class MLBaselineARHeuristic {
 		} // end for
 
 
-
-
-
-		// Return the first answer candidate we have amongst all the candidates
-		if (l_Answers.size() > 0) {
-			l_Answer = l_Answers.getFirst();
-			l_OriginalAnswerString = l_OriginalAnswerStrings.getFirst();
-		}
-		
 		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+
+		if (l_Answers.size() > 0) {
+			
+			for (int i = 0; i < Configuration.ANSWERS_PER_QUESTION; i++) 
+			{
+				if(l_Answers.size() > i)
+				{
+					result[i] = new DataItem("response");
+					result[i].AddAttribute("answer", l_Answers.get(i));
+					result[i].AddAttribute("original_string",  l_OriginalAnswerStrings.get(i));
+				}
+				else
+				{
+					result[i] = null; 
+				
+				}
+			}
+			
+		}
 
 		return result;
 	}

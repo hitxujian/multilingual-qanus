@@ -221,7 +221,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		//System.out.println("Comenzando heuristicas");
 		MLBaselineARHeuristic ar = new MLBaselineARHeuristic( m_FBQ, m_InformationBase);
 		DataItem[] res = ar.execute(question, l_BestSentence, l_ExpectedAnswerType, question.toDataItem(), a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
-		System.out.println(res[0].GetAttribute("answer"));
+		printRes(res);
 		
 		return res;
 		// Pattern-based answer extraction
@@ -230,6 +230,16 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 
 	} // end GetAnswerForQuestion()
 
+	private void printRes(DataItem[] res)
+	{
+		for (int i = 0; i < res.length; i++) {
+			if(res[i] != null)
+			{
+				System.out.println(i+")"+res[i].GetAttribute("answer"));
+			}
+		}
+		
+	}
 	
 	/**
 	 * Retrieve the humber of hits when we send the query to a search engine.

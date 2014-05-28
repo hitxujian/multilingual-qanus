@@ -34,7 +34,7 @@ public class Configuration {
 	public static int N_PASSAGES = 2; //default at quanus was 40
 	public static int PASSAGE_RANK = 3; //1,2,3
 	public static int QUERYGENERATION = 3; //1, 2, 3 
-	public static int ANSWERS_PER_QUESTION = 1;
+	public static int ANSWERS_PER_QUESTION = 2;
 	
 	public static boolean USE_STANFORD = false;
 	

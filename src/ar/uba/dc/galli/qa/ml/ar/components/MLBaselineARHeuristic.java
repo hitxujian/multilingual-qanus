@@ -133,28 +133,28 @@ public class MLBaselineARHeuristic {
 
 			// Abbreviations : Contractions -> What can we do?
 			
-		} else if ( false && (l_ExpectedAnswerType.length() >= 6
+		} else if (  (l_ExpectedAnswerType.length() >= 6
 				&& l_ExpectedAnswerType.substring(0, 6).compareToIgnoreCase("HUM:gr") == 0)
-				|| false && (l_ExpectedAnswerType.length() >= 11
+				||  (l_ExpectedAnswerType.length() >= 11
 				&& l_ExpectedAnswerType.substring(0, 11).compareToIgnoreCase("ENTY:cremat") == 0)) {
 
 				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 
-		} else if (false && l_ExpectedAnswerType.length() >= 7
+		} else if ( l_ExpectedAnswerType.length() >= 7
 				&& l_ExpectedAnswerType.substring(0, 7).compareTo("HUM:ind") == 0) {
 		
 			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 
-		} else if (false && l_ExpectedAnswerType.length() >= 4
+		} else if (l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("HUM:") == 0) {
 			
 			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (true || l_ExpectedAnswerType.length() >= 4
+		} else if (l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("LOC:") == 0) {
 
 			result = locCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,    l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -164,12 +164,12 @@ public class MLBaselineARHeuristic {
 
 			result = numDateCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,   l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
-		} else if ( l_ExpectedAnswerType.compareToIgnoreCase("NUM:period") == 0) {
+		} else if (l_ExpectedAnswerType.compareToIgnoreCase("NUM:period") == 0) {
 
 			result = numPeriodCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if (l_ExpectedAnswerType.compareToIgnoreCase("NUM:count") == 0) {
+		} else if ( l_ExpectedAnswerType.compareToIgnoreCase("NUM:count") == 0) {
 
 			result = numCountCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,   l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
@@ -733,85 +733,23 @@ public class MLBaselineARHeuristic {
 	
 	private DataItem[] numDateCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence,  String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
-	
-		
-		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, true, false);
-		if (l_ExtractedResult[0].length() > 0) {
-			l_Answer = l_ExtractedResult[0];
-			l_OriginalAnswerString = l_ExtractedResult[1];
-		
-		}
-
-		
-		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-	
-		return result;
+		return RetrieveBestCD2(l_BestSentence, true, false);
 	}
 	
 	private DataItem[] numPeriodCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence,  String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
-		
-		// We are unable to retrieve any "subject" from the question
-		// Fall back to our default strategy
-		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, true, true);
-		if (l_ExtractedResult[0].length() > 0) {
-			l_Answer = l_ExtractedResult[0];
-			l_OriginalAnswerString = l_ExtractedResult[1];
-		
-		}
-
-		
-		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		return result;
+		return RetrieveBestCD2(l_BestSentence, true, true);
 	}
 	
 	private DataItem[] numCountCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Counts
-
-		// We are unable to retrieve any "subject" from the question
-		// Fall back to our default strategy
-		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, false, true);
-		if (l_ExtractedResult[0].length() > 0) {
-			l_Answer = l_ExtractedResult[0];
-			l_OriginalAnswerString = l_ExtractedResult[1];
-
-		}
-
-
-
-		
-		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		
-		return result;
+		return RetrieveBestCD2(l_BestSentence, false, true);
 	}
 	
 	private DataItem[] numGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence,  String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
-		// Default strategy, look for the first /CD we come across
-		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, true, true);
-		if (l_ExtractedResult[0].length() > 0) {
-			l_Answer = l_ExtractedResult[0];
-			l_OriginalAnswerString = l_ExtractedResult[1];
-
-		
-		}
-		
-		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		
-		return result;
+		return RetrieveBestCD2(l_BestSentence, true, true);
 	}
 	
 	private DataItem[] entyGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
@@ -819,32 +757,7 @@ public class MLBaselineARHeuristic {
 		// Entities
 		// Default strategy
 
-		// Look for any nouns and return the first one as the answer
-		boolean answer_found = false;
-		FreelingAPI free = FreelingAPI.getInstance();
-		for(String sentence: l_BestSentence)
-		{
-			ListSentence ls = free.process(sentence);
-			String[] free_nouns = free.getContinuousNounsStr(ls);
-			for(String answer: free_nouns)
-			{
-				if (answer.length() > 0) {
-					l_Answer = answer;
-					l_OriginalAnswerString = sentence;
-					answer_found = true;
-					break;
-				}
-			}
-			if(answer_found)break;
-		}
-	
-		
-		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-	
-		return result;
+		return generalCase(question, l_ExpectedAnswerType, a_QuestionItem,  l_BestSentence,  l_Answer, l_OriginalAnswerString, l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 	}
 	
 	private DataItem[] generalCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
@@ -855,31 +768,63 @@ public class MLBaselineARHeuristic {
 
 		boolean answer_found = false;
 		FreelingAPI free = FreelingAPI.getInstance();
+		LinkedList<AnswerCandidate> l_TopCandidates = new LinkedList<AnswerCandidate>();
+		LinkedList<String> already_seen = new LinkedList<String>();
+		
 		for(String sentence: l_BestSentence)
 		{
 			ListSentence ls = free.process(sentence);
 			String[] free_nouns = free.getContinuousNounsStr(ls);
 			for(String answer: free_nouns)
 			{
-				if (answer.length() > 0) {
-					l_Answer = answer;
-					l_OriginalAnswerString = sentence;
-					answer_found = true;
-					break;
+				if (answer.length() > 0) 
+				{
+					if(already_seen.contains(answer.toLowerCase()))continue;
+					
+					already_seen.add(answer.toLowerCase());
+					l_TopCandidates.add(new AnswerCandidate(answer, sentence));
+					
+					if(l_TopCandidates.size() >= Configuration.ANSWERS_PER_QUESTION)
+					{
+						answer_found = true;
+						break;	
+					}
 				}
+				if(answer_found)break;
 			}
 			if(answer_found)break;
 			
 		}
-		
-		//System.out.println("Second answer:"+l_Answer);
-	
 		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		
+		AnswerCandidate aux;
+		if (l_TopCandidates.size() > 0) {
+			
+			int i = 0;
+			while( i < Configuration.ANSWERS_PER_QUESTION) 
+			{
+				if(l_TopCandidates.size() > i)
+				{
+					aux = l_TopCandidates.get(i);
+					result[i] = new DataItem("response");
+					result[i].AddAttribute("answer", aux.GetAnswer());
+					result[i].AddAttribute("original_string",  aux.GetOrigSource());
+				}
+				else
+					result[i] = null; 
+				
+				i++;
+			}
+			
+		}
+		else
+		{
+			for (int i = 0; i < result.length; i++) {
+				result[i] = null;
+			}
+		}
+
 		return result;
+		
 	}
 	
 	
@@ -1057,6 +1002,74 @@ public class MLBaselineARHeuristic {
 		return l_Result;
 
 	} // end RetrieveBestCD()
+	private DataItem[] RetrieveBestCD2( String[] a_Sentences, boolean dates, boolean others) 
+	{
+
+		
+		boolean answer_found = false;
+		FreelingAPI free = FreelingAPI.getInstance();
+		LinkedList<AnswerCandidate> l_TopCandidates = new LinkedList<AnswerCandidate>();
+		LinkedList<String> already_seen = new LinkedList<String>();
+		
+		for(String sentence: a_Sentences)
+		{
+			ListSentence ls = free.process(sentence);
+			String[] free_numbers = free.getNumbersStr(ls, dates, others);
+			for(String answer: free_numbers)
+			{
+				if (answer.length() > 0 && answer.compareToIgnoreCase("a") != 0 && answer.compareToIgnoreCase("an") != 0) 
+				{
+					if(already_seen.contains(answer.toLowerCase()))continue;
+					
+					already_seen.add(answer.toLowerCase());
+					l_TopCandidates.add(new AnswerCandidate(answer, sentence));
+					
+					if(l_TopCandidates.size() >= Configuration.ANSWERS_PER_QUESTION)
+					{
+						answer_found = true;
+						break;	
+					}
+	
+				}
+				
+				if(answer_found)break;
+				
+			}
+			if(answer_found)break;
+		}
+		
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+	
+		AnswerCandidate aux;
+		if (l_TopCandidates.size() > 0) {
+			
+			int i = 0;
+			while( i < Configuration.ANSWERS_PER_QUESTION) 
+			{
+				if(l_TopCandidates.size() > i)
+				{
+					aux = l_TopCandidates.get(i);
+					result[i] = new DataItem("response");
+					result[i].AddAttribute("answer", aux.GetAnswer());
+					result[i].AddAttribute("original_string",  aux.GetOrigSource());
+				}
+				else
+					result[i] = null; 
+				
+				i++;
+			}
+			
+		}
+		else
+		{
+			for (int i = 0; i < result.length; i++) {
+				result[i] = null;
+			}
+		}
+
+		return result;
+	}
 	
 
 }

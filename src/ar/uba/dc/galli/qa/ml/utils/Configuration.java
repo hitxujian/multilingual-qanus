@@ -31,7 +31,7 @@ public class Configuration {
 	
 	//Para evaluacion
 	public static int LUCENERESULTS = 50; //default at qanus was 50
-	public static int N_PASSAGES = 40; //default at quanus was 40
+	public static int N_PASSAGES = 60; //default at quanus was 40
 	public static int PASSAGE_RANK = 1; //1,2,3
 	public static int QUERYGENERATION = 2; //1, 2, 3 
 	public static int ANSWERS_PER_QUESTION = 10;

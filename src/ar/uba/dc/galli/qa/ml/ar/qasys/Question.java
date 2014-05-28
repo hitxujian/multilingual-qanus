@@ -67,6 +67,7 @@ public class Question {
 	public void setProcessed(boolean processed) {this.processed = processed;}
 
 	public Logger LOGGER = Logger.getLogger(Controller.class .getName());
+	private TextEntity[] free_quoted;
 	
 
 	
@@ -112,7 +113,8 @@ public class Question {
 			ListSentence ls = free.process(question);
 			free_entities = free.getEntities(ls);
 			free_verbs = free.getVerbs(ls);
-			free_nouns = free.getNouns(ls);	
+			free_nouns = free.getNouns(ls);
+			free_quoted = free.getQuotedTokens(ls);	
 			free_adjectives = free.getAdjectives(ls);
 			free_processed = true;
 			//print();
@@ -201,6 +203,12 @@ public class Question {
 	{
 		if(Configuration.USE_STANFORD)return stan_adjectives;
 		else return free_adjectives;
+	}
+	
+	public TextEntity[] getQuotedTokens()
+	{
+	
+		return free_quoted;
 	}
 	
 	public TextEntity[] getVerbs()

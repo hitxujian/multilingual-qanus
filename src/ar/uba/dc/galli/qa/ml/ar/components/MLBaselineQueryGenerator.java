@@ -335,6 +335,22 @@ public class MLBaselineQueryGenerator {
 
 	} // end FormQuery()
 	
+	
+	/**
+	 * \begin{enumerate}
+		\item Todas las palabras no stop words entre comillas
+		\item Todas las entidades nombradas reconocidas
+		\item Todas las construcciones nominales con sus adjetivos
+		\item Todas las demás construcciones nominales
+		\item Todos los sustantivos con sus adjetivos
+		\item Todos los demás sustantivos
+		\item Todos los verbos
+		\item El target de la pregunta
+		\end{enumerate}
+	 * @param a_Target
+	 * @param question
+	 * @return
+	 */
 	private static String FormQuery3(String a_Target, Question question) {
 
 		// Tracks used word to ensure no repteition of terms in resulting query
@@ -358,7 +374,9 @@ public class MLBaselineQueryGenerator {
 				l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
 			}
 		}
-
+		for(TextEntity l_Term : question.getEntities())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+	
 		// Use POS if available (Always available
 		for(TextEntity l_Term : question.getNouns())
 			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);

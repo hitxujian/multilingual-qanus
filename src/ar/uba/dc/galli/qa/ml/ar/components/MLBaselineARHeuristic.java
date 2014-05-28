@@ -148,7 +148,7 @@ public class MLBaselineARHeuristic {
 
 
 
-		} else if (l_ExpectedAnswerType.length() >= 4
+		} else if (true || l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("HUM:") == 0) {
 			
 			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -547,10 +547,12 @@ public class MLBaselineARHeuristic {
 	{
 
 		// All other types of HUMAN questions
-		
 
 		boolean answer_found = false;
 		FreelingAPI free = FreelingAPI.getInstance();
+		LinkedList<AnswerCandidate> l_TopCandidates = new LinkedList<AnswerCandidate>();
+		LinkedList<String> already_seen = new LinkedList<String>();
+		
 		for(String sentence: l_BestSentence)
 		{
 			ListSentence ls = free.process(sentence);
@@ -558,31 +560,54 @@ public class MLBaselineARHeuristic {
 			for(String answer: free_entities)
 			{
 				if (answer.length() > 0) {
-					l_Answer = answer;
-					l_OriginalAnswerString = sentence;
-					answer_found = true;
-					break;
+					if(already_seen.contains(answer.toLowerCase()))continue;
+					
+					already_seen.add(answer.toLowerCase());
+					l_TopCandidates.add(new AnswerCandidate(answer, sentence));
+					
+					if(l_TopCandidates.size() >= Configuration.ANSWERS_PER_QUESTION)
+					{
+						answer_found = true;
+						break;	
+					}
+					
 				}
-				
+			
+				if(answer_found)break;
 			}
 			
 			if(answer_found)break;
 		}
+	
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
 		
-		if (l_Answer.length() > 0) {
-			// break in NN, so we can return the answer already
-			//l_OriginalAnswerString = l_BestSentence[0];
-
-
+		AnswerCandidate aux;
+		if (l_TopCandidates.size() > 0) {
+			
+			int i = 0;
+			while( i < Configuration.ANSWERS_PER_QUESTION) 
+			{
+				if(l_TopCandidates.size() > i)
+				{
+					aux = l_TopCandidates.get(i);
+					result[i] = new DataItem("response");
+					result[i].AddAttribute("answer", aux.GetAnswer());
+					result[i].AddAttribute("original_string",  aux.GetOrigSource());
+				}
+				else
+					result[i] = null; 
+				
+				i++;
+			}
+			
+		}
+		else
+		{
+			for (int i = 0; i < result.length; i++) {
+				result[i] = null;
+			}
 		}
 
-		
-		
-		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		
 		return result;
 	}
 	

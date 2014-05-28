@@ -366,6 +366,32 @@ public class MLBaselineQueryGenerator {
 		// as multi-word terms are kept in their correct order.
 		String l_Query = "";
 
+		for(TextEntity l_Term : question.getQuotedTokens())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+	
+		
+		for(String l_Term : question.getPersonNers(false))
+			l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
+		
+		for(String l_Term : question.getOrganizationNers(false))
+			l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
+		
+		for(String l_Term : question.getLocationNers(false))
+			l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
+		
+		for(String l_Term : question.getOtherNers(false)) //NNP
+			l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
+		
+		
+		for(TextEntity l_Term : question.getNouns())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getAdjectives())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getVerbs())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
 		// -- Include the name of the target as part of the query
 		StringTokenizer l_ST_Target = new StringTokenizer(a_Target);
 		while (l_ST_Target.hasMoreTokens()) {
@@ -374,18 +400,6 @@ public class MLBaselineQueryGenerator {
 				l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
 			}
 		}
-		for(TextEntity l_Term : question.getEntities())
-			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
-	
-		// Use POS if available (Always available
-		for(TextEntity l_Term : question.getNouns())
-			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
-		
-		for(TextEntity l_Term : question.getVerbs())
-			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
-		
-		for(TextEntity l_Term : question.getAdjectives())
-			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
 
 
 

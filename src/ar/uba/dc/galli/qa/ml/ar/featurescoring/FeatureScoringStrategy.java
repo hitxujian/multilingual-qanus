@@ -188,7 +188,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 		question.print();
 		System.out.println("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
-		
+		if(true) return null;
 		ScoreDoc[] l_RetrievedDocs = null;
 		
 

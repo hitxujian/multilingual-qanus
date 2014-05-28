@@ -25,8 +25,26 @@ public class MLBaselineQueryGenerator {
 	public static String generateQuery(String l_QuestionTarget, String l_QuestionText, String l_QuestionPOS, String l_ExpectedAnswerType, Question question)
 	{
 	
-		String l_Query;
-		l_Query = FormQuery(l_QuestionTarget, question);
+		String l_Query = "";
+		
+		if(Configuration.QUERYGENERATION == 1)
+		{
+			l_Query = FormQuery(l_QuestionTarget, question);	
+		}
+		else if(Configuration.QUERYGENERATION == 2)
+		{
+			l_Query = FormQuery2(l_QuestionTarget, question);
+		}
+		else if(Configuration.QUERYGENERATION == 3)
+		{
+			l_Query = FormQuery3(l_QuestionTarget, question);
+		}
+		else
+		{
+			System.out.println("Configuration.QUERYGENERATION not in {1,2,3}");
+			System.exit(1);
+		}
+		
 		/*
 		QuestionSubType l_SubType = GetQuestionSubType(l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType);
 		switch (l_SubType) {
@@ -270,6 +288,99 @@ public class MLBaselineQueryGenerator {
 
 	} // end FormQuery()
 
+	private static String FormQuery2(String a_Target, Question question) {
+
+		// Tracks used word to ensure no repteition of terms in resulting query
+		LinkedList<String> l_UsedTerms = new LinkedList<String>();  
+		// Used to remove stop words and stem the query
+		String[] l_StopWordsFileNames = new String[1];
+		l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-word-"+Configuration.getLang()+".txt";
+		StopWordsFilter l_StopWords = new StopWordsFilter(l_StopWordsFileNames);
+
+		// Build seach terms dynamically, incorporating relevant information where possible
+		// We ensure that the query does not has repeated words by using a LinkedList to collect the hash terms first
+		// The linked list helps ensure the terms are ordered unlike if we use a hashset. This could be important
+		// as multi-word terms are kept in their correct order.
+		String l_Query = "";
+		String l_Title = "";
+		// -- Include the name of the target as part of the query
+		StringTokenizer l_ST_Target = new StringTokenizer(a_Target);
+		while (l_ST_Target.hasMoreTokens()) {
+			String l_Term = l_ST_Target.nextToken();
+			if (!l_StopWords.IsStopWord(l_Term)) {
+				l_Title += l_Term+" ";
+				l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
+			}
+		}
+
+		// Use POS if available (Always available
+		for(TextEntity l_Term : question.getNouns())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getVerbs())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getAdjectives())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+
+
+
+
+		// Remove puntuation marks ',', '.', '?', '!' from the end of search terms
+		l_Query = l_Query.replaceAll("[,\\.\\?!]", "");
+
+
+		//
+		return "(TITLE: "+l_Title+")^5 OR (ALL:"+l_Query+")";
+
+	} // end FormQuery()
+	
+	private static String FormQuery3(String a_Target, Question question) {
+
+		// Tracks used word to ensure no repteition of terms in resulting query
+		LinkedList<String> l_UsedTerms = new LinkedList<String>();  
+		// Used to remove stop words and stem the query
+		String[] l_StopWordsFileNames = new String[1];
+		l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-word-"+Configuration.getLang()+".txt";
+		StopWordsFilter l_StopWords = new StopWordsFilter(l_StopWordsFileNames);
+
+		// Build seach terms dynamically, incorporating relevant information where possible
+		// We ensure that the query does not has repeated words by using a LinkedList to collect the hash terms first
+		// The linked list helps ensure the terms are ordered unlike if we use a hashset. This could be important
+		// as multi-word terms are kept in their correct order.
+		String l_Query = "";
+
+		// -- Include the name of the target as part of the query
+		StringTokenizer l_ST_Target = new StringTokenizer(a_Target);
+		while (l_ST_Target.hasMoreTokens()) {
+			String l_Term = l_ST_Target.nextToken();
+			if (!l_StopWords.IsStopWord(l_Term)) {
+				l_Query = UpdateQuery(l_UsedTerms, l_Term, l_Query);
+			}
+		}
+
+		// Use POS if available (Always available
+		for(TextEntity l_Term : question.getNouns())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getVerbs())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+		
+		for(TextEntity l_Term : question.getAdjectives())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+
+
+
+
+		// Remove puntuation marks ',', '.', '?', '!' from the end of search terms
+		l_Query = l_Query.replaceAll("[,\\.\\?!]", "");
+
+
+		//
+		return l_Query;
+
+	} // end FormQuery()
+	
 	/**
 	 * Processes a new search term and get a new query string with the term.
 	 * Terms that are already used will not be added to the query however.

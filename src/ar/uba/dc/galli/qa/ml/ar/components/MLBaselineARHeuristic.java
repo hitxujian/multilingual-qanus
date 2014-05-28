@@ -3,6 +3,7 @@ package ar.uba.dc.galli.qa.ml.ar.components;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +18,7 @@ import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
 import sg.edu.nus.wing.qanus.textprocessing.StanfordPOSTagger;
 import sg.edu.nus.wing.qanus.textprocessing.StopWordsFilter;
 import ar.uba.dc.galli.qa.ml.ar.AnswerCandidate;
+import ar.uba.dc.galli.qa.ml.ar.DocumentScore;
 import ar.uba.dc.galli.qa.ml.ar.FreebaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureSearchTermCoverage;
@@ -123,7 +125,7 @@ public class MLBaselineARHeuristic {
 		//System.out.println(l_ExpectedAnswerType);
 		// Start of pattern based answer extraction - based on the identified expected
 		// answer types of the questions we are handling
-		if ( true || l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
+		if ( l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
 			
 			result = abbrExpCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,    l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
@@ -131,15 +133,15 @@ public class MLBaselineARHeuristic {
 
 			// Abbreviations : Contractions -> What can we do?
 			
-		} else if ( (l_ExpectedAnswerType.length() >= 6
+		} else if ( false && (l_ExpectedAnswerType.length() >= 6
 				&& l_ExpectedAnswerType.substring(0, 6).compareToIgnoreCase("HUM:gr") == 0)
-				|| (l_ExpectedAnswerType.length() >= 11
+				|| false && (l_ExpectedAnswerType.length() >= 11
 				&& l_ExpectedAnswerType.substring(0, 11).compareToIgnoreCase("ENTY:cremat") == 0)) {
 
 				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 
-		} else if (l_ExpectedAnswerType.length() >= 7
+		} else if (false && l_ExpectedAnswerType.length() >= 7
 				&& l_ExpectedAnswerType.substring(0, 7).compareTo("HUM:ind") == 0) {
 		
 			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -308,7 +310,7 @@ public class MLBaselineARHeuristic {
 		double l_BestScore = Double.NEGATIVE_INFINITY;
 		int l_CurrIndex = 0;
 		int l_NumCandidates = l_CandidateAnswers.size();
-		
+		PriorityQueue<AnswerCandidate> l_TopCandidates = new PriorityQueue<AnswerCandidate>();
 		for (String l_Candidate : l_CandidateAnswers) {
 		
 			//System.out.println(l_Candidate);
@@ -348,7 +350,8 @@ public class MLBaselineARHeuristic {
 					+ (0.1 * l_TargetProximityScore)
 					+ (0.15 * l_RepeatedTermScore);
 
-
+			l_TopCandidates.add(new AnswerCandidate(l_Candidate, l_SourceString, l_TotalScore));
+			
 			if (l_TotalScore > l_BestScore) {
 				l_BestScore = l_TotalScore;
 				l_Answer = l_Candidate;
@@ -359,14 +362,37 @@ public class MLBaselineARHeuristic {
 
 		} // end for
 
-
-
 		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		
-		//System.out.println(result);
+		LinkedList<String> already_seen = new LinkedList<String>();
+		AnswerCandidate aux;
+		if (l_TopCandidates.size() > 0) {
+			
+			int i = 0;
+			while( i < Configuration.ANSWERS_PER_QUESTION) 
+			{
+				if(l_TopCandidates.size() > 0)
+				{
+					aux = l_TopCandidates.remove();
+					if(already_seen.contains(aux.GetAnswer().toLowerCase()))
+					{
+						continue;
+					}
+					already_seen.add(aux.GetAnswer().toLowerCase());
+					result[i] = new DataItem("response");
+					result[i].AddAttribute("answer", aux.GetAnswer());
+					result[i].AddAttribute("original_string",  aux.GetOrigSource());
+					i++;
+				}
+				else
+				{
+					result[i] = null; 
+					i++;
+				
+				}
+			}
+			
+		}
+
 		return result;
 	}
 	
@@ -399,6 +425,7 @@ public class MLBaselineARHeuristic {
 		int l_NumCandidates = l_CandidateAnswers.size();
 		int l_CurrIndex = 0;
 		LinkedHashMap<String, Double> l_CandidatesAndScores = new LinkedHashMap<String, Double>();
+		PriorityQueue<AnswerCandidate> l_TopCandidates = new PriorityQueue<AnswerCandidate>();
 		for (AnswerCandidate l_CandidateAnswer : l_CandidateAnswers) {
 
 			String l_CandidateAnswerString = l_CandidateAnswer.GetAnswer();
@@ -457,6 +484,7 @@ public class MLBaselineARHeuristic {
 					+ (0.1 * l_RepeatedTermScore) // Penalties
 					+ (0.5 * l_IsPronoun);
 
+			l_TopCandidates.add(new AnswerCandidate(l_CandidateAnswerString, l_CandidateAnswerSource, l_TotalScore));
 			// Store the candidate answer and its score
 			l_CandidatesAndScores.put(RemoveTrailingPunctuation(l_CandidateAnswerString), l_TotalScore);
 
@@ -480,37 +508,39 @@ public class MLBaselineARHeuristic {
 
 		} // end for
 
-
-
-
-		// If we have an answer string, we see if we can expand on the name
-		// For example given "Bush", we look up all candidate answers, and see
-		// if there are longer versions like "President Bush", "George W. Bush" etc...
-		// We choose the longer version to return as it is more specific.
-		if (l_Answer.length() > 0) {
-
-			double l_CurrBestAlternativeScore = Double.NEGATIVE_INFINITY;
-			for (String l_Candidate : l_CandidatesAndScores.keySet()) {
-				if (l_Candidate.length() > l_Answer.length() && l_Candidate.contains(l_Answer)) {
-					double l_AltScore = l_CandidatesAndScores.get(l_Candidate);
-					if (l_AltScore > l_CurrBestAlternativeScore) {
-						l_CurrBestAlternativeScore = l_AltScore;
-						l_Answer = l_Candidate;
-						// Note we do not change the originating answer string as that
-						// is evidence of the validity of our answer
-					}
-				}
-			} // end for
-
-		} // end if
-
-		
 		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-	
+		LinkedList<String> already_seen = new LinkedList<String>();
+		AnswerCandidate aux;
+		if (l_TopCandidates.size() > 0) {
+			
+			int i = 0;
+			while( i < Configuration.ANSWERS_PER_QUESTION) 
+			{
+				if(l_TopCandidates.size() > 0)
+				{
+					aux = l_TopCandidates.remove();
+					if(already_seen.contains(aux.GetAnswer().toLowerCase()))
+					{
+						continue;
+					}
+					already_seen.add(aux.GetAnswer().toLowerCase());
+					result[i] = new DataItem("response");
+					result[i].AddAttribute("answer", aux.GetAnswer());
+					result[i].AddAttribute("original_string",  aux.GetOrigSource());
+					i++;
+				}
+				else
+				{
+					result[i] = null; 
+					i++;
+				
+				}
+			}
+			
+		}
+
 		return result;
+
 	}
 	
 	private DataItem[] humGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
@@ -589,6 +619,7 @@ public class MLBaselineARHeuristic {
 		double l_BestScore = Double.NEGATIVE_INFINITY;
 		l_CurrIndex = 0;
 		int l_NumCandidates = l_Candidates.size();
+		PriorityQueue<AnswerCandidate> l_TopCandidates = new PriorityQueue<AnswerCandidate>();
 		for (String l_Candidate : l_Candidates) {
 
 			// Passage from which candidate is derived

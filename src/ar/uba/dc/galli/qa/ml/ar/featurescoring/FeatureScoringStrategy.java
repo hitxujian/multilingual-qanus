@@ -156,6 +156,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		String l_QuestionType = question.getQType();
 		if (l_QuestionType.compareToIgnoreCase("FACTOID") != 0) {
 			System.out.println("Non factoid");
+			Utils.logToFile("Non factoid");
 			return null; // TODO list questions?
 			// Plans are to support list questions soon
 		}
@@ -186,7 +187,9 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		l_Query = MLBaselineQueryGenerator.generateQuery(l_QuestionTarget, l_QuestionText, l_QuestionPOS, l_ExpectedAnswerType, question);
 		
 		
+		Utils.logToFile(question);
 		question.print();
+		Utils.logToFile("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
 		System.out.println("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
 		ScoreDoc[] l_RetrievedDocs = null;
 		
@@ -217,6 +220,8 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 				l_AnalysisResults[0].AddField("Stage2", l_Sentence);
 			}
 		}
+		
+		Utils.logToFile("Se obtuvieron "+l_BestSentence.length +" oraciones con BaselinePassageExtractor");
 		System.out.format("Se obtuvieron %d oraciones con BaselinePassageExtractor %n", l_BestSentence.length);
 		//if(true)return null;
 		
@@ -237,6 +242,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		for (int i = 0; i < res.length; i++) {
 			if(res[i] != null)
 			{
+				Utils.logToFile(i+")"+res[i].GetAttribute("answer"));
 				System.out.println(i+")"+res[i].GetAttribute("answer"));
 			}
 		}

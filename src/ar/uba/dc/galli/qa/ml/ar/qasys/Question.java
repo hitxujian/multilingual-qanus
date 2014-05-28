@@ -71,6 +71,7 @@ public class Question {
 	private TextEntity[] free_quoted;
 	private String topic;
 	private TextEntity[] free_all_but_qwords;
+	private TextEntity[] free_numbers;
 	
 
 	
@@ -122,6 +123,7 @@ public class Question {
 			free_quoted = free.getQuotedTokens(ls);	
 			free_adjectives = free.getAdjectives(ls);
 			free_all_but_qwords = free.getAllButQwords(ls);
+			free_numbers = free.getNumbers(ls, true, true);
 			free_processed = true;
 			//print();
 		}
@@ -129,7 +131,15 @@ public class Question {
 		
 	public void print() {
 		
-		System.out.format("Q: '%s' free:{ ner: %s, verb: %s, noun: %s, adj: %s} stan:{ ner: %s, verb: %s, noun: %s, adj: %s} %n", 
+		System.out.format("Q: '%s' free:{ ner: %s, verb: %s, noun: %s, adj: %s}, exp-ans: %s %n", 
+				this.getText(), 
+				Utils.toJson(free_entities), 
+				Utils.toJson(free_verbs), 
+				Utils.toJson(free_nouns),
+				Utils.toJson(free_adjectives), 
+				getAnswer()
+		);
+		/*System.out.format("Q: '%s' free:{ ner: %s, verb: %s, noun: %s, adj: %s} stan:{ ner: %s, verb: %s, noun: %s, adj: %s} %n", 
 						this.getText(), 
 						Utils.toJson(free_entities), 
 						Utils.toJson(free_verbs), 
@@ -138,7 +148,7 @@ public class Question {
 						Utils.toJson(stan_entities), 
 						Utils.toJson(stan_verbs), 
 						Utils.toJson(stan_nouns),
-						Utils.toJson(stan_adjectives));
+						Utils.toJson(stan_adjectives));*/
 		// TODO Auto-generated method stub
 		
 	}
@@ -227,6 +237,12 @@ public class Question {
 	{
 		if(Configuration.USE_STANFORD)return stan_nouns;
 		return free_nouns;
+	}
+	
+	public TextEntity[] getNumbers()
+	{
+
+		return free_numbers;
 	}
 
 	public String getNersAndNounsString()
@@ -549,6 +565,10 @@ public class Question {
 				this.topic +=e.term+" ";
 			}
 			
+			for (TextEntity e : getNumbers()) {
+				this.topic +=e.term+" ";
+			}
+			
 			this.topic = this.topic.trim();
 			
 		}
@@ -564,6 +584,10 @@ public class Question {
 		else if(Configuration.TOPIC_INFERENCE == 4)
 		{
 			for (TextEntity e : getEntities()) {
+				this.topic +=e.term+" ";
+			}
+			
+			for (TextEntity e : getNumbers()) {
 				this.topic +=e.term+" ";
 			}
 			

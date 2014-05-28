@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.gson.Gson;
 
+import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.utils.comparators.EqualNoPunctComparator;
 
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
@@ -20,6 +21,14 @@ public class Utils {
 	public static String encodeNewLine(String input)
 	{
 		return input.replaceAll("\n", "AORTIPRAPRAPRA");
+	}
+	
+	public static void logToFile(String str)
+	{
+		PrintStream old_out = System.out;
+		redirectStdOut();
+		System.out.println(str);
+		redirectStdOut(old_out);
 	}
 	
 	public static String decodeNewLine(String input)
@@ -37,7 +46,7 @@ public class Utils {
 	
 	public static void redirectStdOut()
 	{
-		String log_file = "mitic.log";
+		String log_file = "results.log";
 		try {
 			System.setOut(new PrintStream(new FileOutputStream(log_file, true)));
 			System.setErr(new PrintStream(new FileOutputStream(log_file, true)));
@@ -167,6 +176,14 @@ public class Utils {
 		return a_String;
 
 	} // end StripXMLChar()
+
+	public static void logToFile(Question question) {
+		PrintStream old_out = System.out;
+		redirectStdOut();
+		question.print();
+		redirectStdOut(old_out);
+		
+	}
 
 
 }

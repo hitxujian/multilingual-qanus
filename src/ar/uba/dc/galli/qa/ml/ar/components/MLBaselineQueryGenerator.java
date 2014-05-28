@@ -276,7 +276,8 @@ public class MLBaselineQueryGenerator {
 		for(TextEntity l_Term : question.getAdjectives())
 			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
 
-
+		for(TextEntity l_Term : question.getNumbers())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
 
 
 		// Remove puntuation marks ',', '.', '?', '!' from the end of search terms
@@ -323,6 +324,8 @@ public class MLBaselineQueryGenerator {
 		for(TextEntity l_Term : question.getAdjectives())
 			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
 
+		for(TextEntity l_Term : question.getNumbers())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
 
 
 

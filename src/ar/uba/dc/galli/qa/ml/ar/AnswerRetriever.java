@@ -191,8 +191,6 @@ public class AnswerRetriever{
 		
 		question.annotate();
 		question.setTopic(first_question);
-		System.out.println(question.getTarget());
-		if(true) return null;
 		
 		result = m_Module.GetAnswerForQuestion(question);
 		if(result == null)

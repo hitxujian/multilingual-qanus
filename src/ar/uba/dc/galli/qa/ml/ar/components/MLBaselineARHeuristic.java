@@ -57,7 +57,7 @@ public class MLBaselineARHeuristic {
 		// this is done we can just retrieve the annotations from Lucene - cutting down on
 		// run-time computation requirements.
 		//System.out.println("Cant sentences: "+l_BestSentence.length);
-		String[] l_POSTaggedBestSentence = StanfordAPI.getInstance().pos.ProcessText(l_BestSentence);
+		String[] l_POSTaggedBestSentence = {};//StanfordAPI.getInstance().pos.ProcessText(l_BestSentence);
 	
 		// Variable used to hold the extracted answer (eventually) and the passage from which
 		// it is extracted

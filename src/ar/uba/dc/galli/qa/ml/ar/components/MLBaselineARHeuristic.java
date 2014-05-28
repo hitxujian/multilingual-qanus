@@ -148,13 +148,13 @@ public class MLBaselineARHeuristic {
 
 
 
-		} else if (true || l_ExpectedAnswerType.length() >= 4
+		} else if (false && l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("HUM:") == 0) {
 			
 			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
-		} else if ( l_ExpectedAnswerType.length() >= 4
+		} else if (true || l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("LOC:") == 0) {
 
 			result = locCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,    l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
@@ -684,6 +684,8 @@ public class MLBaselineARHeuristic {
 					+ (0.3 * l_RepeatedTermScore);
 
 
+			l_TopCandidates.add(new AnswerCandidate(l_Candidate, l_SourcePassage, l_TotalScore));
+			
 			if (l_TotalScore > l_BestScore) {
 				l_BestScore = l_TotalScore;
 				l_Answer = l_Candidate;
@@ -695,14 +697,37 @@ public class MLBaselineARHeuristic {
 		} // end for
 
 
-		
-
-		
 		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
-		result[0] = new DataItem("response");
-		result[0].AddAttribute("answer", l_Answer);
-		result[0].AddAttribute("original_string", l_OriginalAnswerString);
-		
+		LinkedList<String> already_seen = new LinkedList<String>();
+		AnswerCandidate aux;
+		if (l_TopCandidates.size() > 0) {
+			
+			int i = 0;
+			while( i < Configuration.ANSWERS_PER_QUESTION) 
+			{
+				if(l_TopCandidates.size() > 0)
+				{
+					aux = l_TopCandidates.remove();
+					if(already_seen.contains(aux.GetAnswer().toLowerCase()))
+					{
+						continue;
+					}
+					already_seen.add(aux.GetAnswer().toLowerCase());
+					result[i] = new DataItem("response");
+					result[i].AddAttribute("answer", aux.GetAnswer());
+					result[i].AddAttribute("original_string",  aux.GetOrigSource());
+					i++;
+				}
+				else
+				{
+					result[i] = null; 
+					i++;
+				
+				}
+			}
+			
+		}
+
 		return result;
 	}
 	

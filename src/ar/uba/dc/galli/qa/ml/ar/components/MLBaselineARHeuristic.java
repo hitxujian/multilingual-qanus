@@ -47,7 +47,7 @@ public class MLBaselineARHeuristic {
 		m_InformationBase = in_InformationBase;
 		
 	}
-	public DataItem execute(Question question, String[] l_BestSentence, String l_ExpectedAnswerType, DataItem a_QuestionItem, boolean a_Analysis, DataItem l_AnalysisResults, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, String l_Query, ScoreDoc[] l_RetrievedDocs, String l_QuestionID) 
+	public DataItem[] execute(Question question, String[] l_BestSentence, String l_ExpectedAnswerType, DataItem a_QuestionItem, boolean a_Analysis, DataItem[] l_AnalysisResults, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, String l_Query, ScoreDoc[] l_RetrievedDocs, String l_QuestionID) 
 	{
 		
 		// Get POS annotations for ranked sentences
@@ -62,13 +62,13 @@ public class MLBaselineARHeuristic {
 		String l_Answer = "";
 		String l_OriginalAnswerString = "";
 		// -----
-		DataItem response;
+		DataItem[] response;
 		response = switchCases( question, l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query, l_QuestionID);
 		
 		
-		l_Answer = response.GetAttribute("answer");
-		l_OriginalAnswerString = response.GetAttribute("original_string");
-		l_AnalysisResults = response.GetFieldValues("analysis_results")[0];
+		l_Answer = response[0].GetAttribute("answer");
+		l_OriginalAnswerString = response[0].GetAttribute("original_string");
+		l_AnalysisResults = response[0].GetFieldValues("analysis_results");
 		
 		//System.out.println(response);
 		
@@ -103,11 +103,12 @@ public class MLBaselineARHeuristic {
 		//System.out.println("Respuesta:"+l_Answer);
 
 		// Build the data item to return as result of this function
-		DataItem l_Result = new DataItem("result");
-		l_Result.AddAttribute("QID", l_QuestionID);
-		l_Result.AddAttribute("answer", l_Answer);
-		l_Result.AddAttribute("questionType", l_ExpectedAnswerType);
-		l_Result.AddAttribute("original_string", l_OriginalAnswerString);
+		DataItem[] l_Result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		l_Result[0] = new DataItem("response");
+		l_Result[0].AddAttribute("QID", l_QuestionID);
+		l_Result[0].AddAttribute("answer", l_Answer);
+		l_Result[0].AddAttribute("questionType", l_ExpectedAnswerType);
+		l_Result[0].AddAttribute("original_string", l_OriginalAnswerString);
 		
 		// Return either analysis results of answer to question
 		if (a_Analysis) {
@@ -118,17 +119,17 @@ public class MLBaselineARHeuristic {
 	}
 	
 	
-	private DataItem switchCases(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] switchCases(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem[] l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 
 
-		DataItem result = new DataItem("response");
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
 		//System.out.println(l_ExpectedAnswerType);
 		// Start of pattern based answer extraction - based on the identified expected
 		// answer types of the questions we are handling
 		if (  l_ExpectedAnswerType.compareToIgnoreCase("ABBR:exp") == 0) {
 			
-			result = abbrExpCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = abbrExpCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,    l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 		} else if ( l_ExpectedAnswerType.compareToIgnoreCase("ABBR:abb") == 0) {
 
@@ -139,64 +140,63 @@ public class MLBaselineARHeuristic {
 				|| (l_ExpectedAnswerType.length() >= 11
 				&& l_ExpectedAnswerType.substring(0, 11).compareToIgnoreCase("ENTY:cremat") == 0)) {
 
-				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+				result = humGrOrEntyCrematCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 
 		} else if (l_ExpectedAnswerType.length() >= 7
 				&& l_ExpectedAnswerType.substring(0, 7).compareTo("HUM:ind") == 0) {
 		
-			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = humIndCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 
 		} else if (l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("HUM:") == 0) {
 			
-			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = humGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 		} else if ( l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("LOC:") == 0) {
 
-			result = locCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = locCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,    l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 			
 		} else if (  l_ExpectedAnswerType.length() >= 8
 				&& l_ExpectedAnswerType.substring(0, 8).compareToIgnoreCase("NUM:date") == 0) {
 
-			result = numDateCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = numDateCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,   l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 		} else if ( l_ExpectedAnswerType.compareToIgnoreCase("NUM:period") == 0) {
 
-			result = numPeriodCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = numPeriodCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 		} else if (l_ExpectedAnswerType.compareToIgnoreCase("NUM:count") == 0) {
 
-			result = numCountCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = numCountCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,   l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 		} else if ( l_ExpectedAnswerType.length() >= 4
 				&& l_ExpectedAnswerType.substring(0, 4).compareTo("NUM:") == 0) {
 
-			result = numGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
+			result = numGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,   l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);
 
 
 		} else if ( l_ExpectedAnswerType.substring(0, 5).compareTo("ENTY:") == 0) {
 
-			result = entyGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);			
+			result = entyGeneralCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);			
 
 		} else {
 
-			result = generalCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);		
+			result = generalCase(question,  l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,    l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query,  l_QuestionID);		
 		} // end if
 		
 	
 		return result;
 	
 	}
-	
-	
-	private DataItem abbrExpCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+
+	private DataItem[] abbrExpCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Abbreviation - Expansions
 
@@ -242,12 +242,7 @@ public class MLBaselineARHeuristic {
 		} // end for
 
 
-		// If analysis is to be performed, we track the sentences that are retrieved
-		if (a_Analysis) {
-			for (String l_Candidate : l_Answers) {
-				l_AnalysisResults.AddField("Stage3", l_Candidate);
-			}
-		}
+
 
 
 		// Return the first answer candidate we have amongst all the candidates
@@ -256,14 +251,15 @@ public class MLBaselineARHeuristic {
 			l_OriginalAnswerString = l_OriginalAnswerStrings.getFirst();
 		}
 		
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+
 		return result;
 	}
 	
-	private DataItem humGrOrEntyCrematCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] humGrOrEntyCrematCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 
 		// HUM:gr - Human groups (companies, organizations)
@@ -361,22 +357,17 @@ public class MLBaselineARHeuristic {
 		} // end for
 
 
-		// If analysis is to be performed, we track the sentences that are retrieved
-		if (a_Analysis) {
-			for (String l_Candidate : l_CandidateAnswers) {
-				l_AnalysisResults.AddField("Stage3", l_Candidate);
-			}
-		}
+
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
 		
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
 		//System.out.println(result);
 		return result;
 	}
 	
-	private DataItem humIndCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] humIndCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// HUM:ind - Humans - individuals
 		
@@ -487,12 +478,6 @@ public class MLBaselineARHeuristic {
 		} // end for
 
 
-		// If analysis is to be performed, we track the sentences that are retrieved
-		if (a_Analysis) {
-			for (AnswerCandidate l_Candidate : l_CandidateAnswers) {
-				l_AnalysisResults.AddField("Stage3", l_Candidate.GetAnswer());
-			}
-		}
 
 
 		// If we have an answer string, we see if we can expand on the name
@@ -516,14 +501,16 @@ public class MLBaselineARHeuristic {
 
 		} // end if
 
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+	
 		return result;
 	}
 	
-	private DataItem humGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] humGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 
 		// All other types of HUMAN questions
@@ -554,21 +541,19 @@ public class MLBaselineARHeuristic {
 			//l_OriginalAnswerString = l_BestSentence[0];
 
 
-			// If analysis is to be performed, we track the sentences that are retrieved
-			if (a_Analysis) {
-				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-			}
 		}
 
 		
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+		
 		return result;
 	}
 	
-	private DataItem locCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] locCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence,  String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Location questions
 
@@ -651,22 +636,18 @@ public class MLBaselineARHeuristic {
 		} // end for
 
 
-		// If analysis is to be performed, we track the sentences that are retrieved
-		if (a_Analysis) {
-			for (String l_Candidate : l_Candidates) {
-				l_AnalysisResults.AddField("Stage3", l_Candidate);
-			}
-		}
+		
 
-
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+		
 		return result;
 	}
 	
-	private DataItem numDateCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] numDateCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence,  String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 	
 		
@@ -674,20 +655,19 @@ public class MLBaselineARHeuristic {
 		if (l_ExtractedResult[0].length() > 0) {
 			l_Answer = l_ExtractedResult[0];
 			l_OriginalAnswerString = l_ExtractedResult[1];
-			// If analysis is to be performed, we track the sentences that are retrieved
-			if (a_Analysis) {
-				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-			}
+		
 		}
 
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+	
 		return result;
 	}
 	
-	private DataItem numPeriodCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] numPeriodCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence,  String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		
 		// We are unable to retrieve any "subject" from the question
@@ -696,20 +676,18 @@ public class MLBaselineARHeuristic {
 		if (l_ExtractedResult[0].length() > 0) {
 			l_Answer = l_ExtractedResult[0];
 			l_OriginalAnswerString = l_ExtractedResult[1];
-			// If analysis is to be performed, we track the sentences that are retrieved
-			if (a_Analysis) {
-				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-			}
+		
 		}
 
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
 		return result;
 	}
 	
-	private DataItem numCountCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] numCountCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Counts
 
@@ -720,22 +698,20 @@ public class MLBaselineARHeuristic {
 			l_Answer = l_ExtractedResult[0];
 			l_OriginalAnswerString = l_ExtractedResult[1];
 
-			// If analysis is to be performed, we track the sentences that are retrieved
-			if (a_Analysis) {
-				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-			}
 		}
 
 
 
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+		
 		return result;
 	}
 	
-	private DataItem numGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] numGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence,  String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Default strategy, look for the first /CD we come across
 		String[] l_ExtractedResult = RetrieveBestCD(l_BestSentence, true, true);
@@ -743,19 +719,18 @@ public class MLBaselineARHeuristic {
 			l_Answer = l_ExtractedResult[0];
 			l_OriginalAnswerString = l_ExtractedResult[1];
 
-			// If analysis is to be performed, we track the sentences that are retrieved
-			if (a_Analysis) {
-				l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-			}
+		
 		}
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+		
 		return result;
 	}
 	
-	private DataItem entyGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] entyGeneralCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Entities
 		// Default strategy
@@ -778,19 +753,17 @@ public class MLBaselineARHeuristic {
 			}
 			if(answer_found)break;
 		}
-		// If analysis is to be performed, we track the sentences that are retrieved
-		if (a_Analysis) {
-			l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-		}
-
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+	
+		
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+	
 		return result;
 	}
 	
-	private DataItem generalCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, boolean a_Analysis, DataItem l_AnalysisResults, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
+	private DataItem[] generalCase(Question question, String l_ExpectedAnswerType, DataItem a_QuestionItem, String[] l_BestSentence, String l_Answer, String l_OriginalAnswerString, String[] l_POSTaggedBestSentence, String l_QuestionTarget, QuestionSubType l_SubType, String l_QuestionText, String l_QuestionPOS, ScoreDoc[] l_RetrievedDocs, String l_Query, String l_QuestionID)
 	{
 		// Default case, return the first noun we come across
 
@@ -817,14 +790,11 @@ public class MLBaselineARHeuristic {
 		
 		//System.out.println("Second answer:"+l_Answer);
 	
-		// If analysis is to be performed, we track the sentences that are retrieved
-		if (a_Analysis) {
-			l_AnalysisResults.AddField("Stage3", l_OriginalAnswerString);
-		}
-		DataItem result = new DataItem("response");
-		result.AddAttribute("answer", l_Answer);
-		result.AddAttribute("original_string", l_OriginalAnswerString);
-		result.AddField("analysis_results", l_AnalysisResults);
+		DataItem[] result = new DataItem[Configuration.ANSWERS_PER_QUESTION];
+		result[0] = new DataItem("response");
+		result[0].AddAttribute("answer", l_Answer);
+		result[0].AddAttribute("original_string", l_OriginalAnswerString);
+		
 		return result;
 	}
 	

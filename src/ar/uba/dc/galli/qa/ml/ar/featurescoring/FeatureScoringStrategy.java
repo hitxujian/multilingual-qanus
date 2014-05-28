@@ -129,7 +129,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	}
 
 	
-	public DataItem GetAnalysisInfoForQuestion(Question a_QuestionItem) {
+	public DataItem[] GetAnalysisInfoForQuestion(Question a_QuestionItem) {
 		return GetAnswerForQuestion(a_QuestionItem, true);
 	} // end GetAnalysisInfoForQuestion()
 
@@ -139,7 +139,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	 * @param question [in] structure containing question and annotations
 	 * @return Answer to the question
 	 */
-	public DataItem GetAnswerForQuestion(Question question) {
+	public DataItem[] GetAnswerForQuestion(Question question) {
 		return GetAnswerForQuestion(question, false);
 	} // end GetAnswerForQuestion()
 
@@ -149,7 +149,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 	 * @param question [in] structure containing question and annotations
 	 * @return Answer to the question
 	 */
-	public DataItem GetAnswerForQuestion(Question question, boolean a_Analysis) {
+	public DataItem[] GetAnswerForQuestion(Question question, boolean a_Analysis) {
 
 		// Retrieve question and annotations
 		
@@ -173,8 +173,8 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 
 		// If analysis is required, prepare the return items
-		DataItem l_AnalysisResults = new DataItem("Analysis");
-		l_AnalysisResults.AddAttribute("QID", l_QuestionID);
+		DataItem[] l_AnalysisResults = {new DataItem("Analysis")};
+		l_AnalysisResults[0].AddAttribute("QID", l_QuestionID);
 
 
 
@@ -188,7 +188,6 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 		question.print();
 		System.out.println("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
-		if(true) return null;
 		ScoreDoc[] l_RetrievedDocs = null;
 		
 
@@ -209,11 +208,11 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			System.out.format("Doc %d: %s %n", i, m_InformationBase.GetDoc(doc.doc).get("TITLE"));
 		}*/
 		
-		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults, question);
+		String[] l_BestSentence = BaselinePassageExtractor.extractPassages(l_Query, l_RetrievedDocs, m_InformationBase, a_Analysis, l_AnalysisResults[0], question);
 		// If analysis is to be performed, we track the sentences that are retrieved
 		if (a_Analysis) {
 			for (String l_Sentence : l_BestSentence) {
-				l_AnalysisResults.AddField("Stage2", l_Sentence);
+				l_AnalysisResults[0].AddField("Stage2", l_Sentence);
 			}
 		}
 		System.out.format("Se obtuvieron %d oraciones con BaselinePassageExtractor %n", l_BestSentence.length);
@@ -221,8 +220,8 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 		//System.out.println("Comenzando heuristicas");
 		MLBaselineARHeuristic ar = new MLBaselineARHeuristic( m_FBQ, m_InformationBase);
-		DataItem res = ar.execute(question, l_BestSentence, l_ExpectedAnswerType, question.toDataItem(), a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
-		System.out.println(res.GetAttribute("answer"));
+		DataItem[] res = ar.execute(question, l_BestSentence, l_ExpectedAnswerType, question.toDataItem(), a_Analysis, l_AnalysisResults, l_QuestionTarget, l_SubType, l_QuestionText, l_QuestionPOS, l_Query, l_RetrievedDocs, l_QuestionID);
+		System.out.println(res[0].GetAttribute("answer"));
 		
 		return res;
 		// Pattern-based answer extraction

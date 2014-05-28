@@ -124,7 +124,7 @@ public class AnswerRetriever{
 		int[] antitotals = {0,0,0,0};
 		int up_to = Configuration.UP_TO_N_QUESTIONS; //qs.length; //qs.length
 		
-		DataItem[] results = new DataItem[up_to+5];
+		DataItem[][] results = new DataItem[up_to+5][Configuration.ANSWERS_PER_QUESTION];
 		
 		TextEntity[] first_question_ners = {};
 		//System.out.println("# value  token  luc    doc    pass   answ   dcovr  pcovr  acovr  dfreq  pfreq  afreq  dspan  pspan  aspan  tokens    titulo       texto");
@@ -182,9 +182,9 @@ public class AnswerRetriever{
 
 
 
-	private DataItem processQuestion(Question question, TextEntity[] first_question_ners) {
+	private DataItem[] processQuestion(Question question, TextEntity[] first_question_ners) {
 		
-		DataItem result;
+		DataItem[] result;
 		
 		//OJO!!!!
 		//question.question = question.getQuestionEn();

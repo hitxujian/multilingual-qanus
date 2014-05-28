@@ -1,22 +1,23 @@
-package ar.uba.dc.galli.qa.ml.utils.comparatos;
+package ar.uba.dc.galli.qa.ml.utils.comparators;
 
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.*;
 
 /**
- * Ver la clase implementadora
- * @author NG, Jun Ping -- ngjp@nus.edu.sg
- * @version 24Dec2009
- * @see	FeatureSearchTermSpan
+ * count the number of times words in other appear in one.
+ * result is the ratio of count over the length of other
+ * The score will be between 0 and 1 inclusive.
+ * @author julian
+ * @see	FeatureSearchTermCoverage
  *
  */
-public class SpanComparator extends BaseComparator {
+public class FrequencyComparator extends BaseComparator {
 
-	public SpanComparator(String input) {
+	public FrequencyComparator(String input) {
 		super(input);
 	
 	}
 
-	public SpanComparator() {
+	public FrequencyComparator() {
 	}
 
 	@Override
@@ -30,7 +31,7 @@ public class SpanComparator extends BaseComparator {
 
 	@Override
 	public void subclass_constructor() {
-		name = "span";
+		name = "frequency";
 		method_confidence = 0.5;
 		exact = false; 
 		

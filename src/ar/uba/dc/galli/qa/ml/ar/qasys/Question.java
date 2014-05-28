@@ -23,7 +23,7 @@ import ar.uba.dc.galli.qa.ml.utils.Configuration;
 import ar.uba.dc.galli.qa.ml.utils.EnumTypes;
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
 import ar.uba.dc.galli.qa.ml.utils.Utils;
-import ar.uba.dc.galli.qa.ml.utils.comparatos.EqualNoPunctComparator;
+import ar.uba.dc.galli.qa.ml.utils.comparators.EqualNoPunctComparator;
 
 public class Question {
 

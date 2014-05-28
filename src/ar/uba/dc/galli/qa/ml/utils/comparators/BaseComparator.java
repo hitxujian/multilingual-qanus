@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ar.uba.dc.galli.qa.ml.utils.comparatos;
+package ar.uba.dc.galli.qa.ml.utils.comparators;
 
 /**
  * an

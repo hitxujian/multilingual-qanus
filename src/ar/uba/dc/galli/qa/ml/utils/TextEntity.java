@@ -1,6 +1,6 @@
 package ar.uba.dc.galli.qa.ml.utils;
 
-import ar.uba.dc.galli.qa.ml.utils.comparatos.BaseComparator;
+import ar.uba.dc.galli.qa.ml.utils.comparators.BaseComparator;
 
 import com.google.gson.Gson;
 

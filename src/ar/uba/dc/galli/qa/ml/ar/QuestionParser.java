@@ -18,8 +18,8 @@ import org.jdom2.input.SAXBuilder;
 
 import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
-import ar.uba.dc.galli.qa.ml.utils.comparatos.BaseComparator;
-import ar.uba.dc.galli.qa.ml.utils.comparatos.ContainsComparator;
+import ar.uba.dc.galli.qa.ml.utils.comparators.BaseComparator;
+import ar.uba.dc.galli.qa.ml.utils.comparators.ContainsComparator;
 
 //import uba.utils.Utils;
 //import ar.uba.dc.galli.qa.ml.utils.comparators.BaseComparator;

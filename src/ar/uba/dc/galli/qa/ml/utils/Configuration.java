@@ -23,13 +23,16 @@ public class Configuration {
 	
 	/*Cuantas preguntas itera del total del xml 200 = todas*/
 	public static int FROM_QUESTION = 0;
-	public static int UP_TO_N_QUESTIONS = 4;
+	public static int UP_TO_N_QUESTIONS = 1;
 	
 	public static String LANG = "en";
 	public static String INDEX = "pt-2007"; // "pt-2007"
-	public static int LUCENERESULTS = 50; //default at qanus was 50
-	public static int N_PASSAGES = 20; //default at quanus was 40
 	
+	
+	//Para evaluacion
+	public static int LUCENERESULTS = 20; //default at qanus was 50
+	public static int N_PASSAGES = 2; //default at quanus was 40
+	public static int PASSAGE_RANK = 3;
 	
 	public static boolean USE_STANFORD = false;
 	
@@ -56,7 +59,7 @@ public class Configuration {
 	public static String DOCS_LOGFILE = "/home/julian/tesis/clef/queries-eval/"+LANG+"_"+LUCENERESULTS+"_"+INDEX+"-"+QUERYGENERATION+".log";
 
 	
-	public static int PASSAGE_RANK = 2;
+	
 	public static String PASSAGES_LOGFILE = "/home/julian/tesis/clef/passage-eval/"+N_PASSAGES+"_"+LUCENERESULTS+"_3.log";
 	
 	public static Level LOGLEVEL = Level.ALL;

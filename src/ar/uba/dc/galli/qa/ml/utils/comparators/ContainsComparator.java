@@ -1,4 +1,4 @@
-package ar.uba.dc.galli.qa.ml.utils.comparatos;
+package ar.uba.dc.galli.qa.ml.utils.comparators;
 
 public class ContainsComparator extends BaseComparator {
 

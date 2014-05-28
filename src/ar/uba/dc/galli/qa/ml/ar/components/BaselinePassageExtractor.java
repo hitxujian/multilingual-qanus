@@ -13,6 +13,7 @@ import sg.edu.nus.wing.qanus.framework.commons.DataItem;
 import ar.uba.dc.galli.qa.ml.ar.LuceneInformationBaseQuerier;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScorer;
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScoringStrategy;
+import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 
@@ -66,7 +67,7 @@ public class BaselinePassageExtractor {
 	}
 	
 
-	public static String[] extractPassages(String l_Query, ScoreDoc[] l_RetrievedDocs, LuceneInformationBaseQuerier m_InformationBase, boolean a_Analysis, DataItem l_AnalysisResults) {
+	public static String[] extractPassages(String l_Query, ScoreDoc[] l_RetrievedDocs, LuceneInformationBaseQuerier m_InformationBase, boolean a_Analysis, DataItem l_AnalysisResults, Question question) {
 		// Perform search and process results for answers
 		
 			// Iterate over the Documents in the Hits object
@@ -96,7 +97,7 @@ public class BaselinePassageExtractor {
 
 		
 			// Retrieve the N-best passages from all the retrieved documents
-			return l_FScorer.RetrieveTopDocuments(l_Query, Configuration.N_PASSAGES);
+			return l_FScorer.RetrieveTopDocuments(l_Query, Configuration.N_PASSAGES, question);
 			
 
 	}

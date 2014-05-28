@@ -65,9 +65,12 @@ public class MLBaselineARHeuristic {
 		DataItem response;
 		response = switchCases( question, l_ExpectedAnswerType,  a_QuestionItem,  l_BestSentence,  a_Analysis,  l_AnalysisResults,  l_Answer,  l_OriginalAnswerString,  l_POSTaggedBestSentence,  l_QuestionTarget,  l_SubType,  l_QuestionText,  l_QuestionPOS,  l_RetrievedDocs,  l_Query, l_QuestionID);
 		
+		
 		l_Answer = response.GetAttribute("answer");
 		l_OriginalAnswerString = response.GetAttribute("original_string");
 		l_AnalysisResults = response.GetFieldValues("analysis_results")[0];
+		
+		//System.out.println(response);
 		
 		// Final post-processing
 		// 1. Remove punctuation from the end of answers which invariably get extracted too
@@ -94,23 +97,18 @@ public class MLBaselineARHeuristic {
 	
 		// No answer found =(
 		if (l_Answer.length() == 0) {
-			l_Answer = "NA";
+			l_Answer = "NIL";
 		}
 	
 		//System.out.println("Respuesta:"+l_Answer);
-	
+
 		// Build the data item to return as result of this function
-		DataItem l_Result = new DataItem("Result");
+		DataItem l_Result = new DataItem("result");
 		l_Result.AddAttribute("QID", l_QuestionID);
-		l_Result.AddField("Answer", l_Answer);
-		l_Result.AddField("QuestionType", l_ExpectedAnswerType);
-		l_Result.AddField("AnswerString", l_OriginalAnswerString);
-	
-	
-		// Before returning, save the results we have queries from freebase for this question
-		m_FBQ.SaveCache();
-	
-	
+		l_Result.AddAttribute("answer", l_Answer);
+		l_Result.AddAttribute("questionType", l_ExpectedAnswerType);
+		l_Result.AddAttribute("original_string", l_OriginalAnswerString);
+		
 		// Return either analysis results of answer to question
 		if (a_Analysis) {
 			return l_AnalysisResults;
@@ -374,6 +372,7 @@ public class MLBaselineARHeuristic {
 		result.AddAttribute("answer", l_Answer);
 		result.AddAttribute("original_string", l_OriginalAnswerString);
 		result.AddField("analysis_results", l_AnalysisResults);
+		//System.out.println(result);
 		return result;
 	}
 	

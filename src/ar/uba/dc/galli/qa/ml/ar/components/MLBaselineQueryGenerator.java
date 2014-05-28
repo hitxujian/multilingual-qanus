@@ -281,10 +281,10 @@ public class MLBaselineQueryGenerator {
 	 */
 	private static String UpdateQuery(LinkedList<String> a_UsedTerms, String a_Term, String a_Query) {
 
-		if (!a_UsedTerms.contains(a_Term)) {
+		if (!a_UsedTerms.contains(a_Term.toLowerCase())) {
 
 
-			a_UsedTerms.add(a_Term);
+			a_UsedTerms.add(a_Term.toLowerCase());
 			if (a_Query.length() > 0) {
 				a_Query += " ";
 			}

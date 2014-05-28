@@ -10,7 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.gson.Gson;
 
-import ar.uba.dc.galli.qa.ml.utils.comparatos.EqualNoPunctComparator;
+import ar.uba.dc.galli.qa.ml.utils.comparators.EqualNoPunctComparator;
 
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
 

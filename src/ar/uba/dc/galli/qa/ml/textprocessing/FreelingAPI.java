@@ -592,6 +592,36 @@ public class FreelingAPI {
 		return res.toArray(new String[0]);
 	}
 	
+	public TextEntity[] getAllButQwords(ListSentence ls)
+	{
+		LinkedList<TextEntity> res = new LinkedList<TextEntity>();
+		ListWord list_word;
+		Word word;
+		String form, tag;
+		EnumTypes ner_type;
+		
+		for (int i = 0; i < ls.size(); i++)
+	    {
+	    	list_word = ls.get(i);
+	    	for (int j = 0; j < list_word.size(); j++) 
+	    	{
+	    		word = list_word.get(j);
+	    		if(!isQWord(word))
+				{
+	    			
+	    			ner_type = this.getNerType(word);
+	    			form =	cleanUnderscores(word.getForm());
+	    			
+	    			
+	    			tag  = word.getTag()+lang;
+					res.add(new TextEntity(form, word.getTag(), word.getForm(), "", "FreelingAPI("+lang+")", ner_type));
+					
+				}
+			}
+		}
+		return res.toArray(new TextEntity[0]);
+	}
+	
 	public TextEntity[] getEntities(ListSentence ls)
 	{
 		

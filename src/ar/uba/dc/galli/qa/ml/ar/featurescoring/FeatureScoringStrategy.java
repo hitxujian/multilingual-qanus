@@ -190,6 +190,8 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		System.out.println("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
 		ScoreDoc[] l_RetrievedDocs = null;
 		
+		
+		
 
 		// Retrieve documents based on the search string from the search engine
 		l_RetrievedDocs = (ScoreDoc[]) m_InformationBase.SearchQuery(l_Query);

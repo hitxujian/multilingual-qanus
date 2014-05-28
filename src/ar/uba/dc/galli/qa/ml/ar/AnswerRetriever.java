@@ -126,7 +126,7 @@ public class AnswerRetriever{
 		
 		DataItem[][] results = new DataItem[up_to+5][Configuration.ANSWERS_PER_QUESTION];
 		
-		TextEntity[] first_question_ners = {};
+
 		//System.out.println("# value  token  luc    doc    pass   answ   dcovr  pcovr  acovr  dfreq  pfreq  afreq  dspan  pspan  aspan  tokens    titulo       texto");
 		//Aca va un traductor
 		for (int i = Configuration.FROM_QUESTION; i < up_to ; i++) 
@@ -134,15 +134,14 @@ public class AnswerRetriever{
 			if(qs[i].isProcessed())continue;
 			group_entity = "";
 			gr = QuestionParser.getGroup(qs, qs[i].getGroup());
-			first_question_ners = new TextEntity[0];
 			
 			for (int j = 0; j < gr.length && j < up_to; j++) 
 			{
-				if(i > Configuration.FROM_QUESTION )
-					results[i+j] = this.processQuestion(gr[j], first_question_ners);
+				if(j == 0)
+					results[i+j] = this.processQuestion(gr[j], null);
 				else
-					results[i+j] = this.processQuestion(gr[j], first_question_ners);
-		
+					results[i+j] = this.processQuestion(gr[j], gr[0]);
+				
 				QuestionParser.getById(qs, gr[j].getId()).setProcessed(true);
 
 			}
@@ -182,14 +181,19 @@ public class AnswerRetriever{
 
 
 
-	private DataItem[] processQuestion(Question question, TextEntity[] first_question_ners) {
+
+	private DataItem[] processQuestion(Question question, Question first_question) {
 		
 		DataItem[] result;
 		
 		//OJO!!!!
 		//question.question = question.getQuestionEn();
 		
-		question.annotate(first_question_ners);
+		question.annotate();
+		question.setTopic(first_question);
+		System.out.println(question.getTarget());
+		if(true) return null;
+		
 		result = m_Module.GetAnswerForQuestion(question);
 		if(result == null)
 		{

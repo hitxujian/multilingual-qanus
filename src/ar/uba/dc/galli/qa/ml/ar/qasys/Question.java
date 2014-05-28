@@ -15,6 +15,7 @@ import sg.edu.nus.wing.qanus.framework.commons.DataItem;
 import sg.edu.nus.wing.qanus.framework.commons.IRegisterableModule;
 import sg.edu.nus.wing.qanus.textprocessing.StanfordNER;
 import sg.edu.nus.wing.qanus.textprocessing.StanfordPOSTagger;
+import sg.edu.nus.wing.qanus.textprocessing.StopWordsFilter;
 
 import ar.uba.dc.galli.qa.ml.ar.Controller;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
@@ -68,6 +69,8 @@ public class Question {
 
 	public Logger LOGGER = Logger.getLogger(Controller.class .getName());
 	private TextEntity[] free_quoted;
+	private String topic;
+	private TextEntity[] free_all_but_qwords;
 	
 
 	
@@ -83,11 +86,13 @@ public class Question {
 		old_group_entities= in_group_entities;
 	}
 
-	public void annotate(TextEntity[] in_first_question_ners)
+	public void annotate()
 	{
-		first_question_ners = in_first_question_ners;
 		stanfordAnnotation();
-		if(!Configuration.USE_STANFORD) freelingAnnotation();
+		if(!Configuration.USE_STANFORD)
+		{
+			freelingAnnotation();
+		}
 		
 	
 	}
@@ -116,6 +121,7 @@ public class Question {
 			free_nouns = free.getNouns(ls);
 			free_quoted = free.getQuotedTokens(ls);	
 			free_adjectives = free.getAdjectives(ls);
+			free_all_but_qwords = free.getAllButQwords(ls);
 			free_processed = true;
 			//print();
 		}
@@ -387,9 +393,10 @@ public class Question {
 		
 	}
 	
+	
 	public String getTarget()
 	{
-		return this.getGroup();
+		return this.topic;
 		//return Utils.concatString(Utils.flattenTextEntities(getEntities()));
 		//return clean(this.getText());
 	}
@@ -517,6 +524,76 @@ public class Question {
 	public String toGson() {
 		Gson gson = new Gson();
 		return gson.toJson(this);
+	}
+	
+	public void setTopic(Question first_question) {
+		
+		if(first_question == null)
+			this.generateTopic();
+		else
+			topic = first_question.getTarget();
+			
+		
+		
+	}
+	private void generateTopic() {
+		
+		this.topic = "";
+		if(Configuration.TOPIC_INFERENCE == 1)
+		{
+			this.topic =  this.getGroup();	
+		}
+		else if(Configuration.TOPIC_INFERENCE == 2)
+		{
+			for (TextEntity e : getEntities()) {
+				this.topic +=e.term+" ";
+			}
+			
+			this.topic = this.topic.trim();
+			
+		}
+		else if(Configuration.TOPIC_INFERENCE == 3)
+		{
+			for (TextEntity e : getNouns()) {
+				this.topic +=e.term+" ";
+			}
+			
+			this.topic = this.topic.trim();
+			
+		}
+		else if(Configuration.TOPIC_INFERENCE == 4)
+		{
+			for (TextEntity e : getEntities()) {
+				this.topic +=e.term+" ";
+			}
+			
+			for (TextEntity e : getNouns()) {
+				this.topic +=e.term+" ";
+			}
+			
+			this.topic = this.topic.trim();
+		}
+		else
+		{
+			System.out.println("Configuration.TOPIC_INFERENCE not in {1,2,3,4}");
+			System.exit(1);
+		}
+		
+		
+		if(this.topic.compareToIgnoreCase("") == 0)
+		{
+			String l_Query = Utils.concatString(Utils.flattenTextEntities(free_all_but_qwords));
+			
+			String[] l_StopWordsFileNames = new String[1];
+			l_StopWordsFileNames[0] = Configuration.BASELIBDIR+"lib" + File.separator + "common-word-"+Configuration.getLang()+".txt";
+			StopWordsFilter l_StopWords = new StopWordsFilter(l_StopWordsFileNames);
+			
+			String[] l_StopWordsProcessArr = { l_Query };
+			String l_CleanedQuery = l_StopWords.ProcessText(l_StopWordsProcessArr)[0];
+			
+			this.topic = Utils.clean(l_CleanedQuery).trim();
+		}
+		
 	}
 
 	

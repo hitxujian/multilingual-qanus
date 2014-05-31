@@ -154,12 +154,12 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		// Retrieve question and annotations
 		
 		String l_QuestionType = question.getQType();
-		if (l_QuestionType.compareToIgnoreCase("FACTOID") != 0) {
+		/*if (l_QuestionType.compareToIgnoreCase("FACTOID") != 0) {
 			System.out.println("Non factoid");
 			Utils.logToFile("Non factoid");
 			return null; // TODO list questions?
 			// Plans are to support list questions soon
-		}
+		}*/
 
 		String l_QuestionID = question.getId();
 		String l_QuestionTarget = question.getTarget();

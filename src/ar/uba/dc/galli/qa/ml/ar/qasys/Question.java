@@ -28,11 +28,14 @@ import ar.uba.dc.galli.qa.ml.utils.comparators.EqualNoPunctComparator;
 
 public class Question {
 
+	private String number;
 	private String id;
 	private String group;
 	public String question;
 	private String answer;
 	private String question_en;
+	
+	
 	
 	private String q_type;
 	private String q_ans;
@@ -60,22 +63,22 @@ public class Question {
 	public String qc_class;
 	public String qc_subclass;
 
-	public TextEntity[] first_question_ners = {};
+	public transient TextEntity[] first_question_ners = {};
 	
 	private boolean processed = false;
 
 	public boolean isProcessed() {return processed;}
 	public void setProcessed(boolean processed) {this.processed = processed;}
 
-	public Logger LOGGER = Logger.getLogger(Controller.class .getName());
-	private TextEntity[] free_quoted;
+	public transient Logger LOGGER = Logger.getLogger(Controller.class .getName());
+	private  TextEntity[] free_quoted;
 	private String topic;
-	private TextEntity[] free_all_but_qwords;
+	private  TextEntity[] free_all_but_qwords;
 	private TextEntity[] free_numbers;
 	
 
 	
-	public Question(String id, String group, String question, String answer, String question_en, String[] in_group_entities, String q_type, String q_ans, String support) {
+	public Question(String id, String group, String question, String answer, String question_en, String[] in_group_entities, String q_type, String q_ans, String support, String in_number) {
 		setId(id);
 		setGroup(group);
 		setText(question);
@@ -84,6 +87,7 @@ public class Question {
 		setQType(q_type);
 		setSupport(support);
 		setQAns(q_ans);
+		number = in_number;
 		old_group_entities= in_group_entities;
 	}
 

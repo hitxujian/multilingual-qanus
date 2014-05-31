@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import com.google.gson.Gson;
+
 
 /**
  * Houses a unit of data item parsed by the XML handler.
@@ -180,6 +182,11 @@ public class DataItem {
 	} // end AddField()
 	
 	
+
+	public String toGson() {
+		Gson gson = new Gson();
+		return gson.toJson(this);
+	}
 	
 	/**
 	 * Adds inner text to a sub-field of a field of this data item.

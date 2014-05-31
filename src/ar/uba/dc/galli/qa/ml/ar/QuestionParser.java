@@ -41,7 +41,7 @@ public class QuestionParser {
 			
 			List topics = rootNode.getChildren("t");
 			
-			String id, group, text, text_en, answer, q_type, q_ans, support;//, snippet;
+			String id, group, text, text_en, answer, q_type, q_ans, support, number;//, snippet;
 			
 			for (int i = 0; i < topics.size(); i++) {
 
@@ -57,9 +57,10 @@ public class QuestionParser {
 					//snippet = q.getChild("answer").getAttributeValue("a_support");
 					group = t.getAttributeValue("t_string").toString();
 					text = q.getChild("question").getText();
+					number = q.getChild("question").getAttributeValue("question_id");
 					answer = q.getChild("answer").getChildText("a_string");
 					text_en = q.getChild("q_translation").getText();
-					res = ArrayUtils.add(res, new Question(id, group, text, answer, text_en, new String[0], q_type, q_ans,support));	
+					res = ArrayUtils.add(res, new Question(id, group, text, answer, text_en, new String[0], q_type, q_ans,support, number));	
 					
 				}
 				

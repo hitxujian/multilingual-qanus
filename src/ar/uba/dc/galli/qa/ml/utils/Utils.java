@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.google.gson.Gson;
 
 import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
+import ar.uba.dc.galli.qa.ml.ar.qasys.QuestionAndAnswers;
 import ar.uba.dc.galli.qa.ml.utils.comparators.EqualNoPunctComparator;
 
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
@@ -184,6 +185,17 @@ public class Utils {
 		redirectStdOut(old_out);
 		
 	}
+	
+	public static void saveResult(QuestionAndAnswers qas) {
+		String file_name = "results/"+Configuration.LANG_YEAR+"_"+Configuration.LUCENERESULTS+"_"+Configuration.N_PASSAGES+"_"+Configuration.PASSAGE_RANK+"_"+Configuration.QUERYGENERATION+"_"+Configuration.TOPIC_INFERENCE+"_"+Configuration.ANSWERS_PER_QUESTION+".results";
+		PrintStream old_out = System.out;
+		redirectStdOut(file_name);
+		System.out.println(qas.toGson()+", ");
+		redirectStdOut(old_out);
+		
+	}
+
+	
 
 
 }

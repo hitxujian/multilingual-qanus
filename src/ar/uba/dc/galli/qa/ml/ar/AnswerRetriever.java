@@ -19,11 +19,13 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import ar.uba.dc.galli.qa.ml.ar.featurescoring.FeatureScoringStrategy;
 import ar.uba.dc.galli.qa.ml.ar.qasys.Question;
+import ar.uba.dc.galli.qa.ml.ar.qasys.QuestionAndAnswers;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAPI;
 import ar.uba.dc.galli.qa.ml.textprocessing.FreelingAll;
 import ar.uba.dc.galli.qa.ml.textprocessing.StanfordAPI;
 import ar.uba.dc.galli.qa.ml.utils.Configuration;
 import ar.uba.dc.galli.qa.ml.utils.TextEntity;
+import ar.uba.dc.galli.qa.ml.utils.Utils;
 
 
 
@@ -126,7 +128,7 @@ public class AnswerRetriever{
 		
 		DataItem[][] results = new DataItem[up_to+5][Configuration.ANSWERS_PER_QUESTION];
 		
-
+		QuestionAndAnswers qans;
 		//System.out.println("# value  token  luc    doc    pass   answ   dcovr  pcovr  acovr  dfreq  pfreq  afreq  dspan  pspan  aspan  tokens    titulo       texto");
 		//Aca va un traductor
 		for (int i = Configuration.FROM_QUESTION; i < up_to ; i++) 
@@ -143,9 +145,17 @@ public class AnswerRetriever{
 					results[i+j] = this.processQuestion(gr[j], gr[0]);
 				
 				QuestionParser.getById(qs, gr[j].getId()).setProcessed(true);
-
+				
+				qans = new QuestionAndAnswers(gr[j], results[i+j]);
+				System.out.println(qans.toGson());
+				Utils.saveResult(qans);
+				
+				
+					
 			}
 		}
+		
+		
 		/*System.out.format("%ntotal: %d, n-passages: %d, exac: %d,  cov10: %d, cov09: %d, cov08: %d %n", 
 				up_to, Configuration.N_PASSAGES,  totals[3], totals[0],totals[2],  totals[1]);
 				*/
@@ -180,6 +190,13 @@ public class AnswerRetriever{
 	} // end Go()
 
 
+
+
+	private void saveAnswer(Question question, DataItem[] dataItems) {
+		
+		
+		
+	}
 
 
 	private DataItem[] processQuestion(Question question, Question first_question) {

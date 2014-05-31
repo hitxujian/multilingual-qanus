@@ -23,7 +23,7 @@ public class Configuration {
 	
 	/*Cuantas preguntas itera del total del xml 200 = todas*/
 	public static int FROM_QUESTION = 0;
-	public static int UP_TO_N_QUESTIONS = 200;
+	public static int UP_TO_N_QUESTIONS = 2;
 	
 	public static String LANG = "en";
 	public static String INDEX = "pt-2007"; // "pt-2007"
@@ -31,15 +31,15 @@ public class Configuration {
 	
 	//Para evaluacion
 	public static int LUCENERESULTS = 50; //default at qanus was 50
-	public static int N_PASSAGES = 40; //default at quanus was 40
+	public static int N_PASSAGES = 1; //default at quanus was 40
 	public static int PASSAGE_RANK = 2; //1,2,3
 	public static int QUERYGENERATION = 1; //1, 2, 3 
 	public static int TOPIC_INFERENCE = 4; //1, 2, 3,4
-	public static int ANSWERS_PER_QUESTION = 20;
+	public static int ANSWERS_PER_QUESTION = 25;
 	
 	public static boolean USE_STANFORD = false;
 	
-	private static String LANG_YEAR = "";
+	public static String LANG_YEAR = "";
 	
 	public static boolean SUPPORT_WIKI = true;
 	public static boolean SUPPORT_NIL = true;

@@ -395,6 +395,10 @@ public class MLBaselineQueryGenerator {
 		for(TextEntity l_Term : question.getVerbs())
 			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
 		
+		for(TextEntity l_Term : question.getNumbers())
+			l_Query = UpdateQuery(l_UsedTerms, l_Term.term, l_Query);
+
+		
 		// -- Include the name of the target as part of the query
 		StringTokenizer l_ST_Target = new StringTokenizer(a_Target);
 		while (l_ST_Target.hasMoreTokens()) {

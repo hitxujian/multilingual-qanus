@@ -187,7 +187,7 @@ public class Utils {
 	}
 	
 	public static void saveResult(QuestionAndAnswers qas) {
-		String file_name = "results/"+Configuration.LANG_YEAR+"_"+Configuration.LUCENERESULTS+"_"+Configuration.N_PASSAGES+"_"+Configuration.PASSAGE_RANK+"_"+Configuration.QUERYGENERATION+"_"+Configuration.TOPIC_INFERENCE+"_"+Configuration.ANSWERS_PER_QUESTION+".results";
+		String file_name = "results/TRIAL_"+Configuration.TRIAL+"_"+Configuration.LANG_YEAR+"_"+Configuration.LUCENERESULTS+"_"+Configuration.N_PASSAGES+"_"+Configuration.PASSAGE_RANK+"_"+Configuration.QUERYGENERATION+"_"+Configuration.TOPIC_INFERENCE+"_"+Configuration.ANSWERS_PER_QUESTION+".results";
 		PrintStream old_out = System.out;
 		redirectStdOut(file_name);
 		System.out.println(qas.toGson()+", ");

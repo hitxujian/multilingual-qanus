@@ -105,18 +105,21 @@ public class FeatureScorer {
 			}
 			else
 			{
-				qnouns = getQNounsScore(l_Document, question);
-				qners = getQNERScore(l_Document, question);
-				qverb = getQVerbsScore(l_Document, question);
+				
 				
 				if(Configuration.PASSAGE_RANK == 2)
 				{
+					qnouns = getQNounsScore(l_Document, question);
+					qners = getQNERScore(l_Document, question);
+					qverb = getQVerbsScore(l_Document, question);
 					final_score = 0.4 * l_DocScore + 0.25 * qnouns + 0.2 * qners + 0.15* qverb;
 				}
 				else if(Configuration.PASSAGE_RANK == 3)
 				{
 					token = tokenFeature(l_Document);
-					final_score = 0.4 * l_DocScore + 0.15* token + 0.25 * qnouns + 0.1 * qners + 0.1* qverb;
+					//final_score = 0.4 * l_DocScore + 0.15* token + 0.25 * qnouns + 0.1 * qners + 0.1* qverb;
+					//System.out.println("ERROR en FeatureScorer.java PASSAGE_RANK not in {1,2,3}");
+					final_score = 0.8 * l_DocScore + 0.2* token;// + 0.25 * qnouns + 0.1 * qners + 0.1* qverb;
 				}
 				else
 				{

@@ -188,9 +188,9 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		
 		
 		Utils.logToFile(question);
-		question.print();
+		//question.print();
 		Utils.logToFile("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
-		System.out.println("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
+		//System.out.println("Fin de la generacion de queries:"+l_Query+ " ("+l_ExpectedAnswerType+")");
 		ScoreDoc[] l_RetrievedDocs = null;
 		
 		
@@ -222,7 +222,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 		}
 		
 		Utils.logToFile("Se obtuvieron "+l_BestSentence.length +" oraciones con BaselinePassageExtractor");
-		System.out.format("Se obtuvieron %d oraciones con BaselinePassageExtractor %n", l_BestSentence.length);
+		//System.out.format("Se obtuvieron %d oraciones con BaselinePassageExtractor %n", l_BestSentence.length);
 		//if(true)return null;
 		
 		//System.out.println("Comenzando heuristicas");
@@ -243,7 +243,7 @@ public class FeatureScoringStrategy implements IStrategyModule, IAnalyzable {
 			if(res[i] != null)
 			{
 				Utils.logToFile(i+")"+res[i].GetAttribute("answer"));
-				System.out.println(i+")"+res[i].GetAttribute("answer"));
+				//System.out.println(i+")"+res[i].GetAttribute("answer"));
 			}
 		}
 		

@@ -8,6 +8,7 @@ import sg.edu.nus.wing.qanus.framework.commons.DataItem;
 
 public class QuestionAndAnswers {
 
+	public int number;
 	public Question question;
 	public String[] answers;
 	public String lang_year = Configuration.LANG_YEAR;
@@ -18,7 +19,8 @@ public class QuestionAndAnswers {
 	public int topic_inference = Configuration.TOPIC_INFERENCE;
 	public int answers_per_question = Configuration.ANSWERS_PER_QUESTION;
 
-	public QuestionAndAnswers(Question in_question, DataItem[] in_answers) {
+	public QuestionAndAnswers(int in_number, Question in_question, DataItem[] in_answers) {
+		number = in_number;
 		question = in_question;
 		answers = new String[in_answers.length];
 		

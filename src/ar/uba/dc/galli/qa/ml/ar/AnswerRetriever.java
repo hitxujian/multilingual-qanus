@@ -136,23 +136,26 @@ public class AnswerRetriever{
 			if(qs[i].isProcessed())continue;
 			group_entity = "";
 			gr = QuestionParser.getGroup(qs, qs[i].getGroup());
-			
+	
 			for (int j = 0; j < gr.length && j < up_to; j++) 
 			{
+				System.out.println(i+j);
+				
 				if(j == 0)
 					results[i+j] = this.processQuestion(gr[j], null);
 				else
 					results[i+j] = this.processQuestion(gr[j], gr[0]);
 				
-				QuestionParser.getById(qs, gr[j].getId()).setProcessed(true);
-				
-				qans = new QuestionAndAnswers(gr[j], results[i+j]);
-				System.out.println(qans.toGson());
+				qans = new QuestionAndAnswers(i+j, gr[j], results[i+j]);
+				//System.out.println(qans.toGson());
 				Utils.saveResult(qans);
+				
+				QuestionParser.getById(qs, gr[j].getId()).setProcessed(true);
 				
 				
 					
 			}
+			
 		}
 		
 		

@@ -61,6 +61,7 @@ public class Controller extends BasicController {
 
 	protected boolean Entry(String[] args) {
 
+		//System.gc(); 
 		// Check that the arguments are supplied correctly.
 		boolean l_OkSoFar = super.Entry(args);
 		String l_LuceneFolder = Configuration.GetLuceneIndexFromOption((String) GetOptionArgument("run"));

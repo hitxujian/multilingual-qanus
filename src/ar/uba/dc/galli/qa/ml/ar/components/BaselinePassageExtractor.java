@@ -26,8 +26,9 @@ public class BaselinePassageExtractor {
 	public static String[] passagesFromBody(String body)
 	{
 		//System.out.println("Body: "+body);
+		//System.out.println("PRE Spliting");
 		String[] sentences = FreelingAPI.getInstance().splitString(body);
-		
+		//System.out.println("POST Spliting");
 		
 		if(sentences == null)
 		{
